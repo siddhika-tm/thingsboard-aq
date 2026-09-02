@@ -829,7 +829,25 @@ export const menuSectionMap = new Map<MenuId, MenuSection>([
   ]
 ]);
 
+// Sections hidden for this deployment. The server is air-gapped, so anything
+// that reaches an external service can never work here and only clutters the
+// UI. Notifications are deliberately NOT hidden - they stay available.
+// These hide the menu entry only; the routes still resolve if navigated
+// directly, so this is decluttering, not access control.
+const unavailableOffline: MenuFilter = () => false;
+
 const menuFilters = new Map<MenuId, MenuFilter>([
+  [MenuId.iot_hub, unavailableOffline],              // iot-hub.thingsboard.io
+  [MenuId.repository_settings, unavailableOffline],  // needs a git remote
+  [MenuId.auto_commit_settings, unavailableOffline], // needs a git remote
+  [MenuId.mobile_center, unavailableOffline],        // needs app stores / TB mobile app
+  [MenuId.mobile_apps, unavailableOffline],
+  [MenuId.mobile_bundles, unavailableOffline],
+  [MenuId.mobile_qr_code_widget, unavailableOffline],
+  [MenuId.oauth2, unavailableOffline],               // no external IdP reachable
+  [MenuId.domains, unavailableOffline],
+  [MenuId.clients, unavailableOffline],
+  [MenuId.gateways, unavailableOffline],             // gateway dashboard git-syncs from GitHub
   [
     MenuId.edges, (authState) => authState.edgesSupportEnabled
   ],

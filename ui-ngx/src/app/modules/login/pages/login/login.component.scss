@@ -16,95 +16,248 @@
 @import '../../../../../scss/constants';
 @import '../../../../../theme';
 
+// AQ console design tokens. Mirrors the Airlinq SRE console: light neutral
+// surfaces, hairline borders, near-square corners, teal reserved for actions.
+$aq-ground:   #eceef1;
+$aq-panel:    #f7f8fa;
+$aq-raised:   #ffffff;
+$aq-ink:      #14181f;
+$aq-ink-2:    #414b5a;
+$aq-ink-3:    #6b7789;
+$aq-line:     #cdd3dc;
+$aq-accent:   #0b6b78;
+$aq-danger:   #a3182a;
+$aq-radius:   2px;
+
 :host {
   display: flex;
   flex: 1 1 0;
+
   .tb-login-content {
     margin-top: 36px;
     margin-bottom: 76px;
-    background-color: #eee;
-    --mat-card-elevated-container-elevation: none;
-    .tb-login-form {
-      @media #{$mat-gt-xs} {
-        width: 480px !important;
-      }
+    background-color: $aq-ground;
+    color: $aq-ink;
+  }
 
-      .forgot-password {
-        --mat-button-text-horizontal-padding: 0;
-        --mat-button-text-container-height: 20px;
-      }
+  .aq-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 0 16px;
 
-      .tb-action-button{
-        margin: 20px 0 16px;
-      }
+    @media #{$mat-gt-xs} { width: 480px; }
+  }
+
+  .aq-card {
+    width: 100%;
+    background: $aq-raised;
+    border: 1px solid $aq-line;
+    border-radius: $aq-radius;
+    max-height: 84vh;
+    overflow-y: auto;
+  }
+
+  // ---- header band -------------------------------------------------------
+  .aq-head {
+    background: $aq-panel;
+    border-bottom: 1px solid $aq-line;
+    padding: 18px 24px 14px;
+  }
+
+  .aq-lock {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    text-decoration: none !important;   // global anchor styles underline otherwise
+    border-bottom: 0;
+
+    .aq-mark  { height: 24px; width: 24px; display: block; }
+    .aq-brand { font-size: 19px; font-weight: 700; color: $aq-ink; line-height: 1; }
+    .aq-prod  { font-size: 19px; font-weight: 400; color: $aq-ink-2; line-height: 1; }
+  }
+
+  .aq-strip {
+    margin-top: 7px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .13em;
+    color: $aq-ink-3;
+  }
+
+  // ---- body --------------------------------------------------------------
+  .aq-body {
+    display: flex;
+    flex-direction: column;
+    padding: 18px 24px 24px;
+  }
+
+  .aq-progress { height: 4px; }
+  .aq-progress-space { height: 4px; }
+
+  .aq-row { margin-bottom: 16px; }
+
+  .aq-h {
+    font-size: 15px;
+    font-weight: 650;
+    color: $aq-ink;
+  }
+
+  .aq-field { margin-bottom: 16px; }
+
+  .aq-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .11em;
+    text-transform: uppercase;
+    color: $aq-ink-3;
+  }
+
+  .aq-input-wrap { position: relative; }
+
+  .aq-input {
+    width: 100%;
+    height: 40px;
+    padding: 0 11px;
+    border: 1px solid $aq-line;
+    border-radius: $aq-radius;
+    background: $aq-raised;
+    color: $aq-ink;
+    font: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color .12s ease, box-shadow .12s ease;
+
+    &:hover:not(:focus) { border-color: darken($aq-line, 12%); }
+
+    &:focus {
+      border-color: $aq-accent;
+      box-shadow: 0 0 0 3px rgba(11, 107, 120, .13);
     }
 
-    .container-divider {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      margin-bottom: 16px;
-
-      .mat-divider-horizontal{
-        --mat-divider-color: var(--mat-form-field-outlined-outline-color);
-      }
-
-      .text {
-        padding-right: 8px;
-        padding-left: 8px;
-        font-size: 16px;
-        line-height: 24px;
-      }
+    &.aq-invalid {
+      border-color: $aq-danger;
+      &:focus { box-shadow: 0 0 0 3px rgba(163, 24, 42, .13); }
     }
 
-    .oauth-container{
-      .title {
-        font-size: 20px;
-        line-height: 24px;
-        letter-spacing: .1px;
-        text-align: center;
-        margin-bottom: 4px;
-      }
+    // the browser autofill wash fights the light surface
+    &:-webkit-autofill {
+      -webkit-text-fill-color: $aq-ink;
+      -webkit-box-shadow: 0 0 0 1000px $aq-raised inset;
+    }
+  }
 
-      .material-icons{
-        width: 20px;
-        min-width: 20px;
-      }
+  .aq-input-wrap .aq-input { padding-right: 40px; }
 
-      a.login-with-button {
-        color: rgba(black, 0.87);
-        background-color: #ffffff;
-      }
+  .aq-eye {
+    position: absolute;
+    top: 50%;
+    right: 4px;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: $aq-ink-3;
+    cursor: pointer;
 
-      .login-button-container {
-        a.login-with-button {
-          max-width: 170px;
-          min-width: 60px;
-          flex-grow: 1;
-          flex-basis: 130px;
+    &:hover { color: $aq-ink-2; }
+    mat-icon { font-size: 19px; width: 19px; height: 19px; }
+  }
 
-          .tb-mat-20 {
-            margin-right: 12px;
-          }
-        }
+  .aq-error {
+    margin-top: 5px;
+    font-size: 11.5px;
+    color: $aq-danger;
+  }
 
-        &:has(> :nth-child(1):last-child) {
-          a.login-with-button {
-            max-width: 100%;
-          }
-        }
+  .aq-submit {
+    width: 100%;
+    height: 44px;
+    margin-top: 6px;
+    border: 0;
+    border-radius: $aq-radius;
+    background: $aq-accent;
+    color: #fff;
+    font: inherit;
+    font-size: 14.5px;
+    font-weight: 650;
+    cursor: pointer;
+    transition: filter .12s ease;
 
-        &:has(> :nth-child(2):last-child),
-        &:has(> :nth-child(4):last-child) {
-          a.login-with-button {
-            max-width: 100%;
-            flex-basis: 180px;
-          }
-        }
+    &:hover:not(:disabled) { filter: brightness(1.12); }
+    &:disabled { opacity: .55; cursor: default; }
+  }
+
+  .aq-forgot {
+    margin-top: 12px;
+    text-align: right;
+
+    a {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: $aq-accent;
+      // A global anchor rule sets both an underline and a bottom border; the
+      // border is what actually showed, so text-decoration alone was not enough.
+      text-decoration: none !important;
+      border-bottom: 0 !important;
+      &:hover { text-decoration: underline !important; }
+    }
+  }
+
+  .aq-note {
+    margin-top: 12px;
+    text-align: center;
+    font-size: 11.5px;
+    color: $aq-ink-3;
+  }
+
+  // ---- oauth (only rendered when providers are configured) ---------------
+  .aq-divider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+    color: $aq-ink-3;
+    font-size: 12px;
+
+    &::before, &::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: $aq-line;
+    }
+  }
+
+  .oauth-container {
+    margin-bottom: 16px;
+
+    a.login-with-button {
+      color: $aq-ink;
+      background-color: $aq-raised;
+      border-radius: $aq-radius;
+      max-width: 170px;
+      min-width: 60px;
+      flex-grow: 1;
+      flex-basis: 130px;
+
+      .tb-mat-20 { margin-right: 12px; }
+    }
+
+    .login-button-container {
+      &:has(> :nth-child(1):last-child) a.login-with-button { max-width: 100%; }
+      &:has(> :nth-child(2):last-child) a.login-with-button,
+      &:has(> :nth-child(4):last-child) a.login-with-button {
+        max-width: 100%;
+        flex-basis: 180px;
       }
     }
   }
 }
-

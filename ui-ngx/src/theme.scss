@@ -23,26 +23,26 @@
 @include mat.elevation-classes();
 @include mat.app-background();
 
-$tb-mat-indigo: (
-  50: #e8eaf6,
-  100: #c5cae9,
-  200: #9fa8da,
+$tb-mat-teal: (
+  50: #e4f3f5,
+  100: #bce1e6,
+  200: #90cdd6,
   300: $tb-primary-color-light,
-  400: #5c6bc0,
+  400: #1d8d9d,
   500: $tb-primary-color,
   600: $tb-secondary-color,
-  700: #303f9f,
-  800: #283593,
-  900: #1a237e,
+  700: #095a65,
+  800: #074a53,
+  900: #04333a,
   A100: $tb-hue3-color,
-  A200: #536dfe,
-  A400: #3d5afe,
-  A700: #304ffe,
+  A200: #37b6c9,
+  A400: #22a5b8,
+  A700: #0e8fa1,
   contrast: (
     50: rgba(black, 0.87),
     100: rgba(black, 0.87),
     200: rgba(black, 0.87),
-    300: white,
+    300: rgba(black, 0.87),
     400: white,
     500: white,
     600: white,
@@ -50,14 +50,47 @@ $tb-mat-indigo: (
     800: white,
     900: white,
     A100: rgba(black, 0.87),
-    A200: white,
+    A200: rgba(black, 0.87),
     A400: white,
     A700: white,
   )
 );
 
-$tb-primary: mat.m2-define-palette($tb-mat-indigo);
-$tb-accent: mat.m2-define-palette(mat.$m2-deep-orange-palette);
+$tb-primary: mat.m2-define-palette($tb-mat-teal);
+$tb-mat-blue: (
+  50: #eaf1ff,
+  100: #c9dcff,
+  200: #a3c4ff,
+  300: #7dabff,
+  400: #5f97ff,
+  500: #3e7bff,
+  600: #2f6ae8,
+  700: #2456c4,
+  800: #1c449e,
+  900: #12306f,
+  A100: #c9dcff,
+  A200: #7dabff,
+  A400: #3e7bff,
+  A700: #2456c4,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: rgba(black, 0.87),
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: rgba(black, 0.87),
+    A200: rgba(black, 0.87),
+    A400: white,
+    A700: white,
+  )
+);
+
+$tb-accent: mat.m2-define-palette($tb-mat-blue);
 
 $tb-mat-theme: mat.m2-define-light-theme((
   color: (
@@ -77,40 +110,40 @@ $tb-theme: map_merge($tb-mat-theme, (_mat-system: $tb-theme-system));
 $primary: mat.m2-get-color-from-palette($tb-primary);
 $accent: mat.m2-get-color-from-palette($tb-accent);
 
-$tb-dark-mat-indigo: (
-  50: #e8eaf6,
-  100: #c5cae9,
-  200: #9fa8da,
-  300: #7986cb,
-  400: #5c6bc0,
+$tb-dark-mat-teal: (
+  50: #e4f3f5,
+  100: #bce1e6,
+  200: #90cdd6,
+  300: #7fc6d1,
+  400: #1d8d9d,
   500: $tb-dark-primary-color,
   600: $tb-secondary-color,
-  700: #303f9f,
+  700: #095a65,
   800: $tb-primary-color,
-  900: #1a237e,
+  900: #04333a,
   A100: $tb-hue3-color,
-  A200: #536dfe,
-  A400: #3d5afe,
-  A700: #304ffe,
+  A200: #37b6c9,
+  A400: #22a5b8,
+  A700: #0e8fa1,
   contrast: (
     50: rgba(black, 0.87),
     100: rgba(black, 0.87),
     200: rgba(black, 0.87),
     300: rgba(black, 0.87),
     400: rgba(black, 0.87),
-    500: map_get($tb-mat-indigo, 900),
+    500: map_get($tb-mat-teal, 900),
     600: white,
     700: white,
     800: white,
     900: white,
     A100: rgba(black, 0.87),
     A200: rgba(black, 0.87),
-    A400: rgba(black, 0.87),
-    A700: rgba(black, 0.87),
+    A400: white,
+    A700: white,
   )
 );
 
-$tb-dark-primary: mat.m2-define-palette($tb-dark-mat-indigo);
+$tb-dark-primary: mat.m2-define-palette($tb-dark-mat-teal);
 
 $tb-dark-theme: mat.m2-define-dark-theme((
   color: (
@@ -122,7 +155,7 @@ $tb-dark-theme: mat.m2-define-dark-theme((
 ));
 
 $tb-dark-theme-system: m2-utils.get-system($tb-dark-theme);
-$tb-dark-theme-system: map_merge($tb-dark-theme-system, ( surface: map_get($tb-dark-mat-indigo, 800) ));
+$tb-dark-theme-system: map_merge($tb-dark-theme-system, ( surface: map_get($tb-dark-mat-teal, 800) ));
 $tb-dark-theme: map_merge($tb-dark-theme, (_mat-system: $tb-dark-theme-system));
 
 @mixin mat-fab-toolbar-theme($theme) {

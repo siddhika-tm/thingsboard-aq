@@ -34,6 +34,7 @@ import { finalize } from 'rxjs/operators';
 export class LoginComponent extends PageComponent implements OnInit {
 
   passwordViolation = false;
+  hidePassword = true;
   isLoading = false;
 
   loginFormGroup = this.fb.group({

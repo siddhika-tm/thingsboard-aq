@@ -40,3 +40,8 @@ rebuild-docker.sh
 .claude
 .planning
 docs/superpowers/
+.env
+CLAUDE.md
+*.orig
+ui-ngx/src/assets/.orig-tb-logos/
+.vscode/
