@@ -1462,4 +1462,22 @@ pre.tb-highlight {
   .mat-mdc-paginator, .mat-mdc-paginator-container,
   .mat-mdc-paginator-range-label { color: #7d8898 !important; }
   .tb-dashboard-layout, gridster { background-color: #0b0e13 !important; }
+
+  /* The user menu popover renders in a CDK overlay attached to <body>, so it
+     inherits .tb-dark but has no dark styling of its own - transparent panel
+     with near-black text, which is unreadable. */
+  .tb-popover-inner,
+  .tb-popover-inner-content,
+  .tb-menu-content {
+    background-color: #1a2029 !important;
+    color: #e8ecf2 !important;
+  }
+  .tb-popover-arrow-content { background-color: #1a2029 !important; }
+  .tb-user-email { color: #aab4c2 !important; }
+  .tb-menu-content button,
+  .tb-user-menu-items button { color: #e8ecf2 !important; }
+  .tb-menu-content button:hover,
+  .tb-user-menu-items button:hover { background-color: #232b36 !important; }
+  .tb-menu-content mat-divider,
+  .tb-user-menu-items mat-divider { border-color: #2b3441 !important; }
 }
