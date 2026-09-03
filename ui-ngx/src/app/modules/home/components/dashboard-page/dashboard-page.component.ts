@@ -87,6 +87,7 @@ import { EntityService } from '@core/http/entity.service';
 import { AliasController } from '@core/api/alias-controller';
 import { BehaviorSubject, Observable, of, Subject, Subscription, throwError } from 'rxjs';
 import { DashboardUtilsService } from '@core/services/dashboard-utils.service';
+import { ThemeService } from '@core/services/theme.service';
 import { DashboardService } from '@core/http/dashboard.service';
 import {
   DashboardContextMenuItem,
@@ -354,6 +355,16 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
 
   private changeMobileSize = new Subject<boolean>();
 
+  /**
+   * Mirrors the app theme onto the dashboard root. TbTimeSeriesChart (and the
+   * bar/state/range charts built on it) switches its axis and grid colour
+   * scheme when the outermost .tb-dashboard-page carries the `dark` class, and
+   * watches it with a MutationObserver - but nothing upstream ever sets it.
+   */
+  get darkTheme(): boolean {
+    return this.themeService.isDark;
+  }
+
   constructor(protected store: Store<AppState>,
               @Inject(WINDOW) private window: Window,
               @Inject(DOCUMENT) private document: Document,
@@ -379,7 +390,8 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
               private cd: ChangeDetectorRef,
               public elRef: ElementRef,
               private injector: Injector,
-              public homeService: HomeService) {
+              public homeService: HomeService,
+              private themeService: ThemeService) {
     super(store);
     if (isDefinedAndNotNull(this.embeddedValue)) {
       this.embedded = this.embeddedValue;

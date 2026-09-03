@@ -261,3 +261,31 @@ $aq-radius:   2px;
     }
   }
 }
+
+// Dark theme. The tokens above are Sass variables (compile-time), so the dark
+// variant re-declares the rules that carry colour. Values match the dashboard
+// dark surfaces in styles.scss / theme.scss.
+:host-context(body.tb-dark) {
+  .tb-login-content { background-color: #0b0e13; color: #e8ecf2; }
+  .aq-card { background: #12161d; border-color: #2b3442; }
+  .aq-head { background: #0f141a; border-bottom-color: #2b3442; }
+  .aq-lock .aq-brand { color: #e8ecf2; }
+  .aq-lock .aq-prod  { color: #c3cad4; }
+  .aq-h { color: #e8ecf2; }
+  .aq-strip, .aq-label, .aq-note, .aq-divider, .aq-eye { color: #7d8898; }
+  .aq-eye:hover { color: #c3cad4; }
+  .aq-divider::before, .aq-divider::after { background: #2b3442; }
+  .aq-input {
+    background: #0f141a;
+    border-color: #2b3442;
+    color: #e8ecf2;
+    &:hover:not(:focus) { border-color: #3a4554; }
+    &:focus { border-color: #37b6c9; box-shadow: 0 0 0 3px rgba(55, 182, 201, .18); }
+    &:-webkit-autofill {
+      -webkit-text-fill-color: #e8ecf2;
+      -webkit-box-shadow: 0 0 0 1000px #0f141a inset;
+    }
+  }
+  .aq-forgot a { color: #37b6c9; }
+  .oauth-container a.login-with-button { color: #e8ecf2; background-color: #12161d; }
+}
