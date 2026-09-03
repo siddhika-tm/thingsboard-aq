@@ -46,6 +46,18 @@ Use `-Dpkg.skip=true` to skip all packaging at once (equivalent to all four flag
 | `-Dpkg.skip.rpm=true`      | Gradle `buildRpm`                         | Yes — no test depends on the RPM                             |
 | `-Dpkg.skip.zip=true`      | `maven-assembly-plugin` Windows ZIP       | Yes — no test depends on the ZIP                             |
 
+> **To BUILD the RPM/DEB/boot jar, pass none of these flags** (optionally `-Ppackaging`
+> explicit). The `packaging` profile that carries all the boot-jar/RPM/DEB/assembly config is
+> `activeByDefault`, and Maven disables an `activeByDefault` profile the instant any other
+> profile activates. `-Dpkg.skip=true` (→ `skip-pkg` profile) and `-Dpkg.skip.deb=true`
+> (→ `skip-deb` profile) each activate a profile, so they silently switch **all** packaging off —
+> the build still reports SUCCESS but `application/target/` gets no `.rpm`/`.deb`/`-boot.jar`.
+> `-Dpkg.skip.rpm`/`-Dpkg.skip.zip`/`-Dpkg.skip.bootjar` are plain properties (no matching
+> profile) and are safe to combine with a packaging build. There is no flag that skips only the
+> DEB while keeping the RPM — skipping the DEB means `-Dpkg.skip.deb`, which kills packaging
+> entirely; if you need the RPM, let the DEB build too (the Gradle ospackage tasks are pure-JVM,
+> no system `dpkg`/`rpmbuild` needed).
+
 ## Testcontainers compatibility with the Docker API workaround
 
 In case your tests failed to run testcontainers due to unsupported Docker API version

@@ -51,6 +51,9 @@ c4ee6a1 Add in-app light/dark theme switching
 0e39b20 Rebrand UI to Airlinq and add container fleet simulator
 ```
 
+Two further commits were added on 2026-09-03 and carried onto the seeded branch (PR #1)
+by cherry-pick: `e7a0d83` (this handoff) and `1d52e84` (dark theme default + contrast, §8).
+
 **About PR #1 on peeyush-tm/airlinq-air:** because the base branch was an unrelated one-commit
 repo, GitHub shows the *entire* upstream codebase as the diff (~10k files). Review the four
 commits above instead. If a clean history is preferred there, the alternative is to force-push the
@@ -70,6 +73,19 @@ than embedding a token in a URL (it ends up in shell history and error output).
 clause (`packaging/java/build.gradle:109-111`) advertises java 17/21/25 — that metadata is wrong;
 against Java 21 the package installs cleanly and then dies at class load with
 `UnsupportedClassVersionError`.
+
+On the laptop used so far neither tool is on `PATH`: Maven is `~/apache-maven-3.9.16/bin/mvn`
+and JDK 25 is `~/.local/opt/jdk-25.0.4.1+1` (the system `java` is 21, which Maven will silently
+pick up and then fail on). Export `JAVA_HOME` to the JDK 25 directory and prepend both `bin`
+dirs before any `mvn` command; `mvn -v` must report `Java version: 25`.
+
+`license:check` runs on the root project and scans the working tree, **not** just tracked
+files. `container-sim/.venv` (a Python virtualenv the sim README tells you to create) makes it
+fail with ~1100 "missing header" errors; the pom now excludes `**/.venv/**`, but delete a stray
+venv before building anyway. The sim's own `container_sim.py` carries the Apache header (added
+via `mvn license:format`, which maps `.py` to `#`-comment style and preserves the shebang);
+`container-sim/requirements.txt` is pom-excluded because `.txt` maps to raw-text headers that
+would corrupt the pip file.
 
 Node v22.22.2 and Yarn 1.22.22 are **not** system prerequisites: `frontend-maven-plugin`
 downloads them into `ui-ngx/target/` during the build. The build therefore needs internet
@@ -309,9 +325,17 @@ published default passwords** — see §12.
 
 - `core/services/theme.service.ts`: `BehaviorSubject`, `isDark`, `toggle()`, `setDark()`;
   persists `localStorage['tb-theme']` (`'dark'`/`'light'`) and toggles class **`tb-dark` on
-  `<body>`**. Toggle lives in the user menu (`shared/components/user-menu.component.*`).
-- `index.html` has a 4-line boot script right after `<body class="tb-default">` that applies the
-  stored class before Angular loads — no flash of the wrong theme.
+  `<body>`**. **Dark is the default** — anything but an explicit `'light'` is dark. Switching
+  **reloads the page**: widgets resolve theme-dependent inline colours (chart legends, panel
+  backgrounds) once at init, so a class flip alone left them stale. Toggle lives in the user
+  menu (`shared/components/user-menu.component.*`).
+- `index.html` has a boot script right after `<body class="tb-default">` that applies the stored
+  (or default dark) class before Angular loads — no flash of the wrong theme, including on the
+  reload after a switch.
+- `dashboard-page.component.html` binds `[class.dark]` on the `.tb-dashboard-page` root from
+  `ThemeService`. `TbTimeSeriesChart` (time-series / bar / state / range charts) switches its
+  canvas colour scheme on that class and watches it with a `MutationObserver`; upstream shipped
+  the mechanism but nothing ever set the class.
 - **`.tb-dark` is a colour overlay, not a standalone theme.** Material emits it alongside
   `.tb-default`; both classes sit on body. Consequences:
   - All theme colour lives in `styles.scss` under two blocks marked `AIRLINQ THEMING` (~line
@@ -332,71 +356,56 @@ published default passwords** — see §12.
 
 ---
 
-## 8. Dark theme — where it stands, and the task in progress
+## 8. Dark theme — implemented 2026-09-03 (commit `1d52e84`)
 
-### 8.1 State on 2026-09-03
+The request: dark as the default app-wide; the chart grid was too faint in dark; fix grid /
+background / line contrast consistently across every screen that uses a grid; leave light alone.
 
-Dashboard JSON is one static config: it **cannot vary per theme**, so on 2026-09-03 the
-Container Operations widgets were patched to theme-neutral values (121 changes, 14 widgets):
-widget backgrounds `#fff` → `rgba(0,0,0,0)` so the CSS-themed card shows through; canvas-painted
-colours that CSS cannot reach — ECharts axis labels/ticks/lines `#7a8494`, gridlines
-`rgba(125,137,152,.22)`, legend `#8d97a5`, canvas-gauge plate transparent and ticks/numbers
-lightened; value-card date text `#8d97a5`. Verified by screenshot in both themes. Known gaps:
-the map's light OSM tiles, the gauges' bright chrome bezels, and the overlay sweep above.
-ECharts tooltips stay light-on-dark-text, which is fine.
+### 8.1 What changed (all code; light rules untouched, every new rule scoped to `.tb-dark`)
 
-### 8.2 The open request (received 2026-09-03, exploration done, no code written yet)
+| Where | Change |
+|---|---|
+| `index.html`, `theme.service.ts` | Dark is the default; only a stored `'light'` opts out. Theme switch reloads the page (see §7.2). |
+| `dashboard-page.component.{html,ts}` | `[class.dark]` on the dashboard root from `ThemeService` — turns on upstream's dormant chart dark scheme. |
+| `widget/lib/chart/chart.models.ts` | `chartColorScheme` dark values retuned for the `#12161d` surface: split lines `#566070` (~3:1, was `#484753` at ~2:1), axis text `#aab4c2`, axis lines/ticks `#7d8898`, labels `#e8ecf2`. |
+| `shared/models/widget-settings.models.ts` | `themeAwareBackgroundColor()`: when body has `tb-dark`, an opaque light widget background (stock default `#fff`) becomes transparent so the themed card shows through. Used by `backgroundStyle()` → all 27 widget components. |
+| `time-series-chart-widget.component.ts`, `latest-chart.component.ts` | DOM legends (both chart families) remap their stored light-default colours through `prepareChartThemeColor`. |
+| `styles.scss` `.tb-dark` | `body.tb-dark` / `.mat-app-background` dark (Material's `app-background` is a light-only include); entity-table containers, table toolbar + icons, sticky cells, paginator; brighter table separators (`#2b3442`, header `#323b48`); softened angular-gridster2 edit-mode grid. |
+| `login.component.scss` | `:host-context(body.tb-dark)` variant of the login card tokens. |
 
-> 1. Make Dark the default theme app-wide. 2. Fix grid visibility in Dark — grid lines too faint.
-> 3. Adjust grid/background/line colours and contrast for a readable, consistent dark UI.
-> 4. Consistent across all screens/components that use the grid. 5. No impact on Light.
+Verified on the dev server against live data before building: Container Operations (dark and
+light), Rule Engine Statistics (stock JSON — proves the default-colour remap), Thermostats
+(sticky cells), Devices and Alarms pages (dark and light), login. The probe from §9 reports no
+opaque light element in dark on any of them except map tiles.
 
-Findings that shape the implementation:
+**Deployed and verified 2026-09-03.** RPM `b2382661…` built (JDK 25, `-Ppackaging`, no skip
+flags — see §3 and §4.2), transferred, installed with `rpm -Uvh --force` (config md5 unchanged,
+service up in 33 s), and the served bundle confirmed to carry the new boot script. On the live
+server, the default (no stored preference) now renders dark with all 19 Container Operations
+widgets legible and gridlines visible — produced by the code against the reverted stock
+dashboard data (§8.2) — and the light theme is unchanged. Verified by headless-Chrome screenshot
+in both themes (§9).
 
-- **Upstream already has a dark-mode seam for charts, and nothing turns it on.**
-  `widget/lib/chart/time-series-chart.ts:204` sets
-  `darkMode = settings.darkMode || <outermost .tb-dashboard-page>.hasClass('dark')` and a
-  `MutationObserver` (line ~241) re-themes live when that class changes. The `dark` class is
-  never added anywhere in the codebase. This covers the whole `TbTimeSeriesChart` family
-  (time-series, bar, state, range charts).
-- `widget/lib/chart/chart.models.ts:28` — `chartColorScheme` has light/dark pairs
-  (`axis.splitLine` light `rgba(0,0,0,0.12)` / dark `#484753`; axis line/label/ticks dark
-  `#B9B8CE`; labels `#eee`). `prepareChartThemeColor(color, darkMode, key)` (line 332) swaps a
-  *dark* colour for the scheme's dark value (or inverts it). The dark values are tuned for
-  ECharts' own `#100C2A`, not our `#12161d` — `#484753` is ~2:1 there, which is the "too faint"
-  grid. Only the time-series family calls this; doughnut/pie/bar-with-labels have no darkMode.
-- `shared/models/widget-settings.models.ts` `backgroundStyle()` returns the widget background as
-  an inline `background` style with no theme awareness — that is where the default `#fff` comes
-  from. Called from 27 widget components.
-- Legend label colour is set inline at `time-series-chart-widget.component.ts:130`.
-- The dashboard page root is `dashboard-page.component.html:32`
-  (`<div class="tb-dashboard-page …">`); `ThemeService` is injectable there.
-- Gridster shows layout grid lines only `onDrag&Resize` (`dashboard.component.ts:104`), using
-  angular-gridster2's default styles.
+### 8.2 Data-side consequence
 
-Planned approach (not started):
+With the code owning theming, the 2026-09-03 *data* patches to Container Operations (neutral
+`#7a8494` axes, translucent grid, `#8d97a5` legend, transparent backgrounds) are redundant for
+the ECharts widgets and, being non-default values, are **not** remapped by `chartColorScheme`.
+They are reverted to stock defaults after deploy (`rgba(0, 0, 0, 0.54)` axes, `rgba(0, 0, 0,
+0.12)` split lines, `rgba(0, 0, 0, 0.76)` legend, `#fff` background) so light gets the stock
+look back and dark is produced by code — and any *new* widget is correct in both themes with no
+per-dashboard work. The canvas-gauge (`colorPlate`, tick/number colours) and value-card
+`dateColor` tweaks stay: no code path themes those, and they read acceptably in both themes.
 
-1. Default dark: `index.html` boot script adds `tb-dark` unless `tb-theme === 'light'`;
-   `ThemeService.readStored()` returns `true` when nothing is stored.
-2. Bridge: bind `[class.dark]` on the `.tb-dashboard-page` root to `ThemeService.isDark` — this
-   alone switches every time-series chart to the dark scheme, live.
-3. Retune `chartColorScheme` dark values for the `#12161d` surface — roughly split lines
-   `#566070` (~3:1), axis text `#aab4c2`, axis lines/ticks `#7d8898`, labels `#e8ecf2`.
-4. `backgroundStyle()`: when body has `tb-dark` and the colour is opaque and light, return
-   transparent; legend label through `prepareChartThemeColor`. Consider extending darkMode to the
-   latest-chart family.
-5. `styles.scss` `.tb-dark`: brighter table separators (`#1a212b` → ~`#2b3442`, header border
-   ~`#323b48`), gridster edit-grid lines ~`rgba(255,255,255,.10)`.
-6. Toggle: inline styles from (4) don't re-evaluate on class change — either `location.reload()`
-   after `setDark()` (simple, correct, boot script prevents flash) or make them observables.
-7. Login page needs a dark variant once dark is default.
-8. After deploying, **revert the dashboard's axis/legend colours to the stock defaults** so the
-   code owns theming and any new widget is correct automatically (the 2026-09-03 neutral values
-   won't be remapped by (3) because they are no longer the defaults). Stock defaults:
-   axis `rgba(0, 0, 0, 0.54)`, split lines `rgba(0, 0, 0, 0.12)`, legend `rgba(0, 0, 0, 0.76)`.
-9. Verify both themes by screenshot (§9), then commit, deploy (§4.2), and update this section.
+### 8.3 Remaining gaps (cosmetic, not blocking)
 
----
+- Map widgets use light OpenStreetMap tiles in dark (a dark tile layer such as CartoDB
+  dark_matter would change the light look too — a product call).
+- Radial gauges keep their bright chrome bezels (canvas-gauges, no theme awareness).
+- ECharts `dataZoom` slider stays light-blue in dark.
+- Pie/doughnut *canvas* labels are not remapped (only their DOM legends are); polar/radar and
+  the bar-with-labels widget have their own light-default label colours.
+- CDK overlays not yet swept: dialogs, selects, tooltips, the entity-details drawer.
 
 ## 9. How to verify UI changes (don't trust the API)
 
@@ -413,7 +422,7 @@ What works: headless Chrome driven over the DevTools protocol.
   query params. Injecting `jwt_token` into localStorage alone leaves the app on the boot spinner
   because the `*_expiration` keys are missing.
 - Set `localStorage.setItem('tb-theme','dark'|'light')` on the origin *before* the final
-  navigation to test either theme.
+  navigation to test either theme; `removeItem` to test the built-in default (should be dark).
 - `Page.captureScreenshot` with `captureBeyondViewport:true` for the whole dashboard; a
   `Runtime.evaluate` probe that walks `tb-dashboard *` and reports any element whose computed
   background is opaque and light finds white patches faster than eyeballing.
@@ -456,14 +465,17 @@ What works: headless Chrome driven over the DevTools protocol.
 - One rsync per destination; md5 on both ends; MTU (§4.3).
 - Shell `while read` loops skip the last line of a file without a trailing newline —
   `CONTAINER-SIM-11` was missed three times that way.
+- `pkill -f <pattern>` matches the command line of the shell you are running it from if the
+  pattern appears there — it killed a 30-minute build before Maven started. Match on
+  `/proc/<pid>/cmdline` of `pgrep -x node` (or similar) instead.
+- `mvn clean` on `ui-ngx` deletes `ui-ngx/target/`, which is where the dev server's Node and
+  Yarn live — stop `ng serve` before a Maven build.
 
 ---
 
 ## 11. Backlog (offered / discussed, not done)
 
-- **Dark default + grid contrast** (§8.2) — in progress.
-- Sweep remaining CDK overlays for dark (dialogs, selects, tooltips, entity drawer).
-- Dark map tiles (e.g. CartoDB dark_matter — the client browser does reach OSM) and darker gauge bezels.
+- Dark-theme cosmetic gaps listed in §8.3 (overlay sweep, map tiles, gauge bezels, dataZoom).
 - Delete the four stock demo dashboards; disable or re-password the ThingsBoard default accounts (§12).
 - `stack_containers` should count the `container_id` attribute, not `tilt`.
 - Simulator: read a shared attribute for publish interval so it can be changed from the UI;
@@ -504,5 +516,6 @@ What works: headless Chrome driven over the DevTools protocol.
   pushed; `peeyush-tm/airlinq-air` created (empty).
 - **2026-09-03** — Dark-mode fixes for user-menu popover and side navigation deployed; dashboard
   widgets made theme-neutral (backgrounds, canvas colours) and verified in both themes; branch
-  pushed to `origin`; `peeyush-tm/airlinq-air` seeded and PR #1 opened; this handoff written; dark
-  default + grid contrast task started (§8.2).
+  pushed to `origin`; `peeyush-tm/airlinq-air` seeded and PR #1 opened; this handoff written;
+  dark made the default with chart grid / table / login contrast fixed in code (§8), verified
+  on a live-data dev server, built and deployed.
