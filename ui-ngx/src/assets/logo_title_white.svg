@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1543.4" height="320" viewBox="0 0 1543.4268 320.00026" role="img" aria-label="Airlinq">
+  <title>Airlinq</title>
+  <defs><linearGradient id="aqwa" x1="0.1" y1="1" x2="0.9" y2="0"><stop offset="0" stop-color="#6A2BE8"/><stop offset="0.45" stop-color="#3E7BFF"/><stop offset="1" stop-color="#25D6FF"/></linearGradient><linearGradient id="aqwb" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#2E9BFF"/><stop offset="1" stop-color="#2ADFFF"/></linearGradient></defs>
+  <g transform="translate(60,35) scale(3.90625)"><path d="M33 3 L59 61 L41 61 L33 42 L33 3 Z" fill="url(#aqwb)"/><path d="M33 3 L33 42 L24 61 L5 61 L33 3 Z" fill="url(#aqwa)"/><path d="M36 46 L50 46 L44 60 L30 60 Z" fill="url(#aqwb)"/></g>
+  <text x="392" y="215" fill="#ffffff"
+        font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif"
+        font-size="150" font-weight="300" letter-spacing="30">AIRLINQ</text>
+</svg>
