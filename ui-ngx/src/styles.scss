@@ -1480,4 +1480,28 @@ pre.tb-highlight {
   .tb-user-menu-items button:hover { background-color: #232b36 !important; }
   .tb-menu-content mat-divider,
   .tb-user-menu-items mat-divider { border-color: #2b3441 !important; }
+
+  /* AIRLINQ DARK SIDENAV
+     The side menu sets rgba(0,0,0,.76) in its own component styles - both
+     directly and via --mat-button-text-label-text-color - which is unreadable
+     on the dark panel. Override the variable and the colour together. */
+  .tb-site-sidenav {
+    --mat-button-text-label-text-color: #e8ecf2;
+
+    a.mat-mdc-button,
+    a.mat-mdc-button.mat-mdc-button-base,
+    .mdc-button__label,
+    tb-menu-link, tb-menu-toggle,
+    .tb-menu-toggle-header { color: #e8ecf2 !important; }
+
+    a.mat-mdc-button.mat-mdc-button-base {
+      --mat-button-text-label-text-color: #e8ecf2;
+    }
+    a.mat-mdc-button:hover,
+    a.mat-mdc-button.tb-hovered,
+    .tb-hovered { background-color: rgba(255, 255, 255, .07) !important; }
+
+    .tb-menu-toggle-list { background: transparent !important; }
+    tb-icon, .mat-icon { color: #aab4c2 !important; }
+  }
 }
