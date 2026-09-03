@@ -900,6 +900,8 @@
                             <exclude>**/banner.txt</exclude>
                             <exclude>node_modules/**</exclude>
                             <exclude>**/*.properties</exclude>
+                            <exclude>**/.venv/**</exclude>
+                            <exclude>container-sim/requirements.txt</exclude>
                             <exclude>src/test/resources/**</exclude>
                             <exclude>src/vendor/**</exclude>
                             <exclude>src/font/**</exclude>
