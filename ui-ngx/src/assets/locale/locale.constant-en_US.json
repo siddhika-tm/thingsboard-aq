@@ -6477,6 +6477,10 @@
         "too-many-updates": "Too many updates",
         "entities-limit-exceeded": "Entities limit exceeded"
     },
+    "theme": {
+        "switch-to-dark": "Dark theme",
+        "switch-to-light": "Light theme"
+    },
     "tenant": {
         "tenant": "Tenant",
         "tenants": "Tenants",

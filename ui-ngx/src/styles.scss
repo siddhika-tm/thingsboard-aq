@@ -1405,3 +1405,61 @@ pre.tb-highlight {
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*********************************
+ * AIRLINQ THEMING — dashboard surfaces
+ *
+ * Colour lives here, not in a dashboard's own CSS: dashboardCss is namespaced
+ * under `.tb-default .tb-dashboard-page-css-<guid>` (3 classes), which would
+ * out-specify anything keyed on `.tb-dark`. Keeping both themes here at equal
+ * specificity means source order decides, and dark wins by coming second.
+ * dashboardCss is left to layout only.
+ ********************************/
+.tb-default {
+  .tb-widget {
+    background: #ffffff !important;
+    border: 1px solid #dde1e8 !important;
+    color: #14181f !important;
+    box-shadow: none !important;
+  }
+  .tb-widget-title .title, .mat-subtitle-1.title { color: #14181f !important; }
+  .tb-timewindow, .tb-timewindow-label { color: #6b7789 !important; }
+  .mat-mdc-header-cell {
+    color: #6b7789 !important;
+    background: #f7f8fa !important;
+    border-bottom-color: #dde1e8 !important;
+  }
+  .mat-mdc-cell { color: #14181f !important; border-bottom-color: #eef1f4 !important; }
+  .mat-mdc-row:hover .mat-mdc-cell { background: #f7f8fa !important; }
+}
+
+.tb-dark {
+  .tb-widget {
+    background: #12161d !important;
+    border: 1px solid #262d38 !important;
+    color: #e8ecf2 !important;
+    box-shadow: none !important;
+  }
+  .tb-widget-title .title, .mat-subtitle-1.title,
+  .tb-widget-header .title { color: #e8ecf2 !important; }
+  .tb-timewindow, .tb-timewindow-label { color: #7d8898 !important; }
+  .tb-widget-content, .tb-absolute-fill { background-color: transparent !important; }
+  .tb-value-card-overlay, .tb-value-card-label-row,
+  .tb-value-card-title-panel { color: #e8ecf2 !important; }
+  .tb-progress-bar-title-value-row, .tb-progress-bar-title,
+  .tb-progress-bar-value { color: #e8ecf2 !important; }
+  .mat-mdc-header-cell {
+    color: #7d8898 !important;
+    background: #0f141a !important;
+    border-bottom-color: #262d38 !important;
+  }
+  .mat-mdc-cell { color: #e8ecf2 !important; border-bottom-color: #1a212b !important; }
+  .mat-mdc-table, table.mat-mdc-table,
+  .mat-mdc-row, .mat-mdc-header-row,
+  .mdc-data-table__row, .mdc-data-table__header-row { background: transparent !important; }
+  .mat-mdc-row { color: #e8ecf2 !important; }
+  .mat-mdc-row:hover .mat-mdc-cell { background: #1a2029 !important; }
+  .mat-mdc-paginator, .mat-mdc-paginator-container,
+  .mat-mdc-paginator-range-label { color: #7d8898 !important; }
+  .tb-dashboard-layout, gridster { background-color: #0b0e13 !important; }
+}

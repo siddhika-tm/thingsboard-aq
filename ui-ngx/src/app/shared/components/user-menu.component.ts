@@ -29,6 +29,7 @@ import { AppState } from '@core/core.state';
 import { selectAuthUser, selectUserDetails } from '@core/auth/auth.selectors';
 import { map } from 'rxjs/operators';
 import { AuthService } from '@core/auth/auth.service';
+import { ThemeService } from '@core/services/theme.service';
 import { Router } from '@angular/router';
 import { coerceBoolean } from '@shared/decorators/coercion';
 
@@ -41,6 +42,8 @@ import { coerceBoolean } from '@shared/decorators/coercion';
     standalone: false
 })
 export class UserMenuComponent implements OnInit, OnDestroy {
+
+  isDark$ = this.themeService.isDark$;
 
   @Input()
   @coerceBoolean()
@@ -73,7 +76,8 @@ export class UserMenuComponent implements OnInit, OnDestroy {
 
   constructor(private store: Store<AppState>,
               private router: Router,
-              private authService: AuthService) {
+              private authService: AuthService,
+              private themeService: ThemeService) {
   }
 
   ngOnInit(): void {
@@ -130,6 +134,11 @@ export class UserMenuComponent implements OnInit, OnDestroy {
   logout(): void {
     this.menuClicked.emit();
     this.authService.logout();
+  }
+
+
+  toggleTheme(): void {
+    this.themeService.toggle();
   }
 
 }

@@ -99,6 +99,15 @@
   </style>
 </head>
 <body class="tb-default">
+  <script>
+    /* Apply the saved theme before Angular boots, so there is no flash of the
+       wrong palette. ThemeService owns it from here on. */
+    try {
+      if (localStorage.getItem('tb-theme') === 'dark') {
+        document.body.classList.add('tb-dark');
+      }
+    } catch (e) { /* storage blocked - default to light */ }
+  </script>
   <tb-root></tb-root>
   <div id="tb-loading-spinner" class="tb-loading-spinner">
     <div class="tb-bounce1"></div>

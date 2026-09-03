@@ -155,7 +155,11 @@ $tb-dark-theme: mat.m2-define-dark-theme((
 ));
 
 $tb-dark-theme-system: m2-utils.get-system($tb-dark-theme);
-$tb-dark-theme-system: map_merge($tb-dark-theme-system, ( surface: map_get($tb-dark-mat-teal, 800) ));
+// Stock ThingsBoard used palette slot 800 as the dark surface, which makes the
+// chrome the brand colour rather than dark. Use a real dark neutral so teal
+// stays an accent; AQ dark ground/panel tokens.
+$tb-dark-surface: #12161d;
+$tb-dark-theme-system: map_merge($tb-dark-theme-system, ( surface: $tb-dark-surface ));
 $tb-dark-theme: map_merge($tb-dark-theme, (_mat-system: $tb-dark-theme-system));
 
 @mixin mat-fab-toolbar-theme($theme) {

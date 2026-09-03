@@ -52,6 +52,10 @@
         <tb-icon matButtonIcon>mdi:account-circle-outline</tb-icon>
         <span translate>account.account</span>
       </button>
+      <button mat-button (click)="toggleTheme()">
+        <tb-icon matButtonIcon>{{ (isDark$ | async) ? 'light_mode' : 'dark_mode' }}</tb-icon>
+        <span>{{ ((isDark$ | async) ? 'theme.switch-to-light' : 'theme.switch-to-dark') | translate }}</span>
+      </button>
       <button mat-button class="tb-logout" (click)="menuPopoverFull?.hide(); menuPopoverIcon?.hide(); logout()">
         <tb-icon matButtonIcon>logout</tb-icon>
         <span translate>home.logout</span>
