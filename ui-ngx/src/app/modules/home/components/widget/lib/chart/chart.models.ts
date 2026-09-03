@@ -32,11 +32,11 @@ import { WidgetContext } from '@home/models/widget-component.models';
 export const chartColorScheme: TbColorScheme = {
   'threshold.line': {
     light: 'rgba(0, 0, 0, 0.76)',
-    dark: '#e8ecf2'
+    dark: '#e9edf3'
   },
   'threshold.label': {
     light: 'rgba(0, 0, 0, 0.76)',
-    dark: '#e8ecf2'
+    dark: '#e9edf3'
   },
   'axis.line': {
     light: 'rgba(0, 0, 0, 0.54)',
@@ -44,7 +44,7 @@ export const chartColorScheme: TbColorScheme = {
   },
   'axis.label': {
     light: 'rgba(0, 0, 0, 0.54)',
-    dark: '#aab4c2'
+    dark: '#aeb8c5'
   },
   'axis.ticks': {
     light: 'rgba(0, 0, 0, 0.54)',
@@ -52,15 +52,15 @@ export const chartColorScheme: TbColorScheme = {
   },
   'axis.tickLabel': {
     light: 'rgba(0, 0, 0, 0.54)',
-    dark: '#aab4c2'
+    dark: '#aeb8c5'
   },
   'axis.splitLine': {
     light: 'rgba(0, 0, 0, 0.12)',
-    dark: '#566070'
+    dark: '#3d4757'
   },
   'series.label': {
     light: 'rgba(0, 0, 0, 0.76)',
-    dark: '#e8ecf2'
+    dark: '#e9edf3'
   }
 };
 

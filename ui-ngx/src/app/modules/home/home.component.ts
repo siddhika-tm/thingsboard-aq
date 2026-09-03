@@ -43,6 +43,7 @@ import { ActiveComponentService } from '@core/services/active-component.service'
 import { FormBuilder } from '@angular/forms';
 import { ActionPreferencesPutUserSettings } from '@core/auth/auth.actions';
 import { HomeService } from '@core/services/home.service';
+import { ThemeService } from '@core/services/theme.service';
 
 @Component({
     selector: 'tb-home',
@@ -66,7 +67,7 @@ export class HomeComponent extends PageComponent implements AfterViewInit, OnIni
   sidenavCollapsed = signal(false);
   menuCollapsed= computed(() => this.sidenavDesktop() && this.sidenavCollapsed());
 
-  logo = 'assets/logo_title_black.svg';
+  logo = 'assets/logo_title_black.svg';   // set for the active theme in ngOnInit
   collapsedLogo =  'assets/small_logo_title_black.svg';
 
   @ViewChild('sidenav')
@@ -89,8 +90,10 @@ export class HomeComponent extends PageComponent implements AfterViewInit, OnIni
               private activeComponentService: ActiveComponentService,
               private fb: FormBuilder,
               public breakpointObserver: BreakpointObserver,
-              public homeService: HomeService) {
+              public homeService: HomeService,
+              private themeService: ThemeService) {
     super(store);
+    this.logo = this.themeService.isDark ? 'assets/logo_title_white.svg' : 'assets/logo_title_black.svg';
   }
 
   ngOnInit() {
