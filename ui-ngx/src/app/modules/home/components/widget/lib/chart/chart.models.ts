@@ -25,38 +25,42 @@ import { LabelLayoutOptionCallback } from 'echarts/types/dist/shared';
 import { BuiltinTextPosition } from 'zrender/src/core/types';
 import { WidgetContext } from '@home/models/widget-component.models';
 
+// Dark values are tuned for the Airlinq dark widget surface (#12161d, see
+// theme.scss), not for ECharts' own dark canvas (#100C2A) that upstream's
+// values assumed: the upstream #484753 split line sits at ~2:1 on our surface
+// and reads as no grid at all. Targets: grid ~3:1, axis text >= 7:1.
 export const chartColorScheme: TbColorScheme = {
   'threshold.line': {
     light: 'rgba(0, 0, 0, 0.76)',
-    dark: '#eee'
+    dark: '#e8ecf2'
   },
   'threshold.label': {
     light: 'rgba(0, 0, 0, 0.76)',
-    dark: '#eee'
+    dark: '#e8ecf2'
   },
   'axis.line': {
     light: 'rgba(0, 0, 0, 0.54)',
-    dark: '#B9B8CE'
+    dark: '#7d8898'
   },
   'axis.label': {
     light: 'rgba(0, 0, 0, 0.54)',
-    dark: '#B9B8CE'
+    dark: '#aab4c2'
   },
   'axis.ticks': {
     light: 'rgba(0, 0, 0, 0.54)',
-    dark: '#B9B8CE'
+    dark: '#7d8898'
   },
   'axis.tickLabel': {
     light: 'rgba(0, 0, 0, 0.54)',
-    dark: '#B9B8CE'
+    dark: '#aab4c2'
   },
   'axis.splitLine': {
     light: 'rgba(0, 0, 0, 0.12)',
-    dark: '#484753'
+    dark: '#566070'
   },
   'series.label': {
     light: 'rgba(0, 0, 0, 0.76)',
-    dark: '#eee'
+    dark: '#e8ecf2'
   }
 };
 

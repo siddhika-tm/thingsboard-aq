@@ -1137,12 +1137,29 @@ export const validateAndUpdateBackgroundSettings = (background: BackgroundSettin
   return background;
 };
 
+/**
+ * Widget backgrounds are stored as literal colours (the stock default is #fff),
+ * so on the dark theme a widget would paint a white panel over the dark card.
+ * When <body> carries `.tb-dark`, an opaque light colour becomes transparent and
+ * the themed card (styles.scss) shows through; translucent, dark and image
+ * backgrounds are left alone.
+ */
+export const themeAwareBackgroundColor = (color: string): string => {
+  if (color && typeof document !== 'undefined' && document.body?.classList.contains('tb-dark')) {
+    const c = tinycolor(color);
+    if (c.isValid() && c.getAlpha() >= 0.99 && c.isLight()) {
+      return 'transparent';
+    }
+  }
+  return color;
+};
+
 export const backgroundStyle = (background: BackgroundSettings, imagePipe: ImagePipe,
                                 sanitizer: DomSanitizer, preview = false): Observable<ComponentStyle> => {
   background = validateAndUpdateBackgroundSettings(background);
   if (background.type === BackgroundType.color) {
     return of({
-      background: background.color
+      background: themeAwareBackgroundColor(background.color)
     });
   } else {
     const imageUrl = background.imageUrl;

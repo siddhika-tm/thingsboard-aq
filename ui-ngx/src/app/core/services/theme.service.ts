@@ -22,13 +22,17 @@ const STORAGE_KEY = 'tb-theme';
 const DARK_CLASS = 'tb-dark';
 
 /**
- * App-wide light/dark switching.
+ * App-wide light/dark switching. Dark is the default; 'light' is the opt-out.
  *
  * `.tb-dark` is a colour overlay that Material emits alongside `.tb-default`
- * (see theme.scss), so toggling the class on <body> re-themes the whole app
- * without a reload. The preference is device-local: the same account may want
- * dark on a laptop and light on a projector, and localStorage lets the choice
- * apply before Angular boots, avoiding a flash of the wrong theme.
+ * (see theme.scss), so the class on <body> drives every stylesheet rule. The
+ * preference is device-local: the same account may want dark on a laptop and
+ * light on a projector, and localStorage lets the choice apply before Angular
+ * boots (see the boot script in index.html), avoiding a flash of the wrong theme.
+ *
+ * Switching reloads the page: widgets resolve theme-dependent inline colours
+ * (chart legends, panel backgrounds) once at init, so a class flip alone would
+ * leave them stale. The boot script makes the reload flash-free.
  */
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
@@ -57,6 +61,7 @@ export class ThemeService {
       // private browsing or blocked storage - the theme still applies for this session
     }
     this.darkSubject.next(dark);
+    window.location.reload();
   }
 
   private apply(dark: boolean): void {
@@ -73,9 +78,9 @@ export class ThemeService {
 
   private readStored(): boolean {
     try {
-      return localStorage.getItem(STORAGE_KEY) === 'dark';
+      return localStorage.getItem(STORAGE_KEY) !== 'light';
     } catch (e) {
-      return false;
+      return true;
     }
   }
 }

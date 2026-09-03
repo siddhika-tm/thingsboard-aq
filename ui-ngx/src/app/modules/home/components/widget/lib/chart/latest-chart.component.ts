@@ -36,6 +36,8 @@ import {
 import { WidgetContext } from '@home/models/widget-component.models';
 import { Observable } from 'rxjs';
 import { backgroundStyle, ComponentStyle, overlayStyle, textStyle } from '@shared/models/widget-settings.models';
+import { prepareChartThemeColor } from '@home/components/widget/lib/chart/chart.models';
+import { ThemeService } from '@core/services/theme.service';
 import { TbLatestChart } from '@home/components/widget/lib/chart/latest-chart';
 import { ImagePipe } from '@shared/pipe/image.pipe';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -101,7 +103,8 @@ export class LatestChartComponent implements OnInit, OnDestroy, AfterViewInit {
               private sanitizer: DomSanitizer,
               private renderer: Renderer2,
               private translate: TranslateService,
-              private cd: ChangeDetectorRef) {
+              private cd: ChangeDetectorRef,
+              private themeService: ThemeService) {
   }
 
   ngOnInit(): void {
@@ -114,12 +117,13 @@ export class LatestChartComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.showLegend) {
       this.legendClass = `legend-${this.settings.legendPosition}`;
       this.legendHorizontal = [LegendPosition.left, LegendPosition.right].includes(this.settings.legendPosition);
+      const darkMode = this.themeService.isDark;
       this.legendLabelStyle = textStyle(this.settings.legendLabelFont);
       this.disabledLegendLabelStyle = textStyle(this.settings.legendLabelFont);
-      this.legendLabelStyle.color = this.settings.legendLabelColor;
+      this.legendLabelStyle.color = prepareChartThemeColor(this.settings.legendLabelColor, darkMode);
       this.legendValueStyle = textStyle(this.settings.legendValueFont);
       this.disabledLegendValueStyle = textStyle(this.settings.legendValueFont);
-      this.legendValueStyle.color = this.settings.legendValueColor;
+      this.legendValueStyle.color = prepareChartThemeColor(this.settings.legendValueColor, darkMode);
     }
   }
 
