@@ -1,0 +1,102 @@
+<!--
+
+    Copyright © 2016-2026 The Thingsboard Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<div class="tb-login-content flex flex-1 items-center justify-center">
+  <div class="aq-wrap">
+    <div class="aq-card">
+
+      <div class="aq-head">
+        <a class="aq-lock" href="https://www.airlinq.com" target="_blank" rel="noopener">
+          <img class="aq-mark" src="assets/logo_white.svg" alt=""/>
+          <span class="aq-brand">Airlinq</span>
+          <span class="aq-prod">IoT Platform</span>
+        </a>
+        <div class="aq-strip">OPERATOR CONSOLE</div>
+      </div>
+
+      <form class="aq-body" [formGroup]="loginFormGroup" (ngSubmit)="login()">
+
+        @if (isLoading || (isLoading$ | async)) {
+          <mat-progress-bar class="aq-progress" mode="indeterminate"></mat-progress-bar>
+        } @else {
+          <span class="aq-progress-space"></span>
+        }
+        <span tb-toast style="height: 20px;"></span>
+
+        @if (oauth2Clients?.length) {
+          <div class="oauth-container flex flex-col gap-4">
+            @if (oauth2Clients.length !== 1) {
+              <div class="aq-h">{{ 'login.sign-in-with' | translate: {name: ''} }}</div>
+            }
+            <div class="login-button-container flex flex-wrap justify-center gap-4">
+              @for (oauth2Client of oauth2Clients; track oauth2Client.url) {
+                <a mat-stroked-button class="login-with-button" [href]=getOAuth2Uri(oauth2Client)>
+                  <tb-icon matButtonIcon class="tb-mat-20">{{ oauth2Client.icon }}</tb-icon>
+                  @if (oauth2Clients.length === 1) {
+                    {{ 'login.sign-in-with' | translate: {name: oauth2Clients[0].name} }}
+                  } @else {
+                    {{ oauth2Client.name }}
+                  }
+                </a>
+              }
+            </div>
+            <div class="aq-divider"><span>{{ "login.or" | translate | uppercase }}</span></div>
+          </div>
+        }
+
+        <div class="aq-row">
+          <div class="aq-h">{{ 'login.sign-in-to-your-account' | translate }}</div>
+        </div>
+
+        <div class="aq-field">
+          <label class="aq-label" for="username-input">{{ 'login.username' | translate }}</label>
+          <input class="aq-input" id="username-input" type="email" autofocus
+                 formControlName="username" autocomplete="email"
+                 [class.aq-invalid]="loginFormGroup.get('username').invalid && loginFormGroup.get('username').touched"/>
+          @if (loginFormGroup.get('username').invalid && loginFormGroup.get('username').touched) {
+            <div class="aq-error">{{ 'login.invalid-email-format' | translate }}</div>
+          }
+        </div>
+
+        <div class="aq-field">
+          <label class="aq-label" for="password-input">{{ 'common.password' | translate }}</label>
+          <div class="aq-input-wrap">
+            <input class="aq-input" id="password-input" [type]="hidePassword ? 'password' : 'text'"
+                   formControlName="password" autocomplete="current-password"/>
+            <button class="aq-eye" type="button" tabindex="-1"
+                    [attr.aria-label]="(hidePassword ? 'login.show-password' : 'login.hide-password') | translate"
+                    (click)="hidePassword = !hidePassword">
+              <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <button class="aq-submit" type="submit" [disabled]="isLoading || (isLoading$ | async)">
+          {{ 'login.sign-in' | translate }}
+        </button>
+
+        <div class="aq-forgot">
+          <a routerLink="/login/resetPasswordRequest">
+            {{ (passwordViolation ? 'login.reset-password' : 'login.forgot-password') | translate }}
+          </a>
+        </div>
+
+      </form>
+    </div>
+    <div class="aq-note">Airlinq IoT Platform</div>
+  </div>
+</div>
