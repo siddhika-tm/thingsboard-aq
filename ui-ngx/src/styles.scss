@@ -1433,10 +1433,13 @@ pre.tb-highlight {
   .mat-mdc-row:hover .mat-mdc-cell { background: #f7f8fa !important; }
 }
 
+body.tb-dark { background-color: #0b0e13 !important; }
+
 .tb-dark {
+  .mat-app-background { background-color: #0b0e13 !important; color: #e8ecf2 !important; }
   .tb-widget {
     background: #12161d !important;
-    border: 1px solid #262d38 !important;
+    border: 1px solid #2b3442 !important;
     color: #e8ecf2 !important;
     box-shadow: none !important;
   }
@@ -1451,9 +1454,9 @@ pre.tb-highlight {
   .mat-mdc-header-cell {
     color: #7d8898 !important;
     background: #0f141a !important;
-    border-bottom-color: #262d38 !important;
+    border-bottom-color: #323b48 !important;
   }
-  .mat-mdc-cell { color: #e8ecf2 !important; border-bottom-color: #1a212b !important; }
+  .mat-mdc-cell { color: #e8ecf2 !important; border-bottom-color: #2b3442 !important; }
   .mat-mdc-table, table.mat-mdc-table,
   .mat-mdc-row, .mat-mdc-header-row,
   .mdc-data-table__row, .mdc-data-table__header-row { background: transparent !important; }
@@ -1462,6 +1465,30 @@ pre.tb-highlight {
   .mat-mdc-paginator, .mat-mdc-paginator-container,
   .mat-mdc-paginator-range-label { color: #7d8898 !important; }
   .tb-dashboard-layout, gridster { background-color: #0b0e13 !important; }
+  /* Edit-mode layout grid: angular-gridster2 draws it with 1px solid white
+     lines (onDrag&Resize), which glare on the dark canvas. */
+  gridster .gridster-column {
+    border-left-color: rgba(255, 255, 255, .14) !important;
+    border-right-color: rgba(255, 255, 255, .14) !important;
+  }
+  gridster .gridster-row {
+    border-top-color: rgba(255, 255, 255, .14) !important;
+    border-bottom-color: rgba(255, 255, 255, .14) !important;
+  }
+
+  /* Entity tables (Devices, Assets, Alarms, ..., plus the attribute / relation /
+     version tables) set `background: #fff` on their container in component styles,
+     and the table toolbar reads its icon colour from a light-only fallback. */
+  .tb-entity-table-content { background: #12161d !important; }
+  .tb-entity-table-content.tb-outlined-border { border-color: #2b3442 !important; }
+  mat-toolbar.mat-mdc-table-toolbar:not(.mat-primary) {
+    background: #0f141a !important;
+    color: #e8ecf2 !important;
+    button.mat-mdc-icon-button .mat-icon { color: #aab4c2 !important; }
+  }
+  .mat-mdc-cell.mat-mdc-table-sticky,
+  .mat-mdc-header-cell.mat-mdc-table-sticky { background: #12161d !important; }
+  .mat-mdc-paginator { background: transparent !important; }
 
   /* The user menu popover renders in a CDK overlay attached to <body>, so it
      inherits .tb-dark but has no dark styling of its own - transparent panel

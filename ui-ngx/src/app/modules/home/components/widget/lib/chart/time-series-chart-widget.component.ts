@@ -38,6 +38,8 @@ import { ImagePipe } from '@shared/pipe/image.pipe';
 import { DomSanitizer } from '@angular/platform-browser';
 import { LegendConfig, LegendData, LegendKey, LegendPosition } from '@shared/models/widget.models';
 import { TbTimeSeriesChart } from '@home/components/widget/lib/chart/time-series-chart';
+import { prepareChartThemeColor } from '@home/components/widget/lib/chart/chart.models';
+import { ThemeService } from '@core/services/theme.service';
 import {
   timeSeriesChartWidgetDefaultSettings,
   TimeSeriesChartWidgetSettings
@@ -90,7 +92,8 @@ export class TimeSeriesChartWidgetComponent implements OnInit, OnDestroy, AfterV
               private imagePipe: ImagePipe,
               private sanitizer: DomSanitizer,
               private renderer: Renderer2,
-              private cd: ChangeDetectorRef) {
+              private cd: ChangeDetectorRef,
+              private themeService: ThemeService) {
   }
 
   ngOnInit(): void {
@@ -123,13 +126,16 @@ export class TimeSeriesChartWidgetComponent implements OnInit, OnDestroy, AfterV
     if (this.showLegend) {
       this.horizontalLegendPosition = [LegendPosition.left, LegendPosition.right].includes(this.legendConfig.position);
       this.legendClass = `legend-${this.legendConfig.position}`;
+      // The legend is DOM, not canvas, so it does not follow the chart's own dark
+      // scheme; remap its stored (light-default) colours the same way.
+      const darkMode = this.settings.darkMode || this.themeService.isDark;
       this.legendColumnTitleStyle = textStyle(this.settings.legendColumnTitleFont);
-      this.legendColumnTitleStyle.color = this.settings.legendColumnTitleColor;
+      this.legendColumnTitleStyle.color = prepareChartThemeColor(this.settings.legendColumnTitleColor, darkMode);
       this.legendLabelStyle = textStyle(this.settings.legendLabelFont);
       this.disabledLegendLabelStyle = textStyle(this.settings.legendLabelFont);
-      this.legendLabelStyle.color = this.settings.legendLabelColor;
+      this.legendLabelStyle.color = prepareChartThemeColor(this.settings.legendLabelColor, darkMode);
       this.legendValueStyle = textStyle(this.settings.legendValueFont);
-      this.legendValueStyle.color = this.settings.legendValueColor;
+      this.legendValueStyle.color = prepareChartThemeColor(this.settings.legendValueColor, darkMode);
       this.displayLegendValues = this.legendConfig.showMin || this.legendConfig.showMax ||
         this.legendConfig.showAvg || this.legendConfig.showTotal || this.legendConfig.showLatest;
     }
