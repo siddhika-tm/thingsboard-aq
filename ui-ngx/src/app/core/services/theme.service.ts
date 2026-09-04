@@ -22,7 +22,7 @@ const STORAGE_KEY = 'tb-theme';
 const DARK_CLASS = 'tb-dark';
 
 /**
- * App-wide light/dark switching. Dark is the default; 'light' is the opt-out.
+ * App-wide light/dark switching. Light is the default; 'dark' is the opt-in.
  *
  * `.tb-dark` is a colour overlay that Material emits alongside `.tb-default`
  * (see theme.scss), so the class on <body> drives every stylesheet rule. The
@@ -78,9 +78,9 @@ export class ThemeService {
 
   private readStored(): boolean {
     try {
-      return localStorage.getItem(STORAGE_KEY) !== 'light';
+      return localStorage.getItem(STORAGE_KEY) === 'dark';
     } catch (e) {
-      return true;
+      return false;
     }
   }
 }
