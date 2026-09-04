@@ -1832,3 +1832,60 @@ pre.tb-highlight {
   .tb-widget .mat-mdc-header-cell { background: var(--aq-surface-2) !important; }
   .tb-widget .mat-mdc-paginator { border-top: 1px solid var(--aq-border-subtle); }
 }
+
+/* ---- AIRLINQ GRID: toolbar filters as pills, pager + rows-per-page as chips ---- */
+.tb-default {
+  /* profile/type filter rendered as a mat-form-field in the table toolbar → outlined pill */
+  mat-toolbar.mat-mdc-table-toolbar .mat-mdc-form-field {
+    margin-left: 12px;
+    --mdc-filled-text-field-container-color: transparent;
+    --mdc-filled-text-field-active-indicator-height: 0;
+    --mdc-filled-text-field-focus-active-indicator-height: 0;
+    .mat-mdc-text-field-wrapper {
+      height: 36px;
+      padding: 0 12px 0 14px;
+      border: 1px solid var(--aq-border);
+      border-radius: 999px;
+      background: transparent !important;
+      &:before { display: none; }
+    }
+    .mat-mdc-form-field-flex { height: 36px; align-items: center; }
+    .mat-mdc-form-field-infix { padding: 0 !important; min-height: 0; display: flex; align-items: center; gap: 6px; }
+    .mdc-floating-label { position: static; transform: none; font-size: 12px; color: var(--aq-text-3); pointer-events: none; }
+    .mdc-floating-label::after { content: ':'; }
+    .mat-mdc-select-value, .mat-mdc-input-element { font-size: 13px; font-weight: 500; color: var(--aq-text); }
+    .mat-mdc-form-field-icon-suffix .mat-mdc-icon-button { width: 28px; height: 28px; padding: 2px; }
+    .mdc-line-ripple, .mat-mdc-form-field-subscript-wrapper { display: none; }
+  }
+  /* header band: legible label colour, exact 40px band */
+  .mat-mdc-header-row { height: 40px; }
+  .mat-mdc-header-cell { color: var(--aq-text-2) !important; }
+  /* row action buttons: 32px hit target with a rounded hover */
+  .mat-mdc-cell .mat-mdc-icon-button.mat-mdc-button-base {
+    width: 32px; height: 32px; padding: 4px; border-radius: 8px;
+    --mdc-icon-button-state-layer-size: 32px;
+    &:hover { background: var(--aq-hover); }
+  }
+  /* footer: rows-per-page select and pager buttons as chips */
+  .mat-mdc-paginator {
+    .mat-mdc-paginator-page-size-select .mat-mdc-text-field-wrapper {
+      height: 30px; border: 1px solid var(--aq-border); border-radius: 8px; padding: 0 4px 0 10px;
+      --mdc-outlined-text-field-outline-color: transparent;
+      --mdc-outlined-text-field-hover-outline-color: transparent;
+      --mdc-outlined-text-field-focus-outline-color: transparent;
+    }
+    .mat-mdc-paginator-page-size-select .mat-mdc-form-field-infix { padding: 0 !important; min-height: 30px; display: flex; align-items: center; }
+    .mat-mdc-paginator-range-label { color: var(--aq-text-2); }
+    .mat-mdc-icon-button.mat-mdc-button-base { width: 32px; height: 32px; padding: 4px; border-radius: 8px; --mdc-icon-button-state-layer-size: 32px; }
+    .mat-mdc-icon-button.mat-mdc-button-base:not([disabled]):hover { background: var(--aq-hover); }
+  }
+}
+.tb-default {
+  mat-toolbar.mat-mdc-table-toolbar .mat-mdc-form-field {
+    .mat-mdc-form-field-infix { width: auto; }
+    .mdc-floating-label { width: auto; max-width: none; overflow: visible; white-space: nowrap; }
+    .mat-mdc-select { width: auto; min-width: 48px; }
+  }
+  /* entity name column: keep identifiers on one line */
+  .mat-mdc-cell.mat-column-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
