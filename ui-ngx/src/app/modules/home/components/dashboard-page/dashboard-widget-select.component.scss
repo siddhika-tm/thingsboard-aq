@@ -129,7 +129,7 @@ tb-dashboard-widget-select {
       }
 
       &.focus {
-        background: #fff;
+        background: var(--aq-elevated, #fff);
         border-color: rgba(0, 0, 0, 0.15);
         caret-color: $tb-primary-color;
 
@@ -216,7 +216,7 @@ tb-dashboard-widget-select {
       padding: 16px 20px;
       border: 1px solid $tb-primary-color;
       border-radius: 4px;
-      background: #fff;
+      background: var(--aq-elevated, #fff);
       cursor: pointer;
       transition: background-color 0.2s;
 

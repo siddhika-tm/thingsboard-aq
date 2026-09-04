@@ -69,7 +69,7 @@
     right: 0;
     z-index: 2;
     padding: 10px;
-    background-color: #fff;
+    background-color: var(--aq-elevated, #fff);
     transition: 0.3s ease-in-out;
 
     &-hidden {

@@ -45,7 +45,7 @@
   }
   .tb-shape-fill-stripe-settings-preview {
     flex: 1;
-    background: #fff;
+    background: var(--aq-elevated, #fff);
     border-radius: 4px;
     border: 1px solid rgba(0, 0, 0, 0.12);
     display: flex;

@@ -42,7 +42,7 @@
     justify-content: center;
     margin-top: -14px;
     &-container {
-      background-color: white;
+      background-color: var(--aq-elevated, #fff);
     }
     &-label {
       font-size: 15px;
