@@ -1682,6 +1682,49 @@ pre.tb-highlight {
   .tb-primary-toolbar .mat-toolbar-tools .tb-active,
   .tb-primary-toolbar a.tb-active { color: var(--aq-text) !important; }
 
+  /* ---- Light-theme leaks: components that hardcode rgba(0,0,0,x) in their own
+       styles (or via Material tokens the colour overlay doesn't reach). Each is
+       remapped to a token; light keeps the component's own value. ---- */
+
+  /* sidebar user identity (shown on every page) */
+  .tb-user-authority { color: var(--aq-text-3) !important; }
+
+  /* breadcrumb: current page + divider (parent links already themed) */
+  .tb-breadcrumb .state-entry { color: var(--aq-text) !important; }
+  .tb-breadcrumb .state-divider { color: var(--aq-text-3) !important; }
+
+  /* default icon-buttons (table row actions, toolbars) — Material's default
+     icon colour is rgba(0,0,0,.54); status-coloured buttons are excluded. */
+  .mat-mdc-icon-button:not(.mat-primary):not(.mat-accent):not(.mat-warn) .mat-icon,
+  .mat-mdc-icon-button:not(.mat-primary):not(.mat-accent):not(.mat-warn) tb-icon {
+    color: var(--aq-text-2) !important;
+  }
+  .mat-mdc-icon-button:not(.mat-primary):not(.mat-accent):not(.mat-warn):hover:not([disabled]) .mat-icon {
+    color: var(--aq-text) !important;
+  }
+  .mat-mdc-icon-button[disabled] .mat-icon,
+  .mat-mdc-icon-button.mat-mdc-button-disabled .mat-icon { color: var(--aq-text-disabled) !important; }
+
+  /* form scaffolding: section subheaders, field hints, assignee placeholder */
+  .mat-mdc-subheader { color: var(--aq-text-3) !important; }
+  .mat-mdc-form-field-hint, .mat-mdc-form-field-subscript-wrapper .mat-mdc-form-field-hint-wrapper {
+    color: var(--aq-text-3) !important;
+  }
+  .unassigned-icon { color: var(--aq-text-3) !important; }
+
+  /* neutral icons inside data-table cells (boolean/checkbox columns) */
+  .mat-mdc-cell .mat-icon { color: var(--aq-text-2) !important; }
+
+  /* dashboard content wrapper (Material app-background is light-only; mostly
+     hidden behind the gridster, themed for correctness at edges/during load) */
+  .tb-dashboard-page.mat-content, .tb-dashboard-page .mat-content,
+  .tb-main-content { background-color: var(--aq-bg) !important; }
+
+  /* unselected checkboxes (Material's unselected icon colour is rgba(0,0,0,.54)) */
+  --mdc-checkbox-unselected-icon-color: var(--aq-text-3);
+  --mdc-checkbox-unselected-hover-icon-color: var(--aq-text-2);
+  --mdc-checkbox-unselected-pressed-icon-color: var(--aq-text-2);
+
   /* scrollbars */
   ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .16) !important; }
   ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, .26) !important; }
