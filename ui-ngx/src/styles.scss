@@ -1760,3 +1760,75 @@ pre.tb-highlight {
   ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .16) !important; }
   ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, .26) !important; }
 }
+
+/* =====================================================================
+ * AIRLINQ GRID + DASHBOARD ANATOMY (design canvas 2026-09-04, both themes)
+ * Entity tables, widget tables and dashboard cards share one grid
+ * vocabulary: outer border, header band, 1px row + column dividers,
+ * hover / selected rows, pill toolbar controls. Tokens only.
+ * ===================================================================== */
+.tb-default {
+
+  /* ---- entity-table card: outer border + header/toolbar/footer bands ---- */
+  .tb-entity-table-content {
+    border: 1px solid var(--aq-border) !important;
+  }
+  mat-toolbar.mat-mdc-table-toolbar:not(.mat-primary) {
+    border-bottom: 1px solid var(--aq-border);
+    .tb-entity-table-title { font-size: 16px; font-weight: 600; color: var(--aq-text); }
+  }
+  /* selection toolbar (rows picked): accent-container band, not raw primary */
+  mat-toolbar.mat-mdc-table-toolbar.mat-primary {
+    background: var(--aq-accent-container) !important;
+    color: var(--aq-on-accent-container) !important;
+    .mat-icon, tb-icon, .tb-entity-table-info, button { color: var(--aq-on-accent-container) !important; }
+  }
+  .mat-mdc-paginator {
+    border-top: 1px solid var(--aq-border);
+    background: transparent !important;
+  }
+
+  /* ---- header band ---- */
+  .mat-mdc-header-row { height: 44px; }
+  .mat-mdc-header-cell {
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--aq-border) !important;
+  }
+
+  /* ---- 1px row + column dividers, hover, selected ---- */
+  .mat-mdc-header-cell, .mat-mdc-cell {
+    border-right: 1px solid var(--aq-border-subtle);
+    &:last-of-type { border-right: 0; }
+  }
+  .mat-mdc-row { height: 48px; }
+  .mat-mdc-row:hover .mat-mdc-cell { background: var(--aq-hover) !important; }
+  .mat-mdc-row.tb-current-entity .mat-mdc-cell,
+  .mat-mdc-row.mat-row-select.tb-selected .mat-mdc-cell,
+  .mat-mdc-row:has(.mat-mdc-checkbox-checked) .mat-mdc-cell {
+    background: var(--aq-selected) !important;
+  }
+
+  /* ---- pill controls in table / dashboard toolbars ---- */
+  mat-toolbar.mat-mdc-table-toolbar .mat-mdc-outlined-button,
+  mat-toolbar.mat-mdc-table-toolbar .mat-mdc-unelevated-button,
+  .tb-dashboard-toolbar .mat-mdc-outlined-button,
+  .tb-dashboard-toolbar .mat-mdc-unelevated-button,
+  .tb-primary-toolbar .mat-mdc-outlined-button {
+    border-radius: 999px !important;
+  }
+  mat-toolbar.mat-mdc-table-toolbar .mat-mdc-outlined-button { border-color: var(--aq-border) !important; }
+
+  /* ---- dashboard cards ---- */
+  .tb-widget .tb-widget-title .title,
+  .tb-widget .tb-widget-title .mat-subtitle-1.title { font-size: 14px !important; font-weight: 600 !important; }
+  .tb-widget .tb-widget-title tb-timewindow { opacity: 1; }
+  .tb-widget .tb-timewindow, .tb-widget .tb-timewindow-label {
+    font-size: 11px !important; letter-spacing: .06em; text-transform: uppercase;
+  }
+  /* tables rendered inside widgets: same anatomy, no outer border (the card is the border) */
+  .tb-widget .mat-mdc-header-cell { background: var(--aq-surface-2) !important; }
+  .tb-widget .mat-mdc-paginator { border-top: 1px solid var(--aq-border-subtle); }
+}

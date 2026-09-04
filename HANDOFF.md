@@ -479,6 +479,9 @@ TS line; no template changes, so upstream merges stay cheap. Design spec (local,
 | `home.component.ts` | `menuCollapsed` user setting `undefined` → rail collapsed by default; an explicit `false` (pinned open) is honoured. |
 | `login.component.scss` | Sass `$aq-*` constants replaced by the CSS tokens; the separate dark block is gone (tokens flip). |
 
+| `styles.scss` `AIRLINQ GRID + DASHBOARD ANATOMY` | Applied from the design canvas (2026-09-04, both themes): entity-table card gets a 1px `--aq-border` outline; header band 44 px with 11 px uppercase labels and a 1px bottom rule; 1px row **and column** dividers (`--aq-border-subtle`); 48 px rows; hover `--aq-hover`, selected/current `--aq-selected`; selection toolbar = accent-container band; paginator top rule; pill (999px) outlined/flat buttons in table and dashboard toolbars; widget titles 14/600 and uppercase timewindow labels. |
+| collapsed rail centring | Hidden nav labels still took flex space and pushed icons 6 px left of the brand mark; collapsed items are now `justify-content:center` with a zero-width label, and the user-menu button drops its gap. Measured: rail, mark, chevron, icons, avatar all at x = 40. |
+
 **Hover-expand was tried and removed.** Collapsed sections open as CDK flyout popovers outside
 the rail, so a CSS `:hover` expansion collapses the instant the pointer reaches the flyout. The
 pin button in the rail head is the only expand/collapse control; the sheet re-flows to match.

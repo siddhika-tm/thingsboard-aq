@@ -103,6 +103,17 @@
         mat-sidenav-content.tb-site-content {
           margin-left: calc(var(--aq-rail-w) + 2 * var(--aq-gap)) !important;
         }
+        // user block at the rail foot: avatar on the same axis as the icons
+        ::ng-deep tb-user-menu button.mat-mdc-button.tb-user-menu.tb-collapsed {
+          justify-content: center;
+          padding: 16px 0;
+          gap: 0;
+          .tb-user-info {
+            width: 0;
+            flex: 0 0 0;
+            overflow: hidden;
+          }
+        }
       }
     }
   }

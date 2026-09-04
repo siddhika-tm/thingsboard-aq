@@ -31,11 +31,18 @@
     --mat-button-text-label-text-weight: 500;
     &.tb-collapsed {
       a.mat-mdc-button.mat-mdc-button-base {
-        // 64px rail − 2×8px rail padding = 48px item; 24px icon sits centred
-        padding: 0 12px;
+        // 64px rail − 2×8px rail padding = 48px item; the icon is centred on
+        // the rail axis (x = 40) so it lines up with the brand mark above.
+        padding: 0;
         min-width: 0;
+        justify-content: center;
+        .mat-icon {
+          margin: 0;
+        }
         span.mdc-button__label {
           opacity: 0;
+          width: 0;
+          flex: 0 0 0;
         }
         &.is-new::after {
           opacity: 0;
