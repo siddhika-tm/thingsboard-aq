@@ -336,6 +336,16 @@ published default passwords** — see §12.
   `ThemeService`. `TbTimeSeriesChart` (time-series / bar / state / range charts) switches its
   canvas colour scheme on that class and watches it with a `MutationObserver`; upstream shipped
   the mechanism but nothing ever set the class.
+- **Semantic token layer (`--aq-*`).** `styles.scss` defines one set of CSS custom
+  properties per theme: light values on `.tb-default`, dark values on `.tb-dark` (both sit on
+  `<body>`; dark wins by source order). Tokens cover the surface hierarchy
+  (`--aq-bg` page -> `--aq-sidebar`/`--aq-header` chrome -> `--aq-surface` card -> `--aq-elevated`
+  overlays), text tiers (`--aq-text`/`-2`/`-3`/`-disabled`), borders, hover/selected,
+  accent + status, and chart (`--aq-chart-grid`/`-axis`/`-label`/`-tooltip-bg`/`-cursor`).
+  Component rules consume `var(--aq-*)`, so the same token drives every component and dark is a
+  designed hierarchy, not one flat colour. Add a new colour by adding a token, not a hardcoded
+  hex. The dark chart-token hex values are mirrored in `chart.models.ts` `chartColorScheme`
+  (canvas can't read CSS) — keep the two in sync.
 - **`.tb-dark` is a colour overlay, not a standalone theme.** Material emits it alongside
   `.tb-default`; both classes sit on body. Consequences:
   - All theme colour lives in `styles.scss` under two blocks marked `AIRLINQ THEMING` (~line
@@ -378,7 +388,7 @@ light), Rule Engine Statistics (stock JSON — proves the default-colour remap),
 (sticky cells), Devices and Alarms pages (dark and light), login. The probe from §9 reports no
 opaque light element in dark on any of them except map tiles.
 
-**Deployed and verified 2026-09-03.** RPM `b2382661…` built (JDK 25, `-Ppackaging`, no skip
+**Redesigned into a semantic token system, all contrast leaks fixed, deployed 2026-09-04.** RPM `b2382661…` built (JDK 25, `-Ppackaging`, no skip
 flags — see §3 and §4.2), transferred, installed with `rpm -Uvh --force` (config md5 unchanged,
 service up in 33 s), and the served bundle confirmed to carry the new boot script. On the live
 server, the default (no stored preference) now renders dark with all 19 Container Operations
@@ -406,6 +416,52 @@ per-dashboard work. The canvas-gauge (`colorPlate`, tick/number colours) and val
 - Pie/doughnut *canvas* labels are not remapped (only their DOM legends are); polar/radar and
   the bar-with-labels widget have their own light-default label colours.
 - CDK overlays not yet swept: dialogs, selects, tooltips, the entity-details drawer.
+
+### 8.4 Dark-theme QA checklist (verified on the live server, both themes)
+
+Component-by-component audit at the screenshot viewport (1680 wide). Light re-checked for
+regression on every row.
+
+| Component | Dark | Light |
+|---|---|---|
+| Logo | ✓ white wordmark (theme-switched asset) | ✓ black wordmark |
+| Header / breadcrumb / title / realtime | ✓ token-driven, primary/secondary/disabled | ✓ |
+| Sidebar sections / items / icons | ✓ hierarchy, coordinated contrast | ✓ |
+| Active nav item | ✓ accent tint + inset left bar + brighter label (not colour alone) | ✓ |
+| Hover / disabled states | ✓ | ✓ |
+| KPI cards / values / timestamps | ✓ card > page, number prominent, timestamp secondary | ✓ |
+| Fleet-alignment progress track + fill | ✓ track visible (class !important over inline) | ✓ |
+| Map panel / zoom controls | ✓ controls themed, basemap intact | ✓ |
+| Chart grid / axes / labels / legend | ✓ grid ~3:1, text tokens | ✓ stock |
+| Chart series colours | ✓ distinguishable on dark plot | ✓ |
+| Chart tooltip | ✓ elevated dark surface, light text | ✓ |
+| Chart dataZoom slider | ✓ explicit dark colours | ✓ light |
+| Tables / sticky cells / paginator | ✓ | ✓ |
+| Overlays: menus / selects / dialogs / tooltips | ✓ elevated surface, token text | ✓ |
+| Focus rings | ✓ visible accent outline | ✓ |
+| Borders / dividers | ✓ subtle, not dominant | ✓ |
+| Light-theme leakage | none (probe finds no opaque light element except map tiles) | n/a |
+
+Residual cosmetic (non-blocking): map basemap stays light in dark (a dark tile layer would
+change light too — product call); radial-gauge chrome bezel stays bright (canvas-gauges have no
+theme wiring); the progress-bar *fill* keeps its configured indigo (data colour, not a token).
+
+### 8.5 Semantic token redesign + leak audit (2026-09-04)
+
+The dark theme was rebuilt around the `--aq-*` token layer (§7.2): logo bound to the theme,
+header/sidebar/KPI/overlay/chart/map treatments all token-driven, sidebar active state = accent
+tint + inset bar. A WCAG near-black-text + light-surface audit was then run across the dashboard,
+device list, alarms and account pages; every leak it found (sidebar user role, breadcrumb
+entry/divider, default icon-buttons, data-cell icons, form subheaders/hints, unselected checkbox,
+dashboard content wrapper) was remapped to tokens, and the re-audit reports **zero** text leaks
+and zero light surfaces on all four routes (only near-black text left is the "Add device" label
+on the teal accent button — intentional on-accent). Commits `6c96589` (redesign) and `2543637`
+(leak fixes); live as of the deploy above.
+
+> **Live-server headless screenshots don't work over the VPN** — the app bundle loads too slowly
+> to bootstrap in headless Chrome (you get only the `tb-root` shell). Verify UI on the local dev
+> server (`ng serve` proxied to the live server, §3) which renders instantly on the same code;
+> confirm the deploy separately by checking the served bundle/CSS carries your change.
 
 ## 9. How to verify UI changes (don't trust the API)
 

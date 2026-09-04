@@ -1407,128 +1407,325 @@ pre.tb-highlight {
 @tailwind utilities;
 
 /*********************************
- * AIRLINQ THEMING — dashboard surfaces
+ * AIRLINQ SEMANTIC DARK THEME
  *
- * Colour lives here, not in a dashboard's own CSS: dashboardCss is namespaced
- * under `.tb-default .tb-dashboard-page-css-<guid>` (3 classes), which would
- * out-specify anything keyed on `.tb-dark`. Keeping both themes here at equal
- * specificity means source order decides, and dark wins by coming second.
- * dashboardCss is left to layout only.
+ * A token layer, not per-component colour tweaks. Every theme-dependent colour
+ * is a `--aq-*` custom property defined once per theme below; component rules
+ * consume `var(--aq-*)` so both themes are driven from one source of truth.
+ *
+ * `.tb-default` and `.tb-dark` both sit on <body> at the same specificity, so
+ * the dark token block wins by coming second in source order. Rules that are
+ * correct in both themes are written once under `.tb-default` (always present)
+ * and resolve to dark values automatically when `.tb-dark` is also set. Rules
+ * scoped under `.tb-dark` are additions that must not touch the light theme.
+ *
+ * Chart canvases (ECharts) can't read CSS; their dark values live in
+ * chart.models.ts `chartColorScheme` and are kept numerically in sync with the
+ * `--aq-chart-*` tokens here (see the cross-reference comment in that file).
  ********************************/
+
+/* ---- LIGHT tokens: reproduce the existing light theme exactly ---- */
 .tb-default {
-  .tb-widget {
-    background: #ffffff !important;
-    border: 1px solid #dde1e8 !important;
-    color: #14181f !important;
-    box-shadow: none !important;
-  }
-  .tb-widget-title .title, .mat-subtitle-1.title { color: #14181f !important; }
-  .tb-timewindow, .tb-timewindow-label { color: #6b7789 !important; }
-  .mat-mdc-header-cell {
-    color: #6b7789 !important;
-    background: #f7f8fa !important;
-    border-bottom-color: #dde1e8 !important;
-  }
-  .mat-mdc-cell { color: #14181f !important; border-bottom-color: #eef1f4 !important; }
-  .mat-mdc-row:hover .mat-mdc-cell { background: #f7f8fa !important; }
+  --aq-bg:            #eceef1;
+  --aq-sidebar:       #ffffff;
+  --aq-header:        #ffffff;
+  --aq-surface:       #ffffff;   /* card / primary surface   */
+  --aq-surface-2:     #f7f8fa;   /* table header, insets     */
+  --aq-panel:         #f7f8fa;   /* nested panel             */
+  --aq-elevated:      #ffffff;   /* menus, dialogs, tooltips */
+  --aq-hover:         rgba(15, 23, 32, .05);
+  --aq-selected:      rgba(11, 107, 120, .10);
+
+  --aq-text:          #14181f;
+  --aq-text-2:        #414b5a;
+  --aq-text-3:        #6b7789;
+  --aq-text-disabled: #9aa5b4;
+  --aq-on-accent:     #ffffff;
+
+  --aq-border:        #dde1e8;
+  --aq-border-subtle: #eef1f4;
+  --aq-divider:       #e4e7ec;
+
+  --aq-accent:        #0b6b78;
+  --aq-accent-strong: #0e7f8e;
+  --aq-focus:         #0e7f8e;
+  --aq-success:       #17603a;
+  --aq-warning:       #b45309;
+  --aq-error:         #a3182a;
+  --aq-info:          #1d6b8a;
+
+  --aq-chart-grid:        rgba(0, 0, 0, .12);
+  --aq-chart-axis:        rgba(0, 0, 0, .54);
+  --aq-chart-label:       rgba(0, 0, 0, .54);
+  --aq-chart-tooltip-bg:  rgba(255, 255, 255, .92);
+  --aq-chart-tooltip-txt: rgba(0, 0, 0, .85);
+  --aq-chart-cursor:      rgba(0, 0, 0, .35);
 }
 
-body.tb-dark { background-color: #0b0e13 !important; }
-
+/* ---- DARK tokens: a hierarchy of surfaces, accessible contrast ---- */
 .tb-dark {
-  .mat-app-background { background-color: #0b0e13 !important; color: #e8ecf2 !important; }
+  --aq-bg:            #0a0d12;   /* page — darkest            */
+  --aq-sidebar:       #0e131a;   /* chrome — slightly lifted  */
+  --aq-header:        #0f141b;
+  --aq-surface:       #141922;   /* card — above the page     */
+  --aq-surface-2:     #1a2029;   /* table header, insets      */
+  --aq-panel:         #171d26;   /* nested panel              */
+  --aq-elevated:      #1e2530;   /* menus/dialogs/tooltips — top */
+  --aq-hover:         rgba(255, 255, 255, .06);
+  --aq-selected:      rgba(55, 182, 201, .16);
+
+  --aq-text:          #e9edf3;   /* ~14:1 on surface */
+  --aq-text-2:        #aeb8c5;   /* ~8:1  */
+  --aq-text-3:        #8892a0;   /* ~4.9:1 — timestamps/captions */
+  --aq-text-disabled: #59636f;
+  --aq-on-accent:     #04141a;
+
+  --aq-border:        #2b3542;
+  --aq-border-subtle: #212a35;
+  --aq-divider:       #212a35;
+
+  --aq-accent:        #37b6c9;   /* ~7.6:1 */
+  --aq-accent-strong: #4fc9db;
+  --aq-focus:         #4fc9db;
+  --aq-success:       #46c08a;
+  --aq-warning:       #e0aa4e;
+  --aq-error:         #ec6274;
+  --aq-info:          #55b0df;
+
+  --aq-chart-grid:        #3d4757;
+  --aq-chart-axis:        #7d8898;
+  --aq-chart-label:       #aeb8c5;
+  --aq-chart-tooltip-bg:  #1e2530;
+  --aq-chart-tooltip-txt: #e9edf3;
+  --aq-chart-cursor:      #8892a0;
+}
+
+/* =====================================================================
+ * Shared component rules — token-driven, correct in BOTH themes.
+ * (Light values above are identical to the previous light theme, so light
+ *  is unchanged; dark values apply automatically under .tb-dark.)
+ * ===================================================================== */
+.tb-default {
+
+  /* dashboard canvas */
+  .tb-dashboard-layout, gridster { background-color: var(--aq-bg) !important; }
+
+  /* widget cards */
   .tb-widget {
-    background: #12161d !important;
-    border: 1px solid #2b3442 !important;
-    color: #e8ecf2 !important;
+    background: var(--aq-surface) !important;
+    border: 1px solid var(--aq-border) !important;
+    color: var(--aq-text) !important;
     box-shadow: none !important;
   }
-  .tb-widget-title .title, .mat-subtitle-1.title,
-  .tb-widget-header .title { color: #e8ecf2 !important; }
-  .tb-timewindow, .tb-timewindow-label { color: #7d8898 !important; }
   .tb-widget-content, .tb-absolute-fill { background-color: transparent !important; }
-  .tb-value-card-overlay, .tb-value-card-label-row,
-  .tb-value-card-title-panel { color: #e8ecf2 !important; }
-  .tb-progress-bar-title-value-row, .tb-progress-bar-title,
-  .tb-progress-bar-value { color: #e8ecf2 !important; }
-  .mat-mdc-header-cell {
-    color: #7d8898 !important;
-    background: #0f141a !important;
-    border-bottom-color: #323b48 !important;
+  .tb-widget-title .title, .mat-subtitle-1.title, .tb-widget-header .title {
+    color: var(--aq-text) !important;
   }
-  .mat-mdc-cell { color: #e8ecf2 !important; border-bottom-color: #2b3442 !important; }
-  .mat-mdc-table, table.mat-mdc-table,
-  .mat-mdc-row, .mat-mdc-header-row,
-  .mdc-data-table__row, .mdc-data-table__header-row { background: transparent !important; }
-  .mat-mdc-row { color: #e8ecf2 !important; }
-  .mat-mdc-row:hover .mat-mdc-cell { background: #1a2029 !important; }
-  .mat-mdc-paginator, .mat-mdc-paginator-container,
-  .mat-mdc-paginator-range-label { color: #7d8898 !important; }
-  .tb-dashboard-layout, gridster { background-color: #0b0e13 !important; }
-  /* Edit-mode layout grid: angular-gridster2 draws it with 1px solid white
-     lines (onDrag&Resize), which glare on the dark canvas. */
-  gridster .gridster-column {
-    border-left-color: rgba(255, 255, 255, .14) !important;
-    border-right-color: rgba(255, 255, 255, .14) !important;
-  }
-  gridster .gridster-row {
-    border-top-color: rgba(255, 255, 255, .14) !important;
-    border-bottom-color: rgba(255, 255, 255, .14) !important;
+  .tb-timewindow, .tb-timewindow-label { color: var(--aq-text-3) !important; }
+
+  /* KPI value cards + progress bar */
+  .tb-value-card-overlay, .tb-value-card-label-row, .tb-value-card-title-panel,
+  .tb-progress-bar-title-value-row, .tb-progress-bar-title, .tb-progress-bar-value {
+    color: var(--aq-text) !important;
   }
 
-  /* Entity tables (Devices, Assets, Alarms, ..., plus the attribute / relation /
-     version tables) set `background: #fff` on their container in component styles,
-     and the table toolbar reads its icon colour from a light-only fallback. */
-  .tb-entity-table-content { background: #12161d !important; }
-  .tb-entity-table-content.tb-outlined-border { border-color: #2b3442 !important; }
-  mat-toolbar.mat-mdc-table-toolbar:not(.mat-primary) {
-    background: #0f141a !important;
-    color: #e8ecf2 !important;
-    button.mat-mdc-icon-button .mat-icon { color: #aab4c2 !important; }
+  /* tables (widget + entity tables) */
+  .mat-mdc-header-cell {
+    color: var(--aq-text-3) !important;
+    background: var(--aq-surface-2) !important;
+    border-bottom-color: var(--aq-border) !important;
   }
-  .mat-mdc-cell.mat-mdc-table-sticky,
-  .mat-mdc-header-cell.mat-mdc-table-sticky { background: #12161d !important; }
+  .mat-mdc-cell { color: var(--aq-text) !important; border-bottom-color: var(--aq-border-subtle) !important; }
+  .mat-mdc-row:hover .mat-mdc-cell { background: var(--aq-hover) !important; }
+  .mat-mdc-cell.mat-mdc-table-sticky, .mat-mdc-header-cell.mat-mdc-table-sticky {
+    background: var(--aq-surface) !important;
+  }
+  .tb-entity-table-content { background: var(--aq-surface) !important; }
+  .tb-entity-table-content.tb-outlined-border { border-color: var(--aq-border) !important; }
+}
+
+/* =====================================================================
+ * DARK-ONLY additions — chrome the light theme already handles well.
+ * Every rule here is scoped to .tb-dark, so the light theme is untouched.
+ * ===================================================================== */
+.tb-dark {
+
+  /* app background wherever a route leaves <body> exposed (Material's
+     app-background mixin is a light-only include). */
+  background-color: var(--aq-bg) !important;
+  .mat-app-background { background-color: var(--aq-bg) !important; color: var(--aq-text) !important; }
+
+  /* table scaffolding transparency so the card surface shows through */
+  .mat-mdc-table, table.mat-mdc-table, .mat-mdc-row, .mat-mdc-header-row,
+  .mdc-data-table__row, .mdc-data-table__header-row { background: transparent !important; }
+  .mat-mdc-row { color: var(--aq-text) !important; }
+  .mat-mdc-paginator, .mat-mdc-paginator-container, .mat-mdc-paginator-range-label,
+  .mat-mdc-paginator .mat-mdc-select-value-text, .mat-mdc-paginator .mat-mdc-icon-button {
+    color: var(--aq-text-3) !important;
+  }
   .mat-mdc-paginator { background: transparent !important; }
 
-  /* The user menu popover renders in a CDK overlay attached to <body>, so it
-     inherits .tb-dark but has no dark styling of its own - transparent panel
-     with near-black text, which is unreadable. */
-  .tb-popover-inner,
-  .tb-popover-inner-content,
-  .tb-menu-content {
-    background-color: #1a2029 !important;
-    color: #e8ecf2 !important;
+  /* ---- HEADER (top toolbar) ---- */
+  .tb-primary-toolbar, mat-toolbar.tb-primary-toolbar {
+    background: var(--aq-header) !important;
+    color: var(--aq-text) !important;
+    border-bottom: 1px solid var(--aq-border-subtle);
   }
-  .tb-popover-arrow-content { background-color: #1a2029 !important; }
-  .tb-user-email { color: #aab4c2 !important; }
-  .tb-menu-content button,
-  .tb-user-menu-items button { color: #e8ecf2 !important; }
-  .tb-menu-content button:hover,
-  .tb-user-menu-items button:hover { background-color: #232b36 !important; }
-  .tb-menu-content mat-divider,
-  .tb-user-menu-items mat-divider { border-color: #2b3441 !important; }
+  .tb-primary-toolbar .mat-mdc-icon-button .mat-icon,
+  .tb-primary-toolbar tb-icon, .tb-primary-toolbar .mat-icon { color: var(--aq-text-2) !important; }
+  .tb-primary-toolbar .mat-mdc-icon-button:hover .mat-icon { color: var(--aq-text) !important; }
+  .tb-primary-toolbar .mat-mdc-icon-button[disabled] .mat-icon { color: var(--aq-text-disabled) !important; }
+  .tb-primary-toolbar .tb-breadcrumb, .tb-primary-toolbar .mat-toolbar-tools { color: var(--aq-text) !important; }
+  .tb-breadcrumb a, .tb-breadcrumb .tb-inactive { color: var(--aq-text-3) !important; }
+  .tb-breadcrumb .tb-active, .tb-breadcrumb a:last-child { color: var(--aq-text) !important; }
 
-  /* AIRLINQ DARK SIDENAV
-     The side menu sets rgba(0,0,0,.76) in its own component styles - both
-     directly and via --mat-button-text-label-text-color - which is unreadable
-     on the dark panel. Override the variable and the colour together. */
+  /* ---- SIDEBAR ---- */
   .tb-site-sidenav {
-    --mat-button-text-label-text-color: #e8ecf2;
-
-    a.mat-mdc-button,
-    a.mat-mdc-button.mat-mdc-button-base,
-    .mdc-button__label,
-    tb-menu-link, tb-menu-toggle,
-    .tb-menu-toggle-header { color: #e8ecf2 !important; }
-
-    a.mat-mdc-button.mat-mdc-button-base {
-      --mat-button-text-label-text-color: #e8ecf2;
-    }
-    a.mat-mdc-button:hover,
-    a.mat-mdc-button.tb-hovered,
-    .tb-hovered { background-color: rgba(255, 255, 255, .07) !important; }
-
-    .tb-menu-toggle-list { background: transparent !important; }
-    tb-icon, .mat-icon { color: #aab4c2 !important; }
+    background: var(--aq-sidebar) !important;
+    border-right: 1px solid var(--aq-border-subtle);
+    --mat-button-text-label-text-color: var(--aq-text-2);
   }
+  .tb-nav-header, .tb-nav-header-toolbar, .tb-side-menu-toolbar { background: var(--aq-sidebar) !important; }
+
+  /* nav items: coordinated icon + label contrast */
+  .tb-site-sidenav a.mat-mdc-button,
+  .tb-site-sidenav a.mat-mdc-button.mat-mdc-button-base,
+  .tb-site-sidenav .mdc-button__label,
+  .tb-site-sidenav tb-menu-link, .tb-site-sidenav tb-menu-toggle,
+  .tb-site-sidenav .tb-menu-toggle-header { color: var(--aq-text-2) !important; }
+  .tb-site-sidenav a.mat-mdc-button.mat-mdc-button-base { --mat-button-text-label-text-color: var(--aq-text-2); }
+  .tb-site-sidenav tb-icon, .tb-site-sidenav .mat-icon { color: var(--aq-text-3) !important; }
+
+  /* hover */
+  .tb-site-sidenav a.mat-mdc-button:hover,
+  .tb-site-sidenav a.mat-mdc-button.tb-hovered,
+  .tb-site-sidenav .tb-hovered { background-color: var(--aq-hover) !important; }
+  .tb-site-sidenav a.mat-mdc-button:hover,
+  .tb-site-sidenav a.mat-mdc-button:hover .mdc-button__label { color: var(--aq-text) !important; }
+  .tb-site-sidenav a.mat-mdc-button:hover .mat-icon { color: var(--aq-text-2) !important; }
+
+  /* active/selected — not colour alone: accent tint + left accent bar + strong text */
+  .tb-site-sidenav a.mat-mdc-button.tb-active,
+  .tb-site-sidenav .tb-active > a.mat-mdc-button,
+  .tb-site-sidenav a.mat-mdc-button[class*="active"],
+  .tb-site-sidenav .mat-toolbar a.tb-active {
+    background-color: var(--aq-selected) !important;
+    color: var(--aq-text) !important;
+    box-shadow: inset 3px 0 0 0 var(--aq-accent);
+  }
+  .tb-site-sidenav a.mat-mdc-button.tb-active .mdc-button__label,
+  .tb-site-sidenav a.mat-mdc-button.tb-active .mat-icon,
+  .tb-site-sidenav a.mat-mdc-button.tb-active tb-icon { color: var(--aq-accent-strong) !important; }
+
+  .tb-site-sidenav .tb-menu-toggle-list { background: transparent !important; }
+  .tb-side-menu-divider, .tb-site-sidenav mat-divider { border-color: var(--aq-divider) !important; }
+  .tb-site-sidenav a.mat-mdc-button[disabled],
+  .tb-site-sidenav a.mat-mdc-button[disabled] .mdc-button__label { color: var(--aq-text-disabled) !important; }
+
+  /* edit-mode layout grid (angular-gridster2 draws 1px solid white lines) */
+  gridster .gridster-column { border-left-color: var(--aq-hover) !important; border-right-color: var(--aq-hover) !important; }
+  gridster .gridster-row    { border-top-color: var(--aq-hover) !important;  border-bottom-color: var(--aq-hover) !important; }
+
+  /* entity-table toolbar */
+  mat-toolbar.mat-mdc-table-toolbar:not(.mat-primary) {
+    background: var(--aq-surface-2) !important;
+    color: var(--aq-text) !important;
+  }
+  mat-toolbar.mat-mdc-table-toolbar:not(.mat-primary) button.mat-mdc-icon-button .mat-icon { color: var(--aq-text-2) !important; }
+
+  /* ---- OVERLAYS: menus, selects, dialogs, tooltips, popovers (CDK, attached to <body>) ---- */
+  .tb-popover-inner, .tb-popover-inner-content, .tb-menu-content,
+  .tb-popover-arrow-content { background-color: var(--aq-elevated) !important; }
+  .tb-popover-inner, .tb-popover-inner-content, .tb-menu-content { color: var(--aq-text) !important; }
+  .tb-user-email { color: var(--aq-text-2) !important; }
+  .tb-menu-content button, .tb-user-menu-items button { color: var(--aq-text) !important; }
+  .tb-menu-content button:hover, .tb-user-menu-items button:hover { background-color: var(--aq-hover) !important; }
+  .tb-menu-content mat-divider, .tb-user-menu-items mat-divider { border-color: var(--aq-divider) !important; }
+
+  .mat-mdc-menu-panel, .mat-mdc-select-panel, .mat-mdc-autocomplete-panel,
+  .mat-datepicker-content, .mat-mdc-dialog-surface, div.mat-mdc-menu-panel {
+    background-color: var(--aq-elevated) !important;
+    color: var(--aq-text) !important;
+  }
+  .mat-mdc-menu-item, .mat-mdc-option { color: var(--aq-text) !important; }
+  .mat-mdc-menu-item .mat-icon, .mat-mdc-menu-item mat-icon { color: var(--aq-text-2) !important; }
+  .mat-mdc-menu-item:hover:not([disabled]), .mat-mdc-option:hover:not(.mdc-list-item--disabled),
+  .mat-mdc-option.mat-mdc-option-active { background-color: var(--aq-hover) !important; }
+  .mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled) { background-color: var(--aq-selected) !important; }
+  .mat-mdc-tooltip .mdc-tooltip__surface, .mat-mdc-tooltip {
+    background-color: var(--aq-elevated) !important; color: var(--aq-text) !important;
+  }
+
+  /* focus ring — visible on dark */
+  .cdk-keyboard-focused .mdc-button__ripple,
+  a.mat-mdc-button.cdk-keyboard-focused, button.mat-mdc-button.cdk-keyboard-focused,
+  .mat-mdc-icon-button.cdk-keyboard-focused, .cdk-focused.tb-focused {
+    outline: 2px solid var(--aq-focus) !important; outline-offset: 1px;
+  }
+
+  /* ---- Leaflet map chrome (basemap left intact) ---- */
+  .leaflet-container { background: var(--aq-panel) !important; }
+  .leaflet-bar, .leaflet-bar a, .leaflet-control-zoom a, .leaflet-control-layers-toggle {
+    background-color: var(--aq-elevated) !important; color: var(--aq-text) !important;
+    border-color: var(--aq-border) !important;
+  }
+  .leaflet-bar a:hover, .leaflet-control-zoom a:hover { background-color: var(--aq-hover) !important; }
+  .leaflet-control-attribution { background: rgba(20, 25, 34, .72) !important; color: var(--aq-text-3) !important; }
+  .leaflet-control-attribution a { color: var(--aq-accent) !important; }
+
+  /* progress bar (Fleet alignment health): the track is an inline
+     rgba(0,0,0,.04) that vanishes on dark. A class !important beats the
+     non-important inline style, no data change. */
+  .tb-progress-bar-background { background-color: var(--aq-border) !important; }
+
+  /* breadcrumb: make the current (last) page title the brightest */
+  .tb-primary-toolbar .mat-toolbar-tools .tb-active,
+  .tb-primary-toolbar a.tb-active { color: var(--aq-text) !important; }
+
+  /* ---- Light-theme leaks: components that hardcode rgba(0,0,0,x) in their own
+       styles (or via Material tokens the colour overlay doesn't reach). Each is
+       remapped to a token; light keeps the component's own value. ---- */
+
+  /* sidebar user identity (shown on every page) */
+  .tb-user-authority { color: var(--aq-text-3) !important; }
+
+  /* breadcrumb: current page + divider (parent links already themed) */
+  .tb-breadcrumb .state-entry { color: var(--aq-text) !important; }
+  .tb-breadcrumb .state-divider { color: var(--aq-text-3) !important; }
+
+  /* default icon-buttons (table row actions, toolbars) — Material's default
+     icon colour is rgba(0,0,0,.54); status-coloured buttons are excluded. */
+  .mat-mdc-icon-button:not(.mat-primary):not(.mat-accent):not(.mat-warn) .mat-icon,
+  .mat-mdc-icon-button:not(.mat-primary):not(.mat-accent):not(.mat-warn) tb-icon {
+    color: var(--aq-text-2) !important;
+  }
+  .mat-mdc-icon-button:not(.mat-primary):not(.mat-accent):not(.mat-warn):hover:not([disabled]) .mat-icon {
+    color: var(--aq-text) !important;
+  }
+  .mat-mdc-icon-button[disabled] .mat-icon,
+  .mat-mdc-icon-button.mat-mdc-button-disabled .mat-icon { color: var(--aq-text-disabled) !important; }
+
+  /* form scaffolding: section subheaders, field hints, assignee placeholder */
+  .mat-mdc-subheader { color: var(--aq-text-3) !important; }
+  .mat-mdc-form-field-hint, .mat-mdc-form-field-subscript-wrapper .mat-mdc-form-field-hint-wrapper {
+    color: var(--aq-text-3) !important;
+  }
+  .unassigned-icon { color: var(--aq-text-3) !important; }
+
+  /* neutral icons inside data-table cells (boolean/checkbox columns) */
+  .mat-mdc-cell .mat-icon { color: var(--aq-text-2) !important; }
+
+  /* dashboard content wrapper (Material app-background is light-only; mostly
+     hidden behind the gridster, themed for correctness at edges/during load) */
+  .tb-dashboard-page.mat-content, .tb-dashboard-page .mat-content,
+  .tb-main-content { background-color: var(--aq-bg) !important; }
+
+  /* unselected checkboxes (Material's unselected icon colour is rgba(0,0,0,.54)) */
+  --mdc-checkbox-unselected-icon-color: var(--aq-text-3);
+  --mdc-checkbox-unselected-hover-icon-color: var(--aq-text-2);
+  --mdc-checkbox-unselected-pressed-icon-color: var(--aq-text-2);
+
+  /* scrollbars */
+  ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .16) !important; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, .26) !important; }
 }

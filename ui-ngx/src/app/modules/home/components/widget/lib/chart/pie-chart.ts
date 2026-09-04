@@ -24,7 +24,7 @@ import { Text } from '@svgdotjs/svg.js';
 import { TranslateService } from '@ngx-translate/core';
 import { TbLatestChart } from '@home/components/widget/lib/chart/latest-chart';
 import { formatValue } from '@core/utils';
-import { toAnimationOption } from '@home/components/widget/lib/chart/chart.models';
+import { toAnimationOption, prepareChartThemeColor } from '@home/components/widget/lib/chart/chart.models';
 
 const shapeSize = 134;
 const shapeSegmentWidth = 13.4;
@@ -167,15 +167,21 @@ export class TbPieChart extends TbLatestChart<PieChartSettings> {
   };
 
   private renderTotal() {
+    // The centre total is painted as SVG (fill, not CSS colour), so it must be
+    // themed here. The label fill is hardcoded and the value comes from the
+    // widget setting - both default to near-black; remap them for the dark theme
+    // (prepareChartThemeColor only rewrites dark inputs, so light is unchanged).
+    const darkMode = document.body.classList.contains('tb-dark');
     this.totalTextNode.text(add => {
-      add.tspan(this.translate.instant('widgets.latest-chart.total')).font({size: '12px', weight: 400}).fill('rgba(0, 0, 0, 0.38)');
+      add.tspan(this.translate.instant('widgets.latest-chart.total')).font({size: '12px', weight: 400})
+        .fill(prepareChartThemeColor('rgba(0, 0, 0, 0.38)', darkMode));
       add.tspan('').newLine().font({size: '4px'});
       add.tspan(this.totalText).newLine().font(
         {family: this.settings.totalValueFont.family,
           size: this.settings.totalValueFont.size + this.settings.totalValueFont.sizeUnit,
           weight: this.settings.totalValueFont.weight,
           style: this.settings.totalValueFont.style}
-      ).fill(this.totalValueColor.color);
+      ).fill(prepareChartThemeColor(this.totalValueColor.color, darkMode));
     }).center(this.svgShape.bbox().width / 2, this.svgShape.bbox().height / 2);
   }
 }

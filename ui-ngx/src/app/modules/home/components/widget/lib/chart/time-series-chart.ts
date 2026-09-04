@@ -219,6 +219,16 @@ export class TbTimeSeriesChart {
         }
       }
     }
+    // The tooltip is DOM built from these settings (stock light: white bg, dark
+    // text). prepareChartThemeColor only remaps *dark* inputs, so a light bg is
+    // never caught - flip the tooltip surface/text explicitly for the dark theme.
+    if (this.darkMode) {
+      this.settings.tooltipBackgroundColor = 'rgba(30, 37, 48, 0.94)';
+      this.settings.tooltipValueColor = '#e9edf3';
+      this.settings.tooltipLabelColor = '#aeb8c5';
+      this.settings.tooltipDateColor = '#aeb8c5';
+      if (this.settings.grid) { this.settings.grid.borderColor = '#2b3542'; }
+    }
     this.timeSeriesChartTooltip = new TimeSeriesChartTooltip(
       this.renderer,
       this.ctx.sanitizer,
@@ -864,7 +874,19 @@ export class TbTimeSeriesChart {
           showDetail: false,
           realtime: true,
           filterMode: this.stateData ? 'none' : 'weakFilter',
-          bottom: 10
+          bottom: 10,
+          // Dark-theme colours for the range slider (ECharts' defaults are light).
+          ...(this.darkMode ? {
+            backgroundColor: 'rgba(255, 255, 255, 0.02)',
+            borderColor: '#2b3542',
+            fillerColor: 'rgba(55, 182, 201, 0.18)',
+            dataBackground: { lineStyle: { color: '#3d4757' }, areaStyle: { color: '#1a2029' } },
+            selectedDataBackground: { lineStyle: { color: '#37b6c9' }, areaStyle: { color: 'rgba(55, 182, 201, 0.22)' } },
+            handleStyle: { color: '#1e2530', borderColor: '#5a6472' },
+            moveHandleStyle: { color: '#3d4757' },
+            emphasis: { handleStyle: { borderColor: '#4fc9db' }, moveHandleStyle: { color: '#4fc9db' } },
+            textStyle: { color: '#8892a0' }
+          } : {})
         }
       ],
       ...toAnimationOption(this.ctx, this.settings.animation)
