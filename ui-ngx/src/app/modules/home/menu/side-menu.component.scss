@@ -13,23 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 @import "constants";
 
 :host {
   width: 100%;
 }
 
+// Airlinq shell (treatment "C"): nav items are rounded pills inside a floating
+// rail. Geometry lives here; every colour is an `--aq-*` token from styles.scss
+// so light and dark resolve from one source.
 :host ::ng-deep {
 
   .tb-side-menu {
-    padding: 12px 0;
+    padding: 8px;
     margin: 0;
     list-style: none;
-    --mat-button-text-label-text-weight: 400;
+    --mat-button-text-label-text-weight: 500;
     &.tb-collapsed {
       a.mat-mdc-button.mat-mdc-button-base {
-        padding-right: 0;
+        // 64px rail − 2×8px rail padding = 48px item; 24px icon sits centred
+        padding: 0 12px;
         min-width: 0;
         span.mdc-button__label {
           opacity: 0;
@@ -40,8 +43,8 @@
       }
     }
     .mat-divider.mat-divider-horizontal {
-      margin-top: 12px;
-      margin-bottom: 12px;
+      margin: 8px 8px;
+      border-top-color: var(--aq-divider);
     }
   }
 
@@ -55,27 +58,34 @@
     display: inline-flex;
     width: 100%;
     height: 40px;
+    margin: 2px 0;
     align-items: center;
     overflow: hidden;
     line-height: 40px;
-    border-radius: 0;
-    padding: 0 16px;
-    --mat-button-text-label-text-color: rgba(0, 0, 0, .76);
+    border-radius: var(--aq-radius-md);
+    padding: 0 12px;
+    transition: padding $sidenav-anim-timing, background-color 150ms ease;
+    --mat-button-text-label-text-color: var(--aq-text-2);
     &:hover, &.tb-hovered {
-      background-color: rgba(0, 0, 0, .07);
+      background-color: var(--aq-hover);
       border-bottom: none;
     }
     &:focus {
       border-bottom: none;
     }
     &.tb-active {
-      background-color: rgba(0, 0, 0, .05);
+      background-color: var(--aq-accent-container);
+      --mat-button-text-label-text-color: var(--aq-on-accent-container);
+      .mat-icon, tb-icon {
+        color: var(--aq-on-accent-container);
+      }
     }
     .mat-icon {
-      margin-right: 8px;
+      margin-right: 12px;
       margin-left: 0;
-      min-width: 1.125rem;
-      min-height: 1.125rem;
+      min-width: 1.5rem;
+      min-height: 1.5rem;
+      color: var(--aq-text-3);
     }
     span.mdc-button__label {
       width: 100%;

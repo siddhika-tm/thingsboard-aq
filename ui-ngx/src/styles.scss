@@ -1426,15 +1426,27 @@ pre.tb-highlight {
 
 /* ---- LIGHT tokens: reproduce the existing light theme exactly ---- */
 .tb-default {
-  --aq-bg:            #eceef1;
-  --aq-sidebar:       #ffffff;
-  --aq-header:        #ffffff;
-  --aq-surface:       #ffffff;   /* card / primary surface   */
-  --aq-surface-2:     #f7f8fa;   /* table header, insets     */
+  --aq-bg:            #e9edf1;   /* canvas behind rail + sheet */
+  --aq-sheet:         #ffffff;   /* the floating content sheet */
+  --aq-sidebar:       #ffffff;   /* floating nav rail          */
+  --aq-header:        transparent;
+  --aq-surface:       #f6f8fa;   /* card / primary surface (tonal step on the sheet) */
+  --aq-surface-2:     #eceff3;   /* table header, insets     */
   --aq-panel:         #f7f8fa;   /* nested panel             */
   --aq-elevated:      #ffffff;   /* menus, dialogs, tooltips */
   --aq-hover:         rgba(15, 23, 32, .05);
   --aq-selected:      rgba(11, 107, 120, .10);
+  --aq-accent-container:    #bff1fb;   /* active nav pill */
+  --aq-on-accent-container: #00363e;
+
+  /* shape + depth (identical in both schemes) */
+  --aq-gap:        8px;
+  --aq-radius-sm:  8px;
+  --aq-radius-md:  12px;
+  --aq-radius-lg:  16px;
+  --aq-shadow-1:   0 1px 2px rgba(0, 0, 0, .06);
+  --aq-rail-w:     64px;
+  --aq-rail-w-open: 250px;
 
   --aq-text:          #14181f;
   --aq-text-2:        #414b5a;
@@ -1464,15 +1476,19 @@ pre.tb-highlight {
 
 /* ---- DARK tokens: a hierarchy of surfaces, accessible contrast ---- */
 .tb-dark {
-  --aq-bg:            #0a0d12;   /* page — darkest            */
-  --aq-sidebar:       #0e131a;   /* chrome — slightly lifted  */
-  --aq-header:        #0f141b;
-  --aq-surface:       #141922;   /* card — above the page     */
-  --aq-surface-2:     #1a2029;   /* table header, insets      */
+  --aq-bg:            #0a0d12;   /* canvas — darkest          */
+  --aq-sheet:         #12171f;   /* floating content sheet    */
+  --aq-sidebar:       #171c24;   /* floating nav rail         */
+  --aq-header:        transparent;
+  --aq-surface:       #1b2129;   /* card — above the sheet    */
+  --aq-surface-2:     #232a34;   /* table header, insets      */
   --aq-panel:         #171d26;   /* nested panel              */
   --aq-elevated:      #1e2530;   /* menus/dialogs/tooltips — top */
   --aq-hover:         rgba(255, 255, 255, .06);
   --aq-selected:      rgba(55, 182, 201, .16);
+  --aq-accent-container:    #0e5a66;
+  --aq-on-accent-container: #bff1fb;
+  --aq-shadow-1:   0 1px 2px rgba(0, 0, 0, .45);
 
   --aq-text:          #e9edf3;   /* ~14:1 on surface */
   --aq-text-2:        #aeb8c5;   /* ~8:1  */
@@ -1507,15 +1523,16 @@ pre.tb-highlight {
  * ===================================================================== */
 .tb-default {
 
-  /* dashboard canvas */
-  .tb-dashboard-layout, gridster { background-color: var(--aq-bg) !important; }
+  /* dashboard canvas sits inside the floating sheet */
+  .tb-dashboard-layout, gridster { background-color: var(--aq-sheet) !important; }
 
-  /* widget cards */
+  /* widget cards: tonal step on the sheet, rounded, no hairline (shell "C") */
   .tb-widget {
     background: var(--aq-surface) !important;
-    border: 1px solid var(--aq-border) !important;
+    border: 0 !important;
+    border-radius: var(--aq-radius-lg) !important;
     color: var(--aq-text) !important;
-    box-shadow: none !important;
+    box-shadow: var(--aq-shadow-1) !important;
   }
   .tb-widget-content, .tb-absolute-fill { background-color: transparent !important; }
   .tb-widget-title .title, .mat-subtitle-1.title, .tb-widget-header .title {
@@ -1540,8 +1557,22 @@ pre.tb-highlight {
   .mat-mdc-cell.mat-mdc-table-sticky, .mat-mdc-header-cell.mat-mdc-table-sticky {
     background: var(--aq-surface) !important;
   }
-  .tb-entity-table-content { background: var(--aq-surface) !important; }
-  .tb-entity-table-content.tb-outlined-border { border-color: var(--aq-border) !important; }
+  .tb-entity-table-content {
+    background: var(--aq-surface) !important;
+    border-radius: var(--aq-radius-lg) !important;
+    box-shadow: var(--aq-shadow-1) !important;
+    overflow: hidden;
+  }
+  .tb-entity-table-content.tb-outlined-border { border: 0 !important; }
+  mat-toolbar.mat-mdc-table-toolbar:not(.mat-primary) { background: transparent !important; }
+
+  /* AIRLINQ SHELL C — surfaces that should read as cards on the sheet */
+  .mat-mdc-card, .mat-mdc-dialog-surface, .tb-popover-inner, .mat-mdc-menu-panel,
+  .mat-mdc-select-panel, .mat-mdc-autocomplete-panel {
+    border-radius: var(--aq-radius-md) !important;
+  }
+  .mat-mdc-dialog-surface { border-radius: var(--aq-radius-lg) !important; }
+  .tb-primary-toolbar .tb-breadcrumb { color: var(--aq-text); }
 }
 
 /* =====================================================================
@@ -1569,7 +1600,7 @@ pre.tb-highlight {
   .tb-primary-toolbar, mat-toolbar.tb-primary-toolbar {
     background: var(--aq-header) !important;
     color: var(--aq-text) !important;
-    border-bottom: 1px solid var(--aq-border-subtle);
+    border-bottom: 0;
   }
   .tb-primary-toolbar .mat-mdc-icon-button .mat-icon,
   .tb-primary-toolbar tb-icon, .tb-primary-toolbar .mat-icon { color: var(--aq-text-2) !important; }
@@ -1582,10 +1613,10 @@ pre.tb-highlight {
   /* ---- SIDEBAR ---- */
   .tb-site-sidenav {
     background: var(--aq-sidebar) !important;
-    border-right: 1px solid var(--aq-border-subtle);
+    border-right: 0;
     --mat-button-text-label-text-color: var(--aq-text-2);
   }
-  .tb-nav-header, .tb-nav-header-toolbar, .tb-side-menu-toolbar { background: var(--aq-sidebar) !important; }
+  .tb-nav-header, .tb-nav-header-toolbar, .tb-side-menu-toolbar { background: transparent !important; }
 
   /* nav items: coordinated icon + label contrast */
   .tb-site-sidenav a.mat-mdc-button,
@@ -1604,18 +1635,18 @@ pre.tb-highlight {
   .tb-site-sidenav a.mat-mdc-button:hover .mdc-button__label { color: var(--aq-text) !important; }
   .tb-site-sidenav a.mat-mdc-button:hover .mat-icon { color: var(--aq-text-2) !important; }
 
-  /* active/selected — not colour alone: accent tint + left accent bar + strong text */
+  /* active/selected — shell "C": filled accent-container pill, no inset bar */
   .tb-site-sidenav a.mat-mdc-button.tb-active,
   .tb-site-sidenav .tb-active > a.mat-mdc-button,
   .tb-site-sidenav a.mat-mdc-button[class*="active"],
   .tb-site-sidenav .mat-toolbar a.tb-active {
-    background-color: var(--aq-selected) !important;
-    color: var(--aq-text) !important;
-    box-shadow: inset 3px 0 0 0 var(--aq-accent);
+    background-color: var(--aq-accent-container) !important;
+    color: var(--aq-on-accent-container) !important;
+    box-shadow: none;
   }
   .tb-site-sidenav a.mat-mdc-button.tb-active .mdc-button__label,
   .tb-site-sidenav a.mat-mdc-button.tb-active .mat-icon,
-  .tb-site-sidenav a.mat-mdc-button.tb-active tb-icon { color: var(--aq-accent-strong) !important; }
+  .tb-site-sidenav a.mat-mdc-button.tb-active tb-icon { color: var(--aq-on-accent-container) !important; }
 
   .tb-site-sidenav .tb-menu-toggle-list { background: transparent !important; }
   .tb-side-menu-divider, .tb-site-sidenav mat-divider { border-color: var(--aq-divider) !important; }
@@ -1718,7 +1749,7 @@ pre.tb-highlight {
   /* dashboard content wrapper (Material app-background is light-only; mostly
      hidden behind the gridster, themed for correctness at edges/during load) */
   .tb-dashboard-page.mat-content, .tb-dashboard-page .mat-content,
-  .tb-main-content { background-color: var(--aq-bg) !important; }
+  .tb-main-content { background-color: var(--aq-sheet) !important; }
 
   /* unselected checkboxes (Material's unselected icon colour is rgba(0,0,0,.54)) */
   --mdc-checkbox-unselected-icon-color: var(--aq-text-3);

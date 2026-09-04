@@ -463,6 +463,44 @@ on the teal accent button — intentional on-accent). Commits `6c96589` (redesig
 > server (`ng serve` proxied to the live server, §3) which renders instantly on the same code;
 > confirm the deploy separately by checking the served bundle/CSS carries your change.
 
+### 8.6 Shell redesign, treatment "C" (2026-09-04)
+
+Visual direction chosen from three wireframed treatments: a floating icon rail and one rounded
+content sheet on a tonal canvas (Material 3 look), same DOM, both schemes. CSS/SCSS only, one
+TS line; no template changes, so upstream merges stay cheap. Design spec (local, gitignored
+`docs/superpowers/specs/`) records the alternatives and the deferred `mat.theme()` migration.
+
+| Where | Change |
+|---|---|
+| `styles.scss` token blocks | New tokens on both schemes: `--aq-sheet`, `--aq-accent-container`, `--aq-on-accent-container`, `--aq-gap`, `--aq-radius-{sm,md,lg}`, `--aq-shadow-1`, `--aq-rail-w`, `--aq-rail-w-open`; light `--aq-surface` is now a tonal step (`#f6f8fa`) so cards read on the white sheet; `--aq-header` transparent. |
+| `styles.scss` shared rules | `.tb-widget` / `.tb-entity-table-content`: no border, 16 px radius, `--aq-shadow-1`; gridster + `.tb-main-content` use `--aq-sheet`; table toolbar transparent; overlays 12 px radius. Dark sidenav active state = filled accent-container pill (inset bar removed). |
+| `home.component.scss` | Rail geometry: `left/top/bottom: var(--aq-gap)`, 16 px radius, 64 px collapsed / 250 px open; sheet margin follows the rail; toolbar transparent, no borders. Collapsed head = brand mark over an always-visible expand chevron, centred on the icon column. |
+| `side-menu.component.scss` | Items are 12 px pills with 2 px gaps; colours via tokens (light and dark from one file). |
+| `home.component.ts` | `menuCollapsed` user setting `undefined` → rail collapsed by default; an explicit `false` (pinned open) is honoured. |
+| `login.component.scss` | Sass `$aq-*` constants replaced by the CSS tokens; the separate dark block is gone (tokens flip). |
+
+**Hover-expand was tried and removed.** Collapsed sections open as CDK flyout popovers outside
+the rail, so a CSS `:hover` expansion collapses the instant the pointer reaches the flyout. The
+pin button in the rail head is the only expand/collapse control; the sheet re-flows to match.
+
+**Build notes (Windows laptop, portable JDK 25 + Maven 3.9.9 under `d:/tmp/tools`):**
+- Any `-Dpkg.skip.*` flag activates a property profile, which switches off the `activeByDefault`
+  `packaging` profile — you get a plain jar and no RPM. Build the reactor first
+  (`mvn install -pl application -am -DskipTests -Dlicense.skip=true`), then package with
+  `mvn install -pl application -Ppackaging -DskipTests -Dlicense.skip=true`.
+- `frontend-maven-plugin` fails to extract yarn on Windows ("Could not rename versioned yarn root
+  directory to dist"). Seed `ui-ngx/target/node/yarn/dist` from corepack's cache
+  (`%LOCALAPPDATA%
+ode\corepack1\yarn.22.22`) and pass `-Dskip.installyarn=true`.
+- `mvn clean` on `ui-ngx` deletes `node_modules`; `license:check` fails on untracked
+  `.superpowers/` HTML, hence `-Dlicense.skip=true` locally (all new files carry the header).
+- Component styles ship inside the JS chunks, not `styles-*.css` — grep `public/main-*.js`
+  to confirm a `home.component.scss` change made it into the bundle.
+
+Deployed twice on 2026-09-04 with `deploy.py`-style flow: tar backup of `/usr/share/thingsboard`
++ `/etc/thingsboard` to `/tmp/thingsboard-backup-<stamp>.tar.gz`, previous RPM kept as
+`/tmp/thingsboard.prev.rpm`, md5-verified upload, `rpm -Uvh --force`, conf md5 unchanged.
+
 ## 9. How to verify UI changes (don't trust the API)
 
 Every "fixed" claim that was later wrong had been checked through the API instead of the page.

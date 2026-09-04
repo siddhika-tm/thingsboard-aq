@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 @import "constants";
 
+// Airlinq shell (treatment "C"): a floating icon rail and a single rounded
+// content sheet on a tonal canvas. Only geometry lives here; all colours are
+// `--aq-*` tokens defined per theme in styles.scss. No template changes.
 :host {
   display: flex;
   width: 100%;
@@ -23,9 +25,18 @@
 
   mat-sidenav-container {
     flex: 1;
+    background: var(--aq-bg);
+
     &.tb-desktop {
       mat-sidenav.tb-site-sidenav {
-        width: 250px;
+        width: var(--aq-rail-w-open);
+        top: var(--aq-gap);
+        bottom: var(--aq-gap);
+        left: var(--aq-gap);
+        height: auto;
+        border-radius: var(--aq-radius-lg);
+        box-shadow: var(--aq-shadow-1);
+        overflow: hidden;
         transition: width $sidenav-anim-timing;
         .tb-logo-title {
           opacity: 1;
@@ -33,24 +44,73 @@
         }
       }
       mat-sidenav-content.tb-site-content:not(.tb-force-fullscreen) {
-        margin-left: 250px !important;
+        margin: var(--aq-gap) var(--aq-gap) var(--aq-gap)
+                calc(var(--aq-rail-w-open) + 2 * var(--aq-gap)) !important;
+        height: calc(100% - 2 * var(--aq-gap));
+        border-radius: var(--aq-radius-lg);
+        background: var(--aq-sheet);
+        overflow: hidden;
         transition: margin-left $sidenav-anim-timing;
       }
+      // Collapsed = icon rail. Expansion is explicit (the pin button in the
+      // rail head), never hover: collapsed sections open as flyout popovers
+      // outside the rail, so a hover-expand would collapse the moment the
+      // pointer reaches them. The sheet re-flows to the rail width.
       &.tb-collapsed {
         mat-sidenav.tb-site-sidenav {
-          width: 50px;
+          width: var(--aq-rail-w);
           .tb-logo-title {
-            opacity: 0;
+            display: none;
+          }
+          .tb-nav-header-toolbar {
+            flex-direction: column;
+            justify-content: center;
+            padding: 8px 0 4px;
+            min-height: 0;
+            .tb-sidenav-toggle {
+              position: static;
+              margin: 0 auto;
+              width: 40px;
+              height: 64px;
+              border-radius: var(--aq-radius-md);
+              // brand mark on top, always-visible expand chevron beneath
+              .tb-collapsed-logo-container {
+                width: 24px;
+                height: 56px;
+                margin: 0 auto;
+                .tb-collapsed-logo {
+                  inset: 2px auto auto 0;
+                  width: 24px;
+                  height: 24px;
+                  opacity: 1;
+                }
+                .tb-open-icon {
+                  inset: 34px auto auto 2px;
+                  opacity: 1;
+                  color: var(--aq-text-3);
+                }
+              }
+              &:hover {
+                background: var(--aq-hover);
+                .tb-collapsed-logo-container {
+                  .tb-collapsed-logo { opacity: 1; }
+                  .tb-open-icon { opacity: 1; color: var(--aq-text); }
+                }
+              }
+            }
           }
         }
         mat-sidenav-content.tb-site-content {
-          margin-left: 50px !important;
+          margin-left: calc(var(--aq-rail-w) + 2 * var(--aq-gap)) !important;
         }
       }
     }
   }
+
   mat-sidenav.tb-site-sidenav {
-    width: 250px;
+    width: var(--aq-rail-w-open);
+    background: var(--aq-sidebar);
+    border-right: 0;
     @media (max-width:456px) {
       width: calc(100% - 56px);
     }
@@ -66,7 +126,8 @@
         z-index: 2;
         flex-shrink: 0;
         white-space: nowrap;
-        border-right: 1px solid rgba(0, 0, 0, 0.12);
+        background: transparent;
+        border-right: 0;
         .tb-logo-title {
           width: auto;
           max-width: 100%;
@@ -115,29 +176,36 @@
       overflow: hidden;
       height: inherit;
       padding: 0;
-      border-right: 1px solid rgba(0, 0, 0, 0.12);
-      --mat-toolbar-container-text-color: rgba(0, 0, 0, .76);
+      background: transparent;
+      border-right: 0;
+      --mat-toolbar-container-text-color: var(--aq-text-2);
       tb-user-menu {
-        border-top: 1px solid rgba(0, 0, 0, 0.12);
+        border-top: 1px solid var(--aq-divider);
       }
     }
   }
+
   .tb-primary-toolbar {
     z-index: 2;
     height: 56px;
     min-height: 56px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    padding: 0 16px 0 8px;
+    background: var(--aq-header);
+    color: var(--aq-text);
+    border-bottom: 0;
     .mat-toolbar-tools {
       height: 56px;
       padding: 0;
     }
     h1 {
-      font-size: 24px !important;
-      font-weight: 400 !important;
+      font-size: 20px !important;
+      font-weight: 600 !important;
     }
   }
+
   .tb-main-content {
     overflow: auto;
     position: relative;
+    background: var(--aq-sheet);
   }
 }

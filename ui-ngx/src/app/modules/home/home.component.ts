@@ -105,7 +105,9 @@ export class HomeComponent extends PageComponent implements AfterViewInit, OnIni
     this.store.pipe(select(selectUserSettingsProperty('menuCollapsed'))).pipe(
       take(1)
     ).subscribe((collapsed: boolean) => {
-      this.sidenavCollapsed.set(collapsed);
+      // Airlinq shell: the nav is an icon rail by default (hover expands it);
+      // only an explicit user choice to pin it open (false) is honoured.
+      this.sidenavCollapsed.set(collapsed ?? true);
     });
 
     this.breakpointObserver

@@ -45,3 +45,6 @@ CLAUDE.md
 *.orig
 ui-ngx/src/assets/.orig-tb-logos/
 .vscode/
+
+# brainstorm visual-companion session files
+.superpowers/

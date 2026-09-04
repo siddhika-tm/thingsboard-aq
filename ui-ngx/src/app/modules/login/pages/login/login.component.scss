@@ -16,28 +16,17 @@
 @import '../../../../../scss/constants';
 @import '../../../../../theme';
 
-// AQ console design tokens. Mirrors the Airlinq SRE console: light neutral
-// surfaces, hairline borders, near-square corners, teal reserved for actions.
-$aq-ground:   #eceef1;
-$aq-panel:    #f7f8fa;
-$aq-raised:   #ffffff;
-$aq-ink:      #14181f;
-$aq-ink-2:    #414b5a;
-$aq-ink-3:    #6b7789;
-$aq-line:     #cdd3dc;
-$aq-accent:   #0b6b78;
-$aq-danger:   #a3182a;
-$aq-radius:   2px;
 
 :host {
   display: flex;
   flex: 1 1 0;
+  background: var(--aq-bg);
 
   .tb-login-content {
     margin-top: 36px;
     margin-bottom: 76px;
-    background-color: $aq-ground;
-    color: $aq-ink;
+    background-color: var(--aq-bg);
+    color: var(--aq-text);
   }
 
   .aq-wrap {
@@ -52,17 +41,17 @@ $aq-radius:   2px;
 
   .aq-card {
     width: 100%;
-    background: $aq-raised;
-    border: 1px solid $aq-line;
-    border-radius: $aq-radius;
+    background: var(--aq-sheet);
+    border: 1px solid var(--aq-border);
+    border-radius: var(--aq-radius-lg);
     max-height: 84vh;
     overflow-y: auto;
   }
 
   // ---- header band -------------------------------------------------------
   .aq-head {
-    background: $aq-panel;
-    border-bottom: 1px solid $aq-line;
+    background: var(--aq-surface-2);
+    border-bottom: 1px solid var(--aq-border);
     padding: 18px 24px 14px;
   }
 
@@ -74,8 +63,8 @@ $aq-radius:   2px;
     border-bottom: 0;
 
     .aq-mark  { height: 24px; width: 24px; display: block; }
-    .aq-brand { font-size: 19px; font-weight: 700; color: $aq-ink; line-height: 1; }
-    .aq-prod  { font-size: 19px; font-weight: 400; color: $aq-ink-2; line-height: 1; }
+    .aq-brand { font-size: 19px; font-weight: 700; color: var(--aq-text); line-height: 1; }
+    .aq-prod  { font-size: 19px; font-weight: 400; color: var(--aq-text-2); line-height: 1; }
   }
 
   .aq-strip {
@@ -83,7 +72,7 @@ $aq-radius:   2px;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: .13em;
-    color: $aq-ink-3;
+    color: var(--aq-text-3);
   }
 
   // ---- body --------------------------------------------------------------
@@ -101,7 +90,7 @@ $aq-radius:   2px;
   .aq-h {
     font-size: 15px;
     font-weight: 650;
-    color: $aq-ink;
+    color: var(--aq-text);
   }
 
   .aq-field { margin-bottom: 16px; }
@@ -113,7 +102,7 @@ $aq-radius:   2px;
     font-weight: 600;
     letter-spacing: .11em;
     text-transform: uppercase;
-    color: $aq-ink-3;
+    color: var(--aq-text-3);
   }
 
   .aq-input-wrap { position: relative; }
@@ -122,31 +111,31 @@ $aq-radius:   2px;
     width: 100%;
     height: 40px;
     padding: 0 11px;
-    border: 1px solid $aq-line;
-    border-radius: $aq-radius;
-    background: $aq-raised;
-    color: $aq-ink;
+    border: 1px solid var(--aq-border);
+    border-radius: var(--aq-radius-lg);
+    background: var(--aq-sheet);
+    color: var(--aq-text);
     font: inherit;
     font-size: 14px;
     outline: none;
     transition: border-color .12s ease, box-shadow .12s ease;
 
-    &:hover:not(:focus) { border-color: darken($aq-line, 12%); }
+    &:hover:not(:focus) { border-color: var(--aq-text-disabled); }
 
     &:focus {
-      border-color: $aq-accent;
+      border-color: var(--aq-accent);
       box-shadow: 0 0 0 3px rgba(11, 107, 120, .13);
     }
 
     &.aq-invalid {
-      border-color: $aq-danger;
+      border-color: var(--aq-error);
       &:focus { box-shadow: 0 0 0 3px rgba(163, 24, 42, .13); }
     }
 
     // the browser autofill wash fights the light surface
     &:-webkit-autofill {
-      -webkit-text-fill-color: $aq-ink;
-      -webkit-box-shadow: 0 0 0 1000px $aq-raised inset;
+      -webkit-text-fill-color: var(--aq-text);
+      -webkit-box-shadow: 0 0 0 1000px var(--aq-sheet) inset;
     }
   }
 
@@ -165,17 +154,17 @@ $aq-radius:   2px;
     padding: 0;
     border: 0;
     background: transparent;
-    color: $aq-ink-3;
+    color: var(--aq-text-3);
     cursor: pointer;
 
-    &:hover { color: $aq-ink-2; }
+    &:hover { color: var(--aq-text-2); }
     mat-icon { font-size: 19px; width: 19px; height: 19px; }
   }
 
   .aq-error {
     margin-top: 5px;
     font-size: 11.5px;
-    color: $aq-danger;
+    color: var(--aq-error);
   }
 
   .aq-submit {
@@ -183,8 +172,8 @@ $aq-radius:   2px;
     height: 44px;
     margin-top: 6px;
     border: 0;
-    border-radius: $aq-radius;
-    background: $aq-accent;
+    border-radius: var(--aq-radius-lg);
+    background: var(--aq-accent);
     color: #fff;
     font: inherit;
     font-size: 14.5px;
@@ -203,7 +192,7 @@ $aq-radius:   2px;
     a {
       font-size: 12.5px;
       font-weight: 600;
-      color: $aq-accent;
+      color: var(--aq-accent);
       // A global anchor rule sets both an underline and a bottom border; the
       // border is what actually showed, so text-decoration alone was not enough.
       text-decoration: none !important;
@@ -216,7 +205,7 @@ $aq-radius:   2px;
     margin-top: 12px;
     text-align: center;
     font-size: 11.5px;
-    color: $aq-ink-3;
+    color: var(--aq-text-3);
   }
 
   // ---- oauth (only rendered when providers are configured) ---------------
@@ -225,14 +214,14 @@ $aq-radius:   2px;
     align-items: center;
     gap: 8px;
     margin-bottom: 4px;
-    color: $aq-ink-3;
+    color: var(--aq-text-3);
     font-size: 12px;
 
     &::before, &::after {
       content: "";
       flex: 1;
       height: 1px;
-      background: $aq-line;
+      background: var(--aq-border);
     }
   }
 
@@ -240,9 +229,9 @@ $aq-radius:   2px;
     margin-bottom: 16px;
 
     a.login-with-button {
-      color: $aq-ink;
-      background-color: $aq-raised;
-      border-radius: $aq-radius;
+      color: var(--aq-text);
+      background-color: var(--aq-sheet);
+      border-radius: var(--aq-radius-lg);
       max-width: 170px;
       min-width: 60px;
       flex-grow: 1;
@@ -262,30 +251,3 @@ $aq-radius:   2px;
   }
 }
 
-// Dark theme. The tokens above are Sass variables (compile-time), so the dark
-// variant re-declares the rules that carry colour. Values match the dashboard
-// dark surfaces in styles.scss / theme.scss.
-:host-context(body.tb-dark) {
-  .tb-login-content { background-color: #0b0e13; color: #e8ecf2; }
-  .aq-card { background: #12161d; border-color: #2b3442; }
-  .aq-head { background: #0f141a; border-bottom-color: #2b3442; }
-  .aq-lock .aq-brand { color: #e8ecf2; }
-  .aq-lock .aq-prod  { color: #c3cad4; }
-  .aq-h { color: #e8ecf2; }
-  .aq-strip, .aq-label, .aq-note, .aq-divider, .aq-eye { color: #7d8898; }
-  .aq-eye:hover { color: #c3cad4; }
-  .aq-divider::before, .aq-divider::after { background: #2b3442; }
-  .aq-input {
-    background: #0f141a;
-    border-color: #2b3442;
-    color: #e8ecf2;
-    &:hover:not(:focus) { border-color: #3a4554; }
-    &:focus { border-color: #37b6c9; box-shadow: 0 0 0 3px rgba(55, 182, 201, .18); }
-    &:-webkit-autofill {
-      -webkit-text-fill-color: #e8ecf2;
-      -webkit-box-shadow: 0 0 0 1000px #0f141a inset;
-    }
-  }
-  .aq-forgot a { color: #37b6c9; }
-  .oauth-container a.login-with-button { color: #e8ecf2; background-color: #12161d; }
-}
