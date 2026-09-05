@@ -1466,6 +1466,30 @@ pre.tb-highlight {
   --aq-error:         #a3182a;
   --aq-info:          #1d6b8a;
 
+  /* 18% tints of the semantic colours, for status chips. Pre-mixed rather
+     than color-mix(): color-mix needs Chrome 111 / FF 113 / Safari 16.2, but
+     .browserslistrc supports Chrome 107 / FF 104 / Safari 16 — there the
+     declaration is dropped and the chip loses its background entirely. */
+  --aq-success-tint:  rgba(23, 96, 58, .18);    /* --aq-success #17603a */
+  --aq-warning-tint:  rgba(180, 83, 9, .18);    /* --aq-warning #b45309 */
+  --aq-error-tint:    rgba(163, 24, 42, .18);   /* --aq-error   #a3182a */
+  --aq-info-tint:     rgba(29, 107, 138, .18);  /* --aq-info    #1d6b8a */
+
+  /* Status-chip label colours. Separate from --aq-success/--aq-warning/... on
+     purpose: those are general-purpose semantic colours carrying their own
+     contrast budgets against page backgrounds, whereas these are read ONLY
+     against the 18% tint above. Darkened until every chip state clears WCAG
+     1.4.3 at 4.5:1 (12px/600 is not large text) on all three row backgrounds
+     — base, :hover and .selected — because the row overlays composite under
+     the chip. Ratios verified by
+     .claude/team/artifacts/dashboard-and-grid-design-fidelity/contrast-check.py;
+     worst case here is neutral/selected at 4.72:1. */
+  --aq-success-chip-fg: #0f4527;   /* 7.84 / 7.16 / 6.90 */
+  --aq-warning-chip-fg: #7c3806;   /* 6.37 / 5.83 / 5.60 */
+  --aq-error-chip-fg:   #8c1424;   /* 6.40 / 5.84 / 5.60 */
+  --aq-info-chip-fg:    #154f66;   /* 6.54 / 5.97 / 5.75 */
+  --aq-neutral-chip-fg: #546070;   /* 5.43 / 4.92 / 4.72 */
+
   --aq-chart-grid:        rgba(0, 0, 0, .12);
   --aq-chart-axis:        rgba(0, 0, 0, .54);
   --aq-chart-label:       rgba(0, 0, 0, .54);
@@ -1507,6 +1531,20 @@ pre.tb-highlight {
   --aq-warning:       #e0aa4e;
   --aq-error:         #ec6274;
   --aq-info:          #55b0df;
+
+  /* 18% tints of the semantic colours, for status chips (see .tb-default). */
+  --aq-success-tint:  rgba(70, 192, 138, .18);  /* --aq-success #46c08a */
+  --aq-warning-tint:  rgba(224, 170, 78, .18);  /* --aq-warning #e0aa4e */
+  --aq-error-tint:    rgba(236, 98, 116, .18);  /* --aq-error   #ec6274 */
+  --aq-info-tint:     rgba(85, 176, 223, .18);  /* --aq-info    #55b0df */
+
+  /* Status-chip label colours (see .tb-default for the rationale). Lightened
+     rather than darkened here; worst case is neutral/selected at 4.79:1. */
+  --aq-success-chip-fg: #7fd7ae;   /* 6.75 / 5.71 / 5.14 */
+  --aq-warning-chip-fg: #eec684;   /* 7.06 / 5.95 / 5.47 */
+  --aq-error-chip-fg:   #f5a3af;   /* 6.52 / 5.53 / 5.14 */
+  --aq-info-chip-fg:    #8ccbec;   /* 6.60 / 5.58 / 5.04 */
+  --aq-neutral-chip-fg: #aab3be;   /* 6.42 / 5.34 / 4.79 */
 
   --aq-chart-grid:        #3d4757;
   --aq-chart-axis:        #7d8898;
@@ -1766,11 +1804,22 @@ pre.tb-highlight {
  * Entity tables, widget tables and dashboard cards share one grid
  * vocabulary: outer border, header band, 1px row + column dividers,
  * hover / selected rows, pill toolbar controls. Tokens only.
+ *
+ * Scoped to BOTH `.tb-default` and `.tb-dark`. Note that `tb-default` is
+ * never removed from <body> (index.html sets it statically and
+ * theme.service.ts only adds/removes `tb-dark`), so a `.tb-default`-only
+ * selector DOES still match in dark mode; the dual selector is here to state
+ * intent and to survive that ever changing.
  * ===================================================================== */
-.tb-default {
+.tb-default, .tb-dark {
 
   /* ---- entity-table card: outer border + header/toolbar/footer bands ---- */
-  .tb-entity-table-content {
+  /* NOTE ON SPECIFICITY: `.tb-default .tb-entity-table-content.tb-outlined-border`
+   * (:1604) is (0,3,0). A plain `.tb-entity-table-content` here would be (0,2,0)
+   * and lose regardless of source order, so the outer border is declared at the
+   * SAME compound depth rather than escalated with extra `!important`. */
+  .tb-entity-table-content,
+  .tb-entity-table-content.tb-outlined-border {
     border: 1px solid var(--aq-border) !important;
   }
   mat-toolbar.mat-mdc-table-toolbar:not(.mat-primary) {
@@ -1779,8 +1828,17 @@ pre.tb-highlight {
   }
   /* selection toolbar (rows picked): accent-container band, not raw primary */
   mat-toolbar.mat-mdc-table-toolbar.mat-primary {
+    /* AC-13: no height was declared here, so Material's 64px toolbar default stood.
+     * `.mat-toolbar-row, .mat-toolbar-single-row` carries the height in MDC, so both
+     * the host and its row are pinned to the 40px band. */
+    height: 40px;
+    min-height: 40px;
     background: var(--aq-accent-container) !important;
     color: var(--aq-on-accent-container) !important;
+    .mat-toolbar-row, .mat-toolbar-single-row, .mat-toolbar-tools {
+      height: 40px;
+      min-height: 40px;
+    }
     .mat-icon, tb-icon, .tb-entity-table-info, button { color: var(--aq-on-accent-container) !important; }
   }
   .mat-mdc-paginator {
@@ -1788,8 +1846,11 @@ pre.tb-highlight {
     background: transparent !important;
   }
 
-  /* ---- header band ---- */
-  .mat-mdc-header-row { height: 44px; }
+  /* ---- header band ----
+   * SPECIFICITY: upstream `.tb-default .mat-mdc-table .mat-mdc-header-row { height: 56px }`
+   * (:753-755) is (0,3,0); a bare `.mat-mdc-header-row` here is (0,2,0) and never applies.
+   * Declared at the same depth instead of adding `!important`. 40px per AC-2. */
+  .mat-mdc-table .mat-mdc-header-row { height: 40px; }
   .mat-mdc-header-cell {
     font-size: 11px !important;
     font-weight: 500 !important;
@@ -1803,7 +1864,8 @@ pre.tb-highlight {
     border-right: 1px solid var(--aq-border-subtle);
     &:last-of-type { border-right: 0; }
   }
-  .mat-mdc-row { height: 48px; }
+  /* SPECIFICITY: beats upstream `.tb-default .mat-mdc-table .mat-mdc-row { height: 52px }` (:756-758). */
+  .mat-mdc-table .mat-mdc-row { height: 48px; }
   .mat-mdc-row:hover .mat-mdc-cell { background: var(--aq-hover) !important; }
   .mat-mdc-row.tb-current-entity .mat-mdc-cell,
   .mat-mdc-row.mat-row-select.tb-selected .mat-mdc-cell,
@@ -1831,10 +1893,148 @@ pre.tb-highlight {
   /* tables rendered inside widgets: same anatomy, no outer border (the card is the border) */
   .tb-widget .mat-mdc-header-cell { background: var(--aq-surface-2) !important; }
   .tb-widget .mat-mdc-paginator { border-top: 1px solid var(--aq-border-subtle); }
+
+  /* ---- toolbar: record-count badge + always-visible search (design canvas) ---- */
+  .tb-entity-table-count {
+    display: inline-flex;
+    align-items: center;
+    height: 20px;
+    margin-left: 8px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: var(--aq-surface-2);
+    color: var(--aq-text-2);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .tb-entity-table-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 260px;
+    /* the audit-log and event toolbars also carry a timewindow + filter selects;
+       allow the field to shrink there rather than overflow the toolbar */
+    min-width: 140px;
+    flex: 0 1 260px;
+    height: 36px;
+    padding: 0 4px 0 12px;
+    border-radius: 10px;
+    border: 0;
+    background: var(--aq-surface-2);
+
+    .tb-entity-table-search-icon {
+      flex: none;
+      width: 18px;
+      height: 18px;
+      font-size: 18px;
+      color: var(--aq-text-3);
+    }
+    input {
+      flex: 1;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--aq-text);
+      font-size: 13px;
+      font-family: inherit;
+      &::placeholder { color: var(--aq-text-3); }
+      /* type="search" gives the field the right semantics, but WebKit also
+         draws its own clear affordance — suppress it so the only clear
+         control is the themed button next to it. */
+      &::-webkit-search-cancel-button,
+      &::-webkit-search-decoration {
+        appearance: none;
+        -webkit-appearance: none;
+      }
+    }
+    /* the pill styling removes Material's focus ring — put one back */
+    &:focus-within {
+      outline: 2px solid var(--aq-focus);
+      outline-offset: 1px;
+    }
+    .tb-entity-table-search-clear.mat-mdc-icon-button {
+      width: 28px;
+      height: 28px;
+      padding: 4px;
+      --mdc-icon-button-state-layer-size: 28px;
+      .mat-icon { width: 18px; height: 18px; font-size: 18px; }
+    }
+  }
+
+  /* ---- footer: range wording, rows-per-page chip, numbered pager (canvas) ---- */
+  .tb-entity-table-footer {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 52px;
+    padding: 0 20px;
+    border-top: 1px solid var(--aq-border);
+    font-size: 13px;
+    color: var(--aq-text-2);
+  }
+  .tb-entity-table-range {
+    white-space: nowrap;
+    color: var(--aq-text-2);
+  }
+
+  /* MatPaginator is kept only for page state — hide its range + nav chrome,
+     leave its rows-per-page selector visible (AC-23). */
+  .tb-entity-table-paginator-host {
+    background: transparent !important;
+    border-top: 0 !important;
+    .mat-mdc-paginator-range-actions .mat-mdc-icon-button,
+    .mat-mdc-paginator-range-label { display: none !important; }
+    .mat-mdc-paginator-container { padding: 0; min-height: 0; }
+    .mat-mdc-paginator-page-size-label {
+      color: var(--aq-text-2);
+      font-size: 13px;
+    }
+  }
+
+  .tb-entity-table-pager {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--aq-text-3);
+
+    .mat-mdc-icon-button.mat-mdc-button-base {
+      width: 32px;
+      height: 32px;
+      padding: 4px;
+      border-radius: var(--aq-radius-sm);
+      --mdc-icon-button-state-layer-size: 32px;
+      &:not([disabled]):hover { background: var(--aq-hover); }
+      &[disabled] { color: var(--aq-text-disabled); }
+    }
+    .tb-entity-table-pager-chip {
+      width: 32px;
+      height: 32px;
+      border: 0;
+      border-radius: var(--aq-radius-sm);
+      background: transparent;
+      color: var(--aq-text-2);
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      &:hover { background: var(--aq-hover); }
+      &:focus-visible { outline: 2px solid var(--aq-focus); outline-offset: 1px; }
+      &.tb-active {
+        background: var(--aq-accent-container);
+        color: var(--aq-on-accent-container);
+        font-weight: 600;
+      }
+    }
+    .tb-entity-table-pager-gap {
+      width: 20px;
+      text-align: center;
+      color: var(--aq-text-disabled);
+    }
+  }
 }
 
 /* ---- AIRLINQ GRID: toolbar filters as pills, pager + rows-per-page as chips ---- */
-.tb-default {
+.tb-default, .tb-dark {
   /* profile/type filter rendered as a mat-form-field in the table toolbar → outlined pill */
   mat-toolbar.mat-mdc-table-toolbar .mat-mdc-form-field {
     margin-left: 12px;
@@ -1857,8 +2057,9 @@ pre.tb-highlight {
     .mat-mdc-form-field-icon-suffix .mat-mdc-icon-button { width: 28px; height: 28px; padding: 2px; }
     .mdc-line-ripple, .mat-mdc-form-field-subscript-wrapper { display: none; }
   }
-  /* header band: legible label colour, exact 40px band */
-  .mat-mdc-header-row { height: 40px; }
+  /* header band: legible label colour. The 40px band itself is declared once, at
+   * `.mat-mdc-table .mat-mdc-header-row` in the anatomy block above — a duplicate
+   * lower-specificity `.mat-mdc-header-row { height: 40px }` lived here and never applied. */
   .mat-mdc-header-cell { color: var(--aq-text-2) !important; }
   /* row action buttons: 32px hit target with a rounded hover */
   .mat-mdc-cell .mat-mdc-icon-button.mat-mdc-button-base {
@@ -1880,7 +2081,7 @@ pre.tb-highlight {
     .mat-mdc-icon-button.mat-mdc-button-base:not([disabled]):hover { background: var(--aq-hover); }
   }
 }
-.tb-default {
+.tb-default, .tb-dark {
   mat-toolbar.mat-mdc-table-toolbar .mat-mdc-form-field {
     .mat-mdc-form-field-infix { width: auto; }
     .mdc-floating-label { width: auto; max-width: none; overflow: visible; white-space: nowrap; }

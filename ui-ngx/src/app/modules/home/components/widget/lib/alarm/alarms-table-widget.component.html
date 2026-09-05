@@ -90,7 +90,16 @@
                       [style]="cellStyle(alarm, column, row) | async"
                       (click)="onCellClick($event, alarm, column, $index)"
                       [class.tb-pointer]="columnHasCellClick($index)">
-              <span [innerHTML]="cellContent(alarm, column, row) | async"></span>
+              @if (isSeverityColumn(column)) {
+                <!-- AC-31: severity as a real component, NOT through the
+                     [innerHTML]/bypassSecurityTrustHtml cell-content path. -->
+                @let severity = severityChip(alarm, column);
+                @if (severity) {
+                  <tb-status-chip [label]="severity.label" [tone]="severity.tone"></tb-status-chip>
+                }
+              } @else {
+                <span [innerHTML]="cellContent(alarm, column, row) | async"></span>
+              }
               @if (column.entityKey.key === 'assignee') {
                 <span class="assignee-cell flex flex-row items-center justify-start">
                   @if (alarm.assigneeId && checkAssigneeHasName(alarm.assignee)) {

@@ -18,9 +18,12 @@ import {
   CellActionDescriptorType,
   DateEntityTableColumn,
   EntityLinkTableColumn,
+  EntityStatusChipTableColumn,
   EntityTableColumn,
   EntityTableConfig
 } from '@home/models/entity/entities-table-config.models';
+import { StatusChipContent } from '@home/components/entity/status-chip.component';
+import { alarmSeverityChipTone } from '@home/components/entity/alarm-severity-chip';
 import { EntityType, EntityTypeResource, entityTypeTranslations } from '@shared/models/entity-type.models';
 import { TranslateService } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
@@ -35,7 +38,6 @@ import {
   AlarmInfo,
   AlarmQueryV2,
   AlarmSearchStatus,
-  alarmSeverityColors,
   alarmSeverityTranslations,
   AlarmsMode,
   alarmStatusTranslations,
@@ -123,12 +125,8 @@ export class AlarmTableConfig extends EntityTableConfig<AlarmInfo, TimePageLink>
       new EntityTableColumn<AlarmInfo>('type', 'alarm.type', '25%',
           entity => this.utilsService.customTranslation(entity.type, entity.type)));
     this.columns.push(
-      new EntityTableColumn<AlarmInfo>('severity', 'alarm.severity', '25%',
-        (entity) => this.translate.instant(alarmSeverityTranslations.get(entity.severity)),
-        entity => ({
-          fontWeight: 'bold',
-          color: alarmSeverityColors.get(entity.severity)
-        })));
+      new EntityStatusChipTableColumn<AlarmInfo>('severity', 'alarm.severity', '25%',
+        (entity) => this.alarmSeverityStatus(entity)));
     this.columns.push(
       new EntityTableColumn<AlarmInfo>('assignee', 'alarm.assignee', '240px',
         (entity) => this.getAssigneeTemplate(entity), () => ({}), false, () => ({}), () => undefined, false,
@@ -208,6 +206,19 @@ export class AlarmTableConfig extends EntityTableConfig<AlarmInfo, TimePageLink>
         }
       }
     );
+  }
+
+  /**
+   * Severity as chip data: pill + dot + text label, so severity is never
+   * conveyed by colour alone. Label comes from the existing
+   * `alarmSeverityTranslations`; tone comes from the shared
+   * `alarmSeverityChipTone` mapping that the dashboard alarms widget uses too.
+   */
+  private alarmSeverityStatus(entity: AlarmInfo): StatusChipContent {
+    return {
+      label: this.translate.instant(alarmSeverityTranslations.get(entity.severity)),
+      tone: alarmSeverityChipTone(entity.severity)
+    };
   }
 
   getAssigneeTemplate(entity: AlarmInfo): string {

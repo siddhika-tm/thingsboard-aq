@@ -37,11 +37,14 @@
   <mat-drawer-content>
     <div class="mat-padding tb-entity-table tb-absolute-fill">
       <div class="tb-entity-table-content tb-outlined-border flex flex-col">
-        <mat-toolbar class="mat-mdc-table-toolbar" [class.!hidden]="textSearchMode || !dataSource.selection.isEmpty()">
+        <mat-toolbar class="mat-mdc-table-toolbar" [class.!hidden]="!dataSource.selection.isEmpty()">
           <div class="mat-toolbar-tools">
             <div class="title-container flex flex-row items-center justify-start xs:flex-col xs:items-start xs:justify-center">
               @if (entitiesTableConfig.tableTitle) {
                 <span class="tb-entity-table-title">{{ entitiesTableConfig.tableTitle }}</span>
+              }
+              @if (displayPagination && totalEntities > 0) {
+                <span class="tb-entity-table-count">{{ totalEntities }}</span>
               }
               <tb-anchor #entityTableHeader></tb-anchor>
               @if (entitiesTableConfig.useTimePageLink) {
@@ -97,12 +100,26 @@
               <mat-icon>refresh</mat-icon>
             </button>
             @if (entitiesTableConfig.searchEnabled) {
-              <button
-                mat-icon-button [disabled]="isLoading$ | async" (click)="enterFilterMode()"
-                matTooltip="{{ translations.search | translate }}"
-                matTooltipPosition="above">
-                <mat-icon>search</mat-icon>
-              </button>
+              <div class="tb-entity-table-search">
+                <mat-icon class="tb-entity-table-search-icon" aria-hidden="true">search</mat-icon>
+                <!-- Bare input rather than mat-form-field: the accessible name comes from
+                     aria-label (placeholder alone would not survive a filled field). There is
+                     no validation or hint on a search box, so Material's aria-describedby
+                     plumbing is not needed here. -->
+                <input #searchInput
+                       type="search"
+                       [formControl]="textSearch"
+                       [attr.aria-label]="translations.search | translate"
+                       placeholder="{{ translations.search | translate }}"/>
+                <button mat-icon-button class="tb-entity-table-search-clear"
+                        [class.!hidden]="!textSearch.value"
+                        (click)="exitFilterMode()"
+                        [attr.aria-label]="'action.clear' | translate"
+                        matTooltip="{{ 'action.clear' | translate }}"
+                        matTooltipPosition="above">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
             }
             <div [class.!hidden]="!addEnabled() || !entitiesTableConfig.addAsTextButton" class="pl-3" style="--mat-fab-small-container-elevation-shadow: none;">
               @if (!entitiesTableConfig.addActionDescriptors.length) {
@@ -172,30 +189,10 @@
             </mat-menu>
           </div>
         </mat-toolbar>
-        <mat-toolbar class="mat-mdc-table-toolbar" [class.!hidden]="!textSearchMode || !dataSource.selection.isEmpty()">
-          <div class="mat-toolbar-tools">
-            <button mat-icon-button
-                    matTooltip="{{ translations.search | translate }}"
-                    matTooltipPosition="above">
-              <mat-icon>search</mat-icon>
-            </button>
-            <mat-form-field class="flex-1">
-              <mat-label>&nbsp;</mat-label>
-              <input #searchInput matInput
-                     [formControl]="textSearch"
-                     placeholder="{{ translations.search | translate }}"/>
-            </mat-form-field>
-            <button mat-icon-button (click)="exitFilterMode()"
-                    matTooltip="{{ 'action.close' | translate }}"
-                    matTooltipPosition="above">
-              <mat-icon>close</mat-icon>
-            </button>
-          </div>
-        </mat-toolbar>
         @if (entitiesTableConfig.selectionEnabled) {
           <mat-toolbar class="mat-mdc-table-toolbar" color="primary" [class.!hidden]="dataSource.selection.isEmpty()">
             <div class="mat-toolbar-tools">
-              <span class="tb-entity-table-info">
+              <span class="tb-entity-table-info" role="status" aria-live="polite">
                 {{ translations.selectedEntities | translate:{count: dataSource.selection.selected.length} }}
               </span>
               <span class="flex-1"></span>
@@ -208,6 +205,13 @@
                   <tb-icon>{{actionDescriptor.icon}}</tb-icon>
                 </button>
               }
+              <button mat-icon-button
+                      (click)="dataSource.selection.clear()"
+                      [attr.aria-label]="'action.close' | translate"
+                      matTooltip="{{ 'action.close' | translate }}"
+                      matTooltipPosition="above">
+                <mat-icon>close</mat-icon>
+              </button>
             </div>
           </mat-toolbar>
         }
@@ -256,6 +260,11 @@
                     @case ('entityChips') {
                       <tb-entity-chips [entity]="entity" [key]="column.key"
                       [detailsPagePrefixUrl]="column.entityURL ? column.entityURL(entity) : ''"></tb-entity-chips>
+                    }
+                    @case ('statusChip') {
+                      @if (column.statusContentFunction(entity); as status) {
+                        <tb-status-chip [label]="status.label" [tone]="status.tone"></tb-status-chip>
+                      }
                     }
                     @default {
                       <span [innerHTML]="cellContent(entity, column, row)"></span>
@@ -375,15 +384,72 @@
         </div>
         @if (displayPagination) {
           <mat-divider></mat-divider>
-        }
-        @if (displayPagination) {
-          <mat-paginator
-            [length]="dataSource.total() | async"
-            [pageIndex]="pageLink.page"
-            [pageSize]="pageLink.pageSize"
-            [pageSizeOptions]="pageSizeOptions"
-            [hidePageSize]="hidePageSize"
-          showFirstLastButtons></mat-paginator>
+          <div class="tb-entity-table-footer">
+            <!-- Rendered from the single `showing-range` ICU string rather than
+                 assembled from fragments, so word order is the translator's to
+                 choose and the label stays correct in RTL locales. This is the
+                 same key custom-paginator-intl.ts uses. The former <b> emphasis
+                 on the range is dropped deliberately: markup cannot be placed
+                 inside an interpolated parameter without splitting the string
+                 again, and correct word order outranks the bolding. -->
+            <span class="tb-entity-table-range">
+              {{ 'paginator.showing-range' | translate:{range: rangeText, total: totalEntities} }}
+            </span>
+            <span class="flex-1"></span>
+            <!-- MatPaginator is retained as the page-state owner (it drives the
+                 existing page subscription, the ?page= deep link and the
+                 responsive hidePageSize behaviour). Its range label and nav
+                 buttons are hidden; the numbered strip below replaces them. -->
+            <mat-paginator class="tb-entity-table-paginator-host"
+              [length]="dataSource.total() | async"
+              [pageIndex]="pageLink.page"
+              [pageSize]="pageLink.pageSize"
+              [pageSizeOptions]="pageSizeOptions"
+              [hidePageSize]="hidePageSize"
+            showFirstLastButtons></mat-paginator>
+            <div class="tb-entity-table-pager" role="group"
+                 [attr.aria-label]="'paginator.showing-range' | translate:{range: rangeText, total: totalEntities}">
+              <button mat-icon-button [disabled]="pageLink.page === 0"
+                      (click)="goToPage(0)"
+                      [attr.aria-label]="'paginator.first-page-label' | translate"
+                      matTooltip="{{ 'paginator.first-page-label' | translate }}"
+                      matTooltipPosition="above">
+                <mat-icon>first_page</mat-icon>
+              </button>
+              <button mat-icon-button [disabled]="pageLink.page === 0"
+                      (click)="goToPage(pageLink.page - 1)"
+                      [attr.aria-label]="'paginator.previous-page-label' | translate"
+                      matTooltip="{{ 'paginator.previous-page-label' | translate }}"
+                      matTooltipPosition="above">
+                <mat-icon>chevron_left</mat-icon>
+              </button>
+              @for (p of pageNumbers; track $index) {
+                @if (p === null) {
+                  <span class="tb-entity-table-pager-gap" aria-hidden="true">…</span>
+                } @else {
+                  <button class="tb-entity-table-pager-chip"
+                          [class.tb-active]="p === pageLink.page"
+                          [attr.aria-current]="p === pageLink.page ? 'page' : null"
+                          [attr.aria-label]="'paginator.page-label' | translate:{page: p + 1}"
+                          (click)="goToPage(p)">{{ p + 1 }}</button>
+                }
+              }
+              <button mat-icon-button [disabled]="pageLink.page >= totalPages - 1"
+                      (click)="goToPage(pageLink.page + 1)"
+                      [attr.aria-label]="'paginator.next-page-label' | translate"
+                      matTooltip="{{ 'paginator.next-page-label' | translate }}"
+                      matTooltipPosition="above">
+                <mat-icon>chevron_right</mat-icon>
+              </button>
+              <button mat-icon-button [disabled]="pageLink.page >= totalPages - 1"
+                      (click)="goToPage(totalPages - 1)"
+                      [attr.aria-label]="'paginator.last-page-label' | translate"
+                      matTooltip="{{ 'paginator.last-page-label' | translate }}"
+                      matTooltipPosition="above">
+                <mat-icon>last_page</mat-icon>
+              </button>
+            </div>
+          </div>
         }
       </div>
     </div>

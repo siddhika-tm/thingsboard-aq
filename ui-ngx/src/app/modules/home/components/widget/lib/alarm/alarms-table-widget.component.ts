@@ -90,11 +90,14 @@ import {
   AlarmDataInfo,
   alarmFields,
   AlarmInfo,
-  alarmSeverityColors,
+  AlarmSeverity,
+  alarmSeverityTranslations,
   AlarmStatus,
   getUserDisplayName,
   getUserInitials
 } from '@shared/models/alarm.models';
+import { alarmSeverityChipTone } from '@home/components/entity/alarm-severity-chip';
+import { StatusChipContent } from '@home/components/entity/status-chip.component';
 import { DatePipe } from '@angular/common';
 import {
   AlarmDetailsDialogComponent,
@@ -1145,15 +1148,49 @@ export class AlarmsTableWidgetComponent extends PageComponent implements OnInit,
     }
   }
 
+  /**
+   * True when this column is the alarm severity column. Uses the same
+   * `alarmFields` lookup that `defaultStyle` already used, so the two agree.
+   *
+   * @param key the column being rendered.
+   * @returns whether the column carries alarm severity.
+   */
+  public isSeverityColumn(key: EntityColumn): boolean {
+    return alarmFields[key.name]?.value === alarmFields.severity.value;
+  }
+
+  /**
+   * Chip data for a severity cell: translated label plus semantic tone.
+   *
+   * Rendered by `tb-status-chip` as a real component in the template, so the
+   * severity cell never passes through `bypassSecurityTrustHtml` and never
+   * reaches a user-authored `cellContentFunction`. The label is interpolated
+   * (Angular escapes it) and the tone only toggles static classes.
+   *
+   * @param alarm the alarm row.
+   * @param key the severity column.
+   * @returns label + tone for the chip, or null when severity is absent.
+   */
+  public severityChip(alarm: AlarmDataInfo, key: EntityColumn): StatusChipContent {
+    const severity: AlarmSeverity = getAlarmValue(alarm, key);
+    if (!severity || !alarmSeverityTranslations.has(severity)) {
+      return null;
+    }
+    return {
+      label: this.translate.instant(alarmSeverityTranslations.get(severity)),
+      tone: alarmSeverityChipTone(severity)
+    };
+  }
+
   private defaultStyle(key: EntityColumn, value: any): any {
     if (isDefined(value)) {
       const alarmField = alarmFields[key.name];
       if (alarmField) {
         if (alarmField.value === alarmFields.severity.value) {
-          return {
-            fontWeight: 'bold',
-            color: alarmSeverityColors.get(value)
-          };
+          /* AC-31: severity renders as a `tb-status-chip` component in the
+           * template, so the cell must not also carry bold text in a hardcoded
+           * severity colour. Tone comes from the chip's `--aq-*` tokens. */
+          return {};
         } else {
           return {};
         }

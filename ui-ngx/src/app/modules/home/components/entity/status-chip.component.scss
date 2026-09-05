@@ -1,0 +1,47 @@
+/**
+ * Copyright © 2016-2026 The Thingsboard Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* Geometry from the design canvas: 6px dot, 999px radius, 12px/600 label,
+   padding 2px 8px 2px 6px. Colour is always a --aq-* token pair: a dedicated
+   *-chip-fg label colour on an 18% tint of the matching semantic colour. The
+   label token is separate from --aq-success/--aq-warning/... because it is
+   read against that tint and must clear 4.5:1 there — never a literal, never
+   color-mix. The dot inherits via currentColor, so it tracks the label. */
+.tb-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px 2px 6px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.tb-status-chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+.tb-status-chip-success { color: var(--aq-success-chip-fg); background: var(--aq-success-tint); }
+.tb-status-chip-warning { color: var(--aq-warning-chip-fg); background: var(--aq-warning-tint); }
+.tb-status-chip-error   { color: var(--aq-error-chip-fg);   background: var(--aq-error-tint); }
+.tb-status-chip-info    { color: var(--aq-info-chip-fg);    background: var(--aq-info-tint); }
+.tb-status-chip-neutral { color: var(--aq-neutral-chip-fg); background: var(--aq-hover); }

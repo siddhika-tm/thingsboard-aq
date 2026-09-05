@@ -32,9 +32,19 @@ export class CustomPaginatorIntl implements MatPaginatorIntl {
   previousPageLabel = this.translate.instant('paginator.previous-page-label');
   separator = this.translate.instant('paginator.items-per-page-separator');
 
+  /**
+   * "Showing 1–10 of 20", per the design canvas: an en dash inside the range,
+   * and the whole sentence supplied by one `showing-range` ICU string rather
+   * than assembled from fragments, so word order stays the translator's to
+   * choose and the label reads correctly in RTL locales.
+   */
   getRangeLabel(page: number, pageSize: number, length: number): string {
+    if (!length || !pageSize) {
+      return this.translate.instant('paginator.showing-range', {range: '0', total: length ?? 0});
+    }
     const startNumber = page * pageSize + 1;
-    const endNumber = pageSize * (page + 1);
-    return `${startNumber} – ${endNumber > length ? length : endNumber}  ${this.separator} ${length}`;
+    const endNumber = Math.min(pageSize * (page + 1), length);
+    return this.translate.instant('paginator.showing-range',
+      {range: `${startNumber}–${endNumber}`, total: length});
   }
 }

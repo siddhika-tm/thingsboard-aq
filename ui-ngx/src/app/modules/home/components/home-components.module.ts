@@ -505,6 +505,7 @@ import { GithubBadgeModule } from '@home/components/github-badge/github-badge.mo
     RateLimitsDetailsDialogComponent,
     SendNotificationButtonComponent,
     EntityChipsComponent,
+    SharedHomeComponentsModule,
     DashboardViewComponent,
     CheckConnectivityDialogComponent,
     AIModelDialogComponent,

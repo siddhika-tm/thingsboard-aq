@@ -10553,7 +10553,9 @@
         "last-page-label": "Last page",
         "next-page-label": "Next page",
         "previous-page-label": "Previous page",
-        "items-per-page-separator": "of"
+        "items-per-page-separator": "of",
+        "showing-range": "Showing {{range}} of {{total}}",
+        "page-label": "Page {{page}}"
     },
     "language": {
         "auto": "Auto",

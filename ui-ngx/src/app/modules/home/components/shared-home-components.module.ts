@@ -22,6 +22,7 @@ import { SHARED_HOME_COMPONENTS_MODULE_TOKEN } from '@home/components/tokens';
 import { AlarmCommentComponent } from '@home/components/alarm/alarm-comment.component';
 import { AlarmCommentDialogComponent } from '@home/components/alarm/alarm-comment-dialog.component';
 import { AlarmAssigneeComponent } from '@home/components/alarm/alarm-assignee.component';
+import { StatusChipComponent } from '@home/components/entity/status-chip.component';
 
 @NgModule({
   providers: [
@@ -32,7 +33,8 @@ import { AlarmAssigneeComponent } from '@home/components/alarm/alarm-assignee.co
       AlarmDetailsDialogComponent,
       AlarmCommentComponent,
       AlarmCommentDialogComponent,
-      AlarmAssigneeComponent
+      AlarmAssigneeComponent,
+      StatusChipComponent
     ],
   imports: [
     CommonModule,
@@ -42,7 +44,8 @@ import { AlarmAssigneeComponent } from '@home/components/alarm/alarm-assignee.co
     AlarmDetailsDialogComponent,
     AlarmCommentComponent,
     AlarmCommentDialogComponent,
-    AlarmAssigneeComponent
+    AlarmAssigneeComponent,
+    StatusChipComponent
   ]
 })
 export class SharedHomeComponentsModule { }

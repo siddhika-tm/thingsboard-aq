@@ -32,6 +32,7 @@ import { EntityTabsComponent } from '../../components/entity/entity-tabs.compone
 import { DAY, historyInterval } from '@shared/models/time/time.models';
 import { IEntitiesTableComponent } from '@home/models/entity/entity-table-component.models';
 import { IEntityDetailsPageComponent } from '@home/models/entity/entity-details-page-component.models';
+import { StatusChipContent } from '@home/components/entity/status-chip.component';
 
 export type EntityBooleanFunction<T extends BaseData<HasId>> = (entity: T) => boolean;
 export type EntityStringFunction<T extends BaseData<HasId>> = (entity: T) => string;
@@ -51,8 +52,8 @@ export type HeaderCellStyleFunction<T extends BaseData<HasId>> = (key: string) =
 export type CellStyleFunction<T extends BaseData<HasId>> = (entity: T, key: string) => object;
 export type CopyCellContent<T extends BaseData<HasId>> = (entity: T, key: string, length: number) => object;
 
-export type EntityColumnsType = Array<Partial<EntityTableColumn<BaseData<HasId>> & EntityLinkTableColumn<BaseData<HasId>> & EntityChipsEntityTableColumn<BaseData<HasId>>>>;
-export type EntityColumnType = Partial<EntityTableColumn<BaseData<HasId>> & EntityLinkTableColumn<BaseData<HasId>> & EntityChipsEntityTableColumn<BaseData<HasId>>>;
+export type EntityColumnsType = Array<Partial<EntityTableColumn<BaseData<HasId>> & EntityLinkTableColumn<BaseData<HasId>> & EntityChipsEntityTableColumn<BaseData<HasId>> & EntityStatusChipTableColumn<BaseData<HasId>>>>;
+export type EntityColumnType = Partial<EntityTableColumn<BaseData<HasId>> & EntityLinkTableColumn<BaseData<HasId>> & EntityChipsEntityTableColumn<BaseData<HasId>> & EntityStatusChipTableColumn<BaseData<HasId>>>;
 
 export enum CellActionDescriptorType { 'DEFAULT', 'COPY_BUTTON'}
 
@@ -81,7 +82,7 @@ export interface HeaderActionDescriptor {
   onAction: ($event: MouseEvent) => void;
 }
 
-export type EntityTableColumnType = 'content' | 'action' | 'link' | 'entityChips';
+export type EntityTableColumnType = 'content' | 'action' | 'link' | 'entityChips' | 'statusChip';
 
 export class BaseEntityTableColumn<T extends BaseData<HasId>> {
   constructor(public type: EntityTableColumnType,
@@ -157,7 +158,22 @@ export class EntityChipsEntityTableColumn<T extends BaseData<HasId>> extends Bas
   }
 }
 
-export type EntityColumn<T extends BaseData<HasId>> = EntityTableColumn<T> | EntityActionTableColumn<T> | EntityLinkTableColumn<T> | EntityChipsEntityTableColumn<T>;
+/**
+ * A column whose cell is a status pill (dot + label) rendered by
+ * `tb-status-chip`. Supplies structured data, not markup, so the cell never
+ * reaches the `bypassSecurityTrustHtml` path used by 'content' columns.
+ */
+export class EntityStatusChipTableColumn<T extends BaseData<HasId>> extends BaseEntityTableColumn<T> {
+  constructor(public key: string,
+              public title: string,
+              public width: string = '0px',
+              public statusContentFunction: (entity: T) => StatusChipContent = () => ({label: '', tone: 'neutral'}),
+              public sortable: boolean = true) {
+    super('statusChip', key, title, width, sortable);
+  }
+}
+
+export type EntityColumn<T extends BaseData<HasId>> = EntityTableColumn<T> | EntityActionTableColumn<T> | EntityLinkTableColumn<T> | EntityChipsEntityTableColumn<T> | EntityStatusChipTableColumn<T>;
 
 export class EntityTableConfig<T extends BaseData<HasId>, P extends PageLink = PageLink, L extends BaseData<HasId> = T> {
 

@@ -1,0 +1,55 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "title": "Dashboard · dark",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "DashboardLight.dc.html",
+      "title": "Dashboard · light",
+      "x": 1540,
+      "y": 0,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "DataGrid.dc.html",
+      "title": "Data grid · dark",
+      "x": 0,
+      "y": 1040,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "DataGridLight.dc.html",
+      "title": "Data grid · light",
+      "x": 1540,
+      "y": 1040,
+      "w": 1440,
+      "h": 900
+    }
+  ],
+  "annotations": [
+    {
+      "id": "grid-anatomy",
+      "x": 3060,
+      "y": 1040,
+      "w": 300,
+      "text": "Grid anatomy\n• outer 1px border + 16px radius on the card\n• header band (surface-2), 40px, 11px uppercase labels, sort arrow\n• 48px rows, 1px row + column dividers (border-subtle)\n• hover = --aq-hover, selected = --aq-selected + accent checkbox\n• selection bar replaces toolbar actions when rows are picked\n• status as pill + dot, never colour alone\n• row actions in a fixed right column, 32px hit targets\n• footer: range, rows-per-page, numbered pager"
+    },
+    {
+      "id": "dash-notes",
+      "x": 3060,
+      "y": 0,
+      "w": 300,
+      "text": "Dashboard\n• header = title + context line + time window pill\n• KPI tiles: label, 32px value, one line of context; the alerting tile gets a tinted outline\n• fleet health as a segmented bar with legend, not a bare progress line\n• chart: recessive grid, alarm threshold as dashed rule, 2px lines, legend chips, range pills\n• alarms table uses the same grid anatomy as the entity pages\n• all values are --aq-* tokens already in styles.scss; no new colours"
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}

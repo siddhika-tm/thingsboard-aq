@@ -38,7 +38,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort, SortDirection } from '@angular/material/sort';
 import { EntitiesDataSource } from '@home/models/datasource/entity-datasource';
-import { catchError, debounceTime, distinctUntilChanged, map, skip, takeUntil } from 'rxjs/operators';
+import { catchError, debounceTime, distinctUntilChanged, map, skip, take, takeUntil } from 'rxjs/operators';
 import { Direction, SortOrder } from '@shared/models/page/sort-order';
 import { forkJoin, merge, Observable, of, Subject, Subscription } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
@@ -51,6 +51,7 @@ import {
   EntityChipsEntityTableColumn,
   EntityColumn, EntityColumnsType, EntityColumnType,
   EntityLinkTableColumn,
+  EntityStatusChipTableColumn,
   EntityTableColumn,
   EntityTableConfig,
   GroupActionDescriptor,
@@ -104,6 +105,10 @@ export class EntitiesTableComponent extends PageComponent implements IEntitiesTa
   defaultPageSize = 10;
   displayPagination = true;
   hidePageSize = false;
+  /** Total record count last reported by the data source; drives the pager. */
+  totalEntities = 0;
+  /** Page indices to render as chips; `null` marks an ellipsis gap. */
+  pageNumbers: Array<number | null> = [];
   pageSizeOptions;
   pageLink: PageLink;
   pageMode = true;
@@ -437,13 +442,20 @@ export class EntitiesTableComponent extends PageComponent implements IEntitiesTa
 
   private dataLoaded(col?: number, row?: number) {
     if (isFinite(col) && isFinite(row)) {
+      // Single-cell refresh: the row count cannot have changed, so skip the
+      // total() read below rather than resubscribing once per cell.
       this.clearCellCache(col, row);
-    } else {
-      this.headerCellStyleCache.length = 0;
-      this.cellContentCache.length = 0;
-      this.cellTooltipCache.length = 0;
-      this.cellStyleCache.length = 0;
+      return;
     }
+    this.headerCellStyleCache.length = 0;
+    this.cellContentCache.length = 0;
+    this.cellTooltipCache.length = 0;
+    this.cellStyleCache.length = 0;
+    this.dataSource.total().pipe(take(1)).subscribe((total) => {
+      this.totalEntities = total ?? 0;
+      this.updatePageNumbers();
+      this.cd.markForCheck();
+    });
   }
 
   onRowClick($event: Event, entity) {
@@ -559,11 +571,103 @@ export class EntitiesTableComponent extends PageComponent implements IEntitiesTa
     this.updateData();
   }
 
+  /** Number of pages currently available. */
+  get totalPages(): number {
+    if (!this.displayPagination || !this.pageLink.pageSize) {
+      return 1;
+    }
+    return Math.max(1, Math.ceil(this.totalEntities / this.pageLink.pageSize));
+  }
+
+  /**
+   * Windowed page list: up to 5 numbered chips around the current page, with
+   * `null` standing in for an elided run, plus always the first and last page.
+   * Keeps the footer a fixed width however many pages exist (D3).
+   */
+  private updatePageNumbers() {
+    const total = this.totalPages;
+    const current = this.pageLink.page;
+    const windowSize = 5;
+    if (total <= windowSize + 2) {
+      this.pageNumbers = Array.from({length: total}, (_, i) => i);
+      return;
+    }
+    const half = Math.floor(windowSize / 2);
+    let start = Math.max(1, current - half);
+    const end = Math.min(total - 2, start + windowSize - 1);
+    start = Math.max(1, end - windowSize + 1);
+    const pages: Array<number | null> = [0];
+    if (start > 1) {
+      pages.push(null);
+    }
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    if (end < total - 2) {
+      pages.push(null);
+    }
+    pages.push(total - 1);
+    this.pageNumbers = pages;
+  }
+
+  /**
+   * Move to `pageIndex` through MatPaginator so every existing subscription fires.
+   *
+   * Clamps rather than rejects: `totalPages` derives from `totalEntities`, which
+   * only refreshes in `dataLoaded()`, so a click landing during an in-flight
+   * reload can carry an index past the end of the new, shorter result. Clamping
+   * lands on the last real page instead of silently doing nothing.
+   *
+   * `previousPageIndex` is captured before the assignment and included in the
+   * emitted event, because MatPaginator's own `_emitPageEvent` always supplies
+   * it and subscribers may rely on it.
+   */
+  goToPage(pageIndex: number) {
+    const target = Math.min(Math.max(pageIndex, 0), this.totalPages - 1);
+    if (target === this.paginator.pageIndex) {
+      return;
+    }
+    const previousPageIndex = this.paginator.pageIndex;
+    this.paginator.pageIndex = target;
+    this.paginator.page.emit({
+      previousPageIndex,
+      pageIndex: target,
+      pageSize: this.paginator.pageSize,
+      length: this.paginator.length
+    });
+  }
+
+  /**
+   * Just the "1-10" part of the range; the surrounding words come from
+   * translation keys in the template, so the translated strings stay
+   * markup-free. Deliberately does NOT reach into MatPaginator's `_intl`
+   * (a private Material API used nowhere else in this codebase).
+   */
+  get rangeText(): string {
+    if (!this.totalEntities || !this.pageLink.pageSize) {
+      return '0';
+    }
+    const start = this.pageLink.page * this.pageLink.pageSize + 1;
+    const end = Math.min(this.pageLink.pageSize * (this.pageLink.page + 1), this.totalEntities);
+    return `${start}–${end}`;
+  }
+
+  /**
+   * The search field is always visible now, so this only moves focus into it.
+   *
+   * `textSearchMode` is retained for backwards compatibility only: it is part
+   * of this component's public API and is still assigned here and in
+   * exitFilterMode()/resetSortAndFilter(), but nothing in this component or its
+   * template reads it. The query-param sync sets `pageLink.textSearch` and calls
+   * `textSearch.setValue()` directly, independently of this flag.
+   */
   enterFilterMode() {
     this.textSearchMode = true;
     setTimeout(() => {
-      this.searchInputField.nativeElement.focus();
-      this.searchInputField.nativeElement.setSelectionRange(0, 0);
+      if (this.searchInputField) {
+        this.searchInputField.nativeElement.focus();
+        this.searchInputField.nativeElement.setSelectionRange(0, 0);
+      }
     }, 10);
   }
 
@@ -593,7 +697,7 @@ export class EntitiesTableComponent extends PageComponent implements IEntitiesTa
   columnsUpdated(resetData: boolean = false) {
     this.entityColumns = this.entitiesTableConfig.columns.filter(
       (column) => column instanceof EntityTableColumn || column instanceof EntityLinkTableColumn ||
-        column instanceof EntityChipsEntityTableColumn);
+        column instanceof EntityChipsEntityTableColumn || column instanceof EntityStatusChipTableColumn);
     this.actionColumns = this.entitiesTableConfig.columns.filter(
       (column) => column instanceof EntityActionTableColumn)
       .map(column => column as EntityActionTableColumn<BaseData<HasId>>);

@@ -1,0 +1,11 @@
+# Role memory — technical-architect
+
+Role-private learnings index. One line per learning, newest first; prune entries that stopped being true. Team-relevant items go to the sign-off as `**Team-learning candidate:**` for Jarvis to promote.
+
+- `.tb-default` is NEVER removed from `<body>` — `theme.service.ts` only adds/removes `tb-dark`, so in dark mode body is `class="tb-default tb-dark"`. A `.tb-default`-scoped rule therefore still matches in dark; if it holds only `--aq-*` tokens it already renders dark values (dark token block is later in source order at equal specificity). Do not diagnose "light-only scoping" as a dark-theme bug without checking for colour literals first.
+- Verify a design canvas's CSS features against `ui-ngx/.browserslistrc` before copying them: the 2026-09-04 canvas used `color-mix()`, which needs Chrome 111/FF 113/Safari 16.2 while the repo supports Chrome 107/FF 104/Safari 16 — it would have silently dropped chip backgrounds. Pre-mixed `rgba()` tint tokens instead.
+- `entities-table.component.ts:657` wraps every cell in `domSanitizer.bypassSecurityTrustHtml`, so any `cellContentFunction` returning a string is live markup. Prefer a real component + a new `@case` in the cell `@switch` (the `entityChips` case is the precedent) over HTML strings.
+- Standing HIGH finding, unfixed: `alarm-table-config.ts:213-225` (`getAssigneeTemplate`) interpolates raw user firstName/lastName/email via `getUserDisplayName` into that bypassed HTML → stored XSS. Pre-existing upstream; needs its own work item.
+- ThingsBoard i18n has 28 locale files; add new keys to `locale.constant-en_US.json` only (ngx-translate falls back to en_US). Check for an existing key first — `device.search`, `device.selected-devices` (ICU plural) and the `paginator.*` labels already covered most "new" copy in this work item.
+- `--tb-alarm-severity-*` and `-bg` custom properties are emitted by `alarm.models.ts` with hardcoded fallbacks but defined in NO stylesheet — a free token seam for recolouring severity app-wide without touching TS.
+- Read the widget/config layer before promising a dashboard AC: the demo dashboard is 19 widgets of tenant data in PostgreSQL, not in git, so "segmented bar instead of a progress bar" is a server-config change no `ui-ngx` code can deliver. Split code-vs-config explicitly in every design doc.

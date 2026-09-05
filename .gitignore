@@ -37,7 +37,12 @@ rebuild-docker.sh
 */.run/**
 .run/**
 .run
-.claude
+# Claude Code: keep machine-local state out, ship the virtual-team config
+.claude/*
+!.claude/settings.json
+!.claude/team/
+!.claude/agents/
+.claude/settings.local.json
 .planning
 docs/superpowers/
 .env
@@ -48,3 +53,6 @@ ui-ngx/src/assets/.orig-tb-logos/
 
 # brainstorm visual-companion session files
 .superpowers/
+
+# server credentials for the demo box (never commit)
+env

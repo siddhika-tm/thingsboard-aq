@@ -21,11 +21,14 @@ import {
   CellActionDescriptor,
   checkBoxCell,
   DateEntityTableColumn,
+  EntityColumn,
+  EntityStatusChipTableColumn,
   EntityTableColumn,
   EntityTableConfig,
   GroupActionDescriptor,
   HeaderActionDescriptor
 } from '@home/models/entity/entities-table-config.models';
+import { StatusChipContent } from '@home/components/entity/status-chip.component';
 import { TranslateService } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
 import { EntityType, entityTypeResources, entityTypeTranslations } from '@shared/models/entity-type.models';
@@ -219,14 +222,14 @@ export class DevicesTableConfigResolver  {
     }
   }
 
-  configureColumns(deviceScope: string): Array<EntityTableColumn<DeviceInfo>> {
-    const columns: Array<EntityTableColumn<DeviceInfo>> = [
+  configureColumns(deviceScope: string): Array<EntityColumn<DeviceInfo>> {
+    const columns: Array<EntityColumn<DeviceInfo>> = [
       new DateEntityTableColumn<DeviceInfo>('createdTime', 'common.created-time', this.datePipe, '150px'),
       new EntityTableColumn<DeviceInfo>('name', 'device.name', '25%'),
       new EntityTableColumn<DeviceInfo>('deviceProfileName', 'device-profile.device-profile', '25%'),
       new EntityTableColumn<DeviceInfo>('label', 'device.label', '25%'),
-      new EntityTableColumn<DeviceInfo>('active', 'device.state', '80px',
-        entity => this.deviceState(entity), entity => this.deviceStateStyle(entity))
+      new EntityStatusChipTableColumn<DeviceInfo>('active', 'device.state', '80px',
+        entity => this.deviceStatus(entity))
     ];
     if (deviceScope === 'tenant') {
       columns.push(
@@ -242,29 +245,16 @@ export class DevicesTableConfigResolver  {
     return columns;
   }
 
-  private deviceState(device: DeviceInfo): string {
-    let translateKey = 'device.active';
-    let backgroundColor = 'rgba(25, 128, 56, 0.08)';
-    if (!device.active) {
-      translateKey = 'device.inactive';
-      backgroundColor = 'rgba(209, 39, 48, 0.08)';
-    }
-    return `<div class="status" style="border-radius: 16px; height: 32px;
-                line-height: 32px; padding: 0 12px; width: fit-content; background-color: ${backgroundColor}">
-                ${this.translate.instant(translateKey)}
-            </div>`;
-  }
-
-  private deviceStateStyle(device: DeviceInfo): object {
-    const styleObj = {
-      fontSize: '14px',
-      color: '#198038',
-      cursor: 'pointer'
-    };
-    if (!device.active) {
-      styleObj.color = '#d12730';
-    }
-    return styleObj;
+  /**
+   * Device state as structured chip data. Active/Inactive only — no derived
+   * Watch/Alarm state (that data does not exist). Colour is chosen by the
+   * chip's `tone`, which maps to --aq-* tokens, so no colour literal lives
+   * here any more.
+   */
+  private deviceStatus(device: DeviceInfo): StatusChipContent {
+    return device.active
+      ? {label: this.translate.instant('device.active'), tone: 'success'}
+      : {label: this.translate.instant('device.inactive'), tone: 'error'};
   }
 
   configureEntityFunctions(deviceScope: string): void {
