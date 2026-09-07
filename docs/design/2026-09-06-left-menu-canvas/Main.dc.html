@@ -1,0 +1,183 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; font-family: Roboto, "Helvetica Neue", Arial, sans-serif; }
+    a { color: var(--accent); text-decoration: none; } a:hover { color: var(--accent); text-decoration: underline; }
+    .aq { --bg:#0a0d12; --sheet:#12171f; --rail:#171c24; --surface:#1b2129; --surface-2:#232a34;
+          --hover:rgba(255,255,255,.06); --text:#e9edf3; --text-2:#aeb8c5; --text-3:#8892a0; --text-dis:#59636f;
+          --border:#2b3542; --border-subtle:#212a35; --accent:#37b6c9; --accent-c:#0e5a66; --on-accent-c:#bff1fb;
+          --error:#ec6274; --shadow:0 1px 2px rgba(0,0,0,.45); }
+    .aq.light { --bg:#e9edf1; --sheet:#ffffff; --rail:#ffffff; --surface:#f6f8fa; --surface-2:#eceff3;
+          --hover:rgba(15,23,32,.05); --text:#14181f; --text-2:#414b5a; --text-3:#6b7789; --text-dis:#9aa5b4;
+          --border:#dde1e8; --border-subtle:#eef1f4; --accent:#0b6b78; --accent-c:#bff1fb; --on-accent-c:#00363e;
+          --error:#a3182a; --shadow:0 1px 2px rgba(0,0,0,.06); }
+    .ico { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+    .ico.s { width: 16px; height: 16px; }
+    .panel { position: absolute; top: 8px; bottom: 8px; background: var(--rail); border-radius: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; box-sizing: border-box; overflow: hidden; }
+    .head { height: 64px; display: flex; align-items: center; padding: 0 12px 0 16px; gap: 10px; flex: none; }
+    .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13px; letter-spacing: .12em; color: var(--text); }
+    .pin { margin-left: auto; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-3); }
+    .item { display: flex; align-items: center; gap: 12px; height: 40px; margin: 2px 8px; padding: 0 12px; border-radius: 12px; color: var(--text-2); font-size: 14px; font-weight: 500; }
+    .item .ico { color: var(--text-3); }
+    .item.on { background: var(--accent-c); color: var(--on-accent-c); }
+    .item.on .ico { color: var(--on-accent-c); }
+    .item.hov { background: var(--hover); color: var(--text); }
+    .item .chev { margin-left: auto; color: var(--text-3); }
+    .sub { display: flex; align-items: center; height: 36px; margin: 0 8px 0 8px; padding: 0 12px 0 46px; border-radius: 10px; color: var(--text-2); font-size: 13px; font-weight: 500; position: relative; }
+    .sub::before { content: ""; position: absolute; left: 30px; top: 0; bottom: 0; width: 1px; background: var(--border-subtle); }
+    .sub.on { color: var(--text); font-weight: 600; }
+    .sub.on::after { content: ""; position: absolute; left: 29px; top: 10px; bottom: 10px; width: 3px; border-radius: 2px; background: var(--accent); }
+    .sec { font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); padding: 14px 20px 6px; }
+    .badge { margin-left: auto; font-size: 10px; font-weight: 700; letter-spacing: .06em; padding: 1px 6px; border-radius: 999px; background: var(--accent-c); color: var(--on-accent-c); }
+    .divider { height: 1px; background: var(--border-subtle); margin: 8px 16px; }
+    .user { margin-top: auto; border-top: 1px solid var(--border-subtle); padding: 12px 12px 12px 16px; display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-c); color: var(--on-accent-c); font-weight: 600; font-size: 12px; display: flex; align-items: center; justify-content: center; flex: none; }
+    .uname { font-size: 13px; font-weight: 600; color: var(--text); line-height: 16px; }
+    .urole { font-size: 11px; color: var(--text-3); line-height: 14px; }
+    .rail-item { width: 48px; height: 40px; margin: 2px 8px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--text-3); position: relative; }
+    .rail-item.on { background: var(--accent-c); color: var(--on-accent-c); }
+    .rail-item .dot { position: absolute; top: 6px; right: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--error); }
+    .fly { position: absolute; left: 84px; top: 0; width: 220px; padding: 6px; border-radius: 12px; background: var(--surface-2); box-shadow: 0 8px 24px rgba(0,0,0,.25); }
+    .fly .t { font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); padding: 8px 12px 4px; }
+    .fly .r { height: 36px; display: flex; align-items: center; padding: 0 12px; border-radius: 8px; color: var(--text-2); font-size: 13px; font-weight: 500; }
+    .fly .r.on { color: var(--text); background: var(--hover); }
+    .label { position: absolute; top: -28px; left: 0; font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--text-3); text-transform: uppercase; }
+  </style>
+</helmet>
+
+<div class="aq dark" style="width: 1440px; height: 900px; background: var(--bg); color: var(--text); position: relative; overflow: hidden; font-size: 14px;">
+
+  <!-- ===== A: expanded menu, grouped with section labels (all groups open) ===== -->
+  <div class="panel" style="left: 32px; width: 250px; top: 48px; bottom: 24px;">
+    <span class="label">A · Expanded · sectioned</span>
+    <div class="head">
+      <div class="brand"><svg viewBox="0 0 24 24" style="width: 24px; height: 24px;"><path d="M12 2 3 20h6l3-6 3 6h6L12 2z" fill="#3e7bff"></path><path d="M12 2 9 8h6l-3-6z" fill="#37b6c9"></path></svg>AIRLINQ</div>
+      <div class="pin"><svg class="ico s" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M9 4v16M15 10l-2 2 2 2"></path></svg></div>
+    </div>
+    <div class="item on"><svg class="ico" viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"></path></svg>Home</div>
+    <div class="sec">Monitor</div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"></rect><rect x="13" y="3" width="8" height="5" rx="1.5"></rect><rect x="13" y="11" width="8" height="10" rx="1.5"></rect><rect x="3" y="14" width="8" height="7" rx="1.5"></rect></svg>Dashboards</div>
+    <div class="item hov"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3 2 21h20L12 3zM12 10v5M12 18v.5"></path></svg>Alarms<span class="badge">5</span></div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 21h4"></path></svg>Notifications</div>
+    <div class="sec">Devices &amp; assets</div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="5" width="12" height="14" rx="2"></rect><path d="M18 8h3v10h-3M8 15h2"></path></svg>Devices</div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><path d="M3 21V9l7-5v17M10 21h11V11h-7"></path></svg>Assets</div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 12h18M12 3v18"></path></svg>Entity views</div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"></rect><path d="M9 9h6v6H9z"></path></svg>Profiles<svg class="ico s chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"></path></svg></div>
+    <div class="sec">Operations</div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-5-6.3"></path></svg>Customers &amp; users</div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><path d="m8 8-5 4 5 4M16 8l5 4-5 4M14 5l-4 14"></path></svg>Data processing<svg class="ico s chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"></path></svg></div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>Resources<svg class="ico s chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"></path></svg></div>
+    <div class="sec">Administration</div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"></path></svg>Security<svg class="ico s chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"></path></svg></div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"></path></svg>Platform<svg class="ico s chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"></path></svg></div>
+    <div class="user">
+      <div class="avatar">TA</div>
+      <div><div class="uname">Airlinq TenantAdmin</div><div class="urole">Tenant administrator</div></div>
+      <svg class="ico s" viewBox="0 0 24 24" style="margin-left: auto; color: var(--text-3);"><circle cx="12" cy="5" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="12" cy="19" r="1.5"></circle></svg>
+    </div>
+  </div>
+
+  <!-- ===== B: expanded menu, collapsible groups (current behaviour, refined) ===== -->
+  <div class="panel" style="left: 342px; width: 250px; top: 48px; bottom: 24px;">
+    <span class="label">B · Expanded · accordion</span>
+    <div class="head">
+      <div class="brand"><svg viewBox="0 0 24 24" style="width: 24px; height: 24px;"><path d="M12 2 3 20h6l3-6 3 6h6L12 2z" fill="#3e7bff"></path><path d="M12 2 9 8h6l-3-6z" fill="#37b6c9"></path></svg>AIRLINQ</div>
+      <div class="pin"><svg class="ico s" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M9 4v16M15 10l-2 2 2 2"></path></svg></div>
+    </div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"></path></svg>Home</div>
+    <div class="divider"></div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"></rect><rect x="13" y="3" width="8" height="5" rx="1.5"></rect><rect x="13" y="11" width="8" height="10" rx="1.5"></rect><rect x="3" y="14" width="8" height="7" rx="1.5"></rect></svg>Monitor<svg class="ico s chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></svg></div>
+    <div class="item" style="color: var(--text);"><svg class="ico" viewBox="0 0 24 24" style="color: var(--text-2);"><path d="M12 3 8 9h8l-4-6z"></path><rect x="3" y="13" width="7" height="7" rx="1.5"></rect><rect x="14" y="13" width="7" height="7" rx="1.5"></rect></svg>Devices &amp; assets<svg class="ico s chev" viewBox="0 0 24 24" style="transform: rotate(180deg);"><path d="m6 9 6 6 6-6"></path></svg></div>
+    <div class="sub on">Devices</div>
+    <div class="sub">Assets</div>
+    <div class="sub">Device profiles</div>
+    <div class="sub">Asset profiles</div>
+    <div class="sub">Entity views</div>
+    <div class="sub">OTA updates</div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-5-6.3"></path></svg>Customers &amp; users</div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><path d="m8 8-5 4 5 4M16 8l5 4-5 4M14 5l-4 14"></path></svg>Data processing<svg class="ico s chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></svg></div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>Resources<svg class="ico s chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></svg></div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"></path></svg>Security<svg class="ico s chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></svg></div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"></path></svg>Platform<svg class="ico s chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></svg></div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><path d="M12 20V10M5 10a7 7 0 0 1 14 0M8.5 10a3.5 3.5 0 0 1 7 0"></path></svg>Edge management<svg class="ico s chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></svg></div>
+    <div class="user">
+      <div class="avatar">TA</div>
+      <div><div class="uname">Airlinq TenantAdmin</div><div class="urole">Tenant administrator</div></div>
+      <svg class="ico s" viewBox="0 0 24 24" style="margin-left: auto; color: var(--text-3);"><circle cx="12" cy="5" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="12" cy="19" r="1.5"></circle></svg>
+    </div>
+  </div>
+
+  <!-- ===== Rail, idle ===== -->
+  <div class="panel" style="left: 680px; width: 64px; top: 48px; bottom: 24px; align-items: center; padding-top: 10px;">
+    <span class="label" style="white-space: nowrap;">Rail · idle</span>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; height: 64px; margin-bottom: 8px;">
+      <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; margin-top: 2px;"><path d="M12 2 3 20h6l3-6 3 6h6L12 2z" fill="#3e7bff"></path><path d="M12 2 9 8h6l-3-6z" fill="#37b6c9"></path></svg>
+      <svg class="ico s" viewBox="0 0 24 24" style="color: var(--text-3);"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M9 4v16M13 10l2 2-2 2"></path></svg>
+    </div>
+    <div class="rail-item on"><svg class="ico" viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"></path></svg></div>
+    <div style="width: 32px; height: 1px; background: var(--border-subtle); margin: 6px 0;"></div>
+    <div class="rail-item"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"></rect><rect x="13" y="3" width="8" height="5" rx="1.5"></rect><rect x="13" y="11" width="8" height="10" rx="1.5"></rect><rect x="3" y="14" width="8" height="7" rx="1.5"></rect></svg><span class="dot"></span></div>
+    <div class="rail-item"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3 8 9h8l-4-6z"></path><rect x="3" y="13" width="7" height="7" rx="1.5"></rect><rect x="14" y="13" width="7" height="7" rx="1.5"></rect></svg></div>
+    <div class="rail-item"><svg class="ico" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-5-6.3"></path></svg></div>
+    <div class="rail-item"><svg class="ico" viewBox="0 0 24 24"><path d="m8 8-5 4 5 4M16 8l5 4-5 4M14 5l-4 14"></path></svg></div>
+    <div class="rail-item"><svg class="ico" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg></div>
+    <div class="rail-item"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"></path></svg></div>
+    <div class="rail-item"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"></path></svg></div>
+    <div style="flex: 1;"></div>
+    <div class="avatar" style="margin-bottom: 12px;">TA</div>
+  </div>
+
+  <!-- ===== Rail, hover + flyout ===== -->
+  <div style="position: absolute; left: 790px; top: 48px; bottom: 24px; width: 64px;">
+    <div class="panel" style="left: 0; width: 64px; top: 0; bottom: 0; align-items: center; padding-top: 10px;">
+      <span class="label" style="white-space: nowrap;">Rail · hover + flyout</span>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; height: 64px; margin-bottom: 8px;">
+        <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; margin-top: 2px;"><path d="M12 2 3 20h6l3-6 3 6h6L12 2z" fill="#3e7bff"></path><path d="M12 2 9 8h6l-3-6z" fill="#37b6c9"></path></svg>
+        <svg class="ico s" viewBox="0 0 24 24" style="color: var(--text-3);"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M9 4v16M13 10l2 2-2 2"></path></svg>
+      </div>
+      <div class="rail-item"><svg class="ico" viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"></path></svg></div>
+      <div style="width: 32px; height: 1px; background: var(--border-subtle); margin: 6px 0;"></div>
+      <div class="rail-item" style="background: var(--hover); color: var(--text);"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"></rect><rect x="13" y="3" width="8" height="5" rx="1.5"></rect><rect x="13" y="11" width="8" height="10" rx="1.5"></rect><rect x="3" y="14" width="8" height="7" rx="1.5"></rect></svg></div>
+      <div class="rail-item on"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3 8 9h8l-4-6z"></path><rect x="3" y="13" width="7" height="7" rx="1.5"></rect><rect x="14" y="13" width="7" height="7" rx="1.5"></rect></svg></div>
+      <div class="rail-item"><svg class="ico" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-5-6.3"></path></svg></div>
+      <div class="rail-item"><svg class="ico" viewBox="0 0 24 24"><path d="m8 8-5 4 5 4M16 8l5 4-5 4M14 5l-4 14"></path></svg></div>
+      <div style="flex: 1;"></div>
+      <div class="avatar" style="margin-bottom: 12px;">TA</div>
+    </div>
+    <div class="fly" style="top: 125px;">
+      <div class="t">Monitor</div>
+      <div class="r">Dashboards</div>
+      <div class="r on">Alarms<span class="badge">5</span></div>
+      <div class="r">Notifications</div>
+    </div>
+  </div>
+
+  <!-- ===== notes ===== -->
+  <div style="position: absolute; left: 1060px; top: 48px; width: 340px; color: var(--text-2); font-size: 13px; line-height: 20px;">
+    <div style="font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-3); margin-bottom: 8px;">Menu anatomy</div>
+    <div style="background: var(--surface); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px;">
+      <b style="color: var(--text);">Shared</b><br>250px expanded / 64px rail, 16px radius panel, 40px items with 12px pill, 22px icons on the 40px axis, active = accent-container pill, hover = --aq-hover, alarm count badge, user block pinned at foot with name + role + menu, pin toggle in the head.
+    </div>
+    <div style="background: var(--surface); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px;">
+      <b style="color: var(--text);">A · Sectioned</b><br>Groups become uppercase 11px section labels; every page is one click away; no chevrons except true sub-menus (Profiles, Data processing, Resources, Security, Platform). Longer list, scrolls on short screens.
+    </div>
+    <div style="background: var(--surface); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px;">
+      <b style="color: var(--text);">B · Accordion</b><br>Keeps ThingsBoard's collapsible groups; sub-items 36px, indented under a 1px guide with a 3px accent bar on the active one. Fewer rows visible; matches current behaviour so no menu-model change.
+    </div>
+    <div style="background: var(--surface); border-radius: 12px; padding: 14px 16px;">
+      <b style="color: var(--text);">Rail</b><br>Idle: icons only, alarm dot on Monitor. Hover: hovered tile lifts, flyout with section title and rows appears beside it; active rail tile keeps its pill.
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

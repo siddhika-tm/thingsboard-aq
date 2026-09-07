@@ -1,0 +1,10 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "title": "Left menu · dark", "x": 0, "y": 0, "w": 1440, "h": 900 },
+    { "file": "MenuLight.dc.html", "title": "Left menu · light", "x": 0, "y": 1040, "w": 1440, "h": 900 }
+  ],
+  "annotations": [
+    { "id": "pick", "x": 1540, "y": 0, "w": 300, "text": "Pick one expanded style: A (sectioned, every page one click) or B (accordion, current behaviour refined). The rail states apply to either.\nBoth artboards share geometry; only tokens differ." }
+  ],
+  "launch": { "view": "canvas" }
+}

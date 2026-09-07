@@ -215,9 +215,9 @@ Tolerance: ±1px on lengths, exact on text, exact on token identity.
   proportional to those counts.
 - **AC-29** → the tilt/alignment chart shows a recessive grid (gridlines in `--aq-chart-grid`, visibly lighter than the `--aq-chart-axis` axis line), 2px series lines, and a **dashed horizontal
   threshold rule with a visible text label naming the alarm threshold** (e.g. "alarm 3.0°").
-- **AC-30** → the chart carries legend chips (one per series, each with a short line swatch) and
-  range pills (e.g. 1h / 6h / 24h) where the active pill uses
-  `--aq-accent-container` / `--aq-on-accent-container`.
+- **AC-30** → the chart carries legend chips (one per series, each with a short line swatch).
+  *(Amended by D21: the range pills (1h/6h/24h) are SCOPED OUT - the time-series widget has no
+  range-pill control and D5 forbids adding new functionality.)*
 - **AC-31** → the dashboard's alarms table follows the same grid anatomy as §A: `--aq-surface-2`
   header band with 11px uppercase labels, 1px row dividers, hover state, and severity as pill + dot.
 
@@ -350,6 +350,41 @@ All G1 open questions are resolved. These are constraints on the design and the 
   - *Label-size half* — the 9.5px / JetBrains Mono header override lives in the dashboard's stored
     `dashboardCss`, i.e. SERVER-SIDE config. **Folded into task 10** and therefore
     `BLOCKED — pending task 10`, like AC-24…AC-30, and excluded from the Tester's tally.
+- **D20 (task 10, 2026-09-05):** AC-29/AC-30 apply to widget
+  `cc1ca1df-0377-4605-b5d2-2ba4d6a4e117` ("Alignment - tilt magnitude, all containers") ONLY - the
+  widget the approved canvas depicts. "Stack alignment trend - 6 hours" is deliberately untouched.
+- **D21 (task 10, 2026-09-05): range pills are SCOPED OUT.** The time-series widget has no
+  range-pill control, and D5 forbids adding new functionality. **AC-24 and AC-30 are amended** to
+  require the **timewindow pill in the dashboard toolbar + legend chips only**; the 1h/6h/24h
+  range pills from the canvas are not implemented. The Tester's "range pills absent" observation is
+  therefore a scope decision, not a defect.
+- **D22 (task 10 round 3, 2026-09-05): AC-26 selector = marker-based.** There is no
+  `data-widget-id` in the dashboard DOM, and all four KPI tiles share the
+  `system.cards.value_card` type class, so neither can isolate the Misaligned tile. **Decision:**
+  keep `borderStyle`/`borderWidth` in that widget's `config.widgetStyle` as an INERT MARKER (drop
+  `borderColor`/`backgroundColor` from it) and target it from `dashboardCss` with
+  `.tb-widget[style*="border-style: solid"]`, rendering the full outline there with `!important`
+  after the legacy `.tb-widget` rule. **Rationale:** a gridster `nth-child`/position selector
+  breaks under mobile re-ordering (`mobileOrder` reflows the grid), whereas the marker travels with
+  the widget. This SUPERSEDES the "leave `widgetStyle` {}" instruction in the round-3 brief.
+  The stale `border-radius: 2px !important` is removed from the legacy `.tb-widget` rule and set to
+  16px.
+- **D23 (task 10 round 3, 2026-09-05): AC-24 timewindow pill.** The legacy
+  `.tb-timewindow, .tb-timewindow-label` rule in `dashboardCss` (10px JetBrains Mono, uppercase) is
+  AMENDED - those declarations are dropped and the pill spec applied: 36px high, 1px
+  `var(--aq-border)`, 999px radius, padding `0 12px 0 10px`, 13px/500 `var(--aq-text-2)`.
+- **D23a (task 10 round 3, 2026-09-05): AC-24 pill NARROWED.** The pill spec targets
+  **`mat-toolbar .tb-timewindow`** only, so **in-widget timewindow controls are deliberately left
+  unchanged**. A blanket `.tb-timewindow` rule would have restyled every widget's own timewindow,
+  which the canvas does not ask for.
+- **ROOT-CAUSE CORRECTION (2026-09-05, supersedes the earlier diagnosis).** AC-26's border was
+  blocked by the **compiled global rule `.tb-default .tb-widget { border: 0 !important }`** in the
+  app stylesheet - NOT by the legacy `dashboardCss` `.tb-widget` rule, which is what Jarvis
+  originally blamed. `config.widgetStyle` does become an inline style
+  (`dashboard-component.models.ts:644-646` -> `[style]="widget.style"`), but a global `!important`
+  beats a non-important inline style, so two rounds of `widgetStyle` borders silently vanished.
+  The fix works because `dashboardCss` is namespaced at `.tb-default .tb-dashboard-page-css-<guid>`
+  (0,3,0) AND carries `!important`, which outranks the global rule.
 - **D7 (carried forward, explicit):** Fix the `.tb-default`-only scoping of the
   `AIRLINQ GRID + DASHBOARD ANATOMY` block (`ui-ngx/src/styles.scss:1765-1891`) so the **dark**
   theme receives the anatomy too. Everything stays token-driven.
@@ -389,4 +424,4 @@ and reported to the human; needs its own work item. This round must not widen it
 | G2.5 Implementation review | **PASSED** — zero findings after 3 iterations; diff package APPROVED by human | 2026-09-05 |
 | G2.7 Test plan | **APPROVED (human)** — 60 cases, executing | 2026-09-05 |
 | G3 Quality (tester, zero findings) | **PASSED** — run-2: 53 PASS / 0 FAIL, zero findings | 2026-09-05 |
-| G4 Release (human) | **awaiting human final review** | — |
+| G4 Release (human) | **APPROVED, deployed, task 10 applied (dashboard v42)** | 2026-09-05 |

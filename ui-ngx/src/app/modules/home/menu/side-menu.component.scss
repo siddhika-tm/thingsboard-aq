@@ -33,7 +33,18 @@
       a.mat-mdc-button.mat-mdc-button-base {
         // 64px rail − 2×8px rail padding = 48px item; the icon is centred on
         // the rail axis (x = 40) so it lines up with the brand mark above.
+        // Three declarations are needed to actually land that geometry (AC-20):
+        //   width  - the expanded row is `width: auto` (inset from the panel edge);
+        //            left as-is the pill shrink-wraps the icon to 34px.
+        //   margin - the expanded row's 8px side margins would push the 48px pill
+        //            past the rail edge and off the x=40 axis.
+        //   gap    - the label span collapses to zero width but the 12px row gap
+        //            still applies beside it, shifting the icon 6px off axis.
         padding: 0;
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+        gap: 0;
         min-width: 0;
         justify-content: center;
         .mat-icon {
@@ -53,6 +64,27 @@
       margin: 8px 8px;
       border-top-color: var(--aq-divider);
     }
+    // AIRLINQ: in the rail the divider shrinks to a 32px hairline under Home.
+    &.tb-collapsed .mat-divider.mat-divider-horizontal {
+      width: 32px;
+      margin: 6px auto;
+      border-top-color: var(--aq-border-subtle);
+    }
+  }
+
+  // AIRLINQ: non-interactive section heading above each group of rows.
+  .tb-menu-section {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--aq-text-3);
+    padding: 14px 20px 6px;
+    user-select: none;
+  }
+  // The rail has no room for a text heading; the grouping reads from the dividers.
+  .tb-side-menu.tb-collapsed .tb-menu-section {
+    display: none;
   }
 
   .tb-side-menu ul {
@@ -63,9 +95,13 @@
 
   a.mat-mdc-button.mat-mdc-button-base {
     display: inline-flex;
-    width: 100%;
+    // AIRLINQ: the row is inset 8px from the rail edge, so it cannot be 100% wide.
+    width: auto;
+    position: relative;
     height: 40px;
-    margin: 2px 0;
+    margin: 2px 8px;
+    gap: 12px;
+    font-size: 14px;
     align-items: center;
     overflow: hidden;
     line-height: 40px;
@@ -88,10 +124,12 @@
       }
     }
     .mat-icon {
-      margin-right: 12px;
+      // AIRLINQ: spacing comes from the flex gap so the collapsed rail can drop it.
+      margin-right: 0;
       margin-left: 0;
-      min-width: 1.5rem;
-      min-height: 1.5rem;
+      min-width: 22px;
+      min-height: 22px;
+      font-size: 22px;
       color: var(--aq-text-3);
     }
     span.mdc-button__label {
@@ -106,10 +144,11 @@
         overflow: hidden;
         text-overflow: ellipsis;
       }
-      .tb-toggle-icon {
-        padding-top: 12px;
-        padding-bottom: 12px;
-      }
+      // AIRLINQ (AC-12): the stock rule padded the old 12px Font Awesome caret out to
+      // fill the 40px row. The chevron is now a 16px flex box centred by the tile's own
+      // `align-items: center`, and that padding (with `box-sizing: border-box`) inflated
+      // the declared 16px box to 24px. It is higher-specificity than the component rule
+      // that declares the size, so it has to go here rather than be overridden there.
     }
   }
 }

@@ -38,7 +38,7 @@
         box-shadow: var(--aq-shadow-1);
         overflow: hidden;
         transition: width $sidenav-anim-timing;
-        .tb-logo-title {
+        .tb-brand {
           opacity: 1;
           transition: opacity $sidenav-anim-timing;
         }
@@ -59,7 +59,7 @@
       &.tb-collapsed {
         mat-sidenav.tb-site-sidenav {
           width: var(--aq-rail-w);
-          .tb-logo-title {
+          .tb-brand {
             display: none;
           }
           .tb-nav-header-toolbar {
@@ -67,6 +67,9 @@
             justify-content: center;
             padding: 8px 0 4px;
             min-height: 0;
+            // AIRLINQ: the collapsed head stacks the mark over the chevron, so it must
+            // not inherit the expanded head's fixed 64px band.
+            height: auto;
             .tb-sidenav-toggle {
               position: static;
               margin: 0 auto;
@@ -131,26 +134,65 @@
       white-space: nowrap;
       .tb-nav-header-toolbar {
         position: relative;
-        min-height: 56px;
-        height: inherit;
-        padding: 8px 12px 8px 16px;
+        // AIRLINQ (AC-13): 64px head band with the canvas padding.
+        min-height: 64px;
+        height: 64px;
+        padding: 0 12px 0 16px;
         z-index: 2;
         flex-shrink: 0;
         white-space: nowrap;
         background: transparent;
         border-right: 0;
-        .tb-logo-title {
-          width: auto;
-          max-width: 100%;
-          height: 30px;
-          max-height: 100%;
-          margin: auto 0;
+        // AIRLINQ (AC-13): 24px mark + wordmark, replacing the 144px logo raster.
+        .tb-brand {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          min-width: 0;
+          .tb-brand-mark {
+            flex: none;
+            width: 24px;
+            height: 24px;
+          }
+          .tb-brand-wordmark {
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 16px;
+            letter-spacing: .12em;
+            color: var(--aq-text);
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
         }
+        // AIRLINQ (AC-14): the pin control. A 32px hit target with an 8px radius,
+        // pushed to the trailing edge by the head's flex flow rather than absolute
+        // positioning, so it stays aligned when the wordmark ellipsises.
         .tb-sidenav-toggle {
-          margin: 0;
-          position: absolute;
-          right: 9px;
-          top: 12px;
+          position: static;
+          flex: none;
+          margin: 0 0 0 auto;
+          width: 32px;
+          height: 32px;
+          padding: 0;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--aq-text-3);
+          .mat-icon, tb-icon {
+            width: 16px;
+            height: 16px;
+            min-width: 16px;
+            min-height: 16px;
+            font-size: 16px;
+            line-height: 16px;
+            color: var(--aq-text-3);
+          }
+          &:hover {
+            background: var(--aq-hover);
+            color: var(--aq-text);
+            .mat-icon, tb-icon { color: var(--aq-text); }
+          }
           .tb-collapsed-logo-container {
             position: relative;
             width: 20px;
@@ -190,8 +232,11 @@
       background: transparent;
       border-right: 0;
       --mat-toolbar-container-text-color: var(--aq-text-2);
+      // AIRLINQ (AC-15): the hairline belongs to the user BUTTON (user-menu.component
+      // .scss), which also owns the 12/12/12/16 padding it must sit above. Keeping a
+      // second border here stacked two rules and pushed the block past its 56px.
       tb-user-menu {
-        border-top: 1px solid var(--aq-divider);
+        flex: none;
       }
     }
   }

@@ -15,28 +15,52 @@
     limitations under the License.
 
 -->
-<a mat-button class="tb-button-toggle"
+<a #toggleTile mat-button class="tb-button-toggle"
+   tabindex="0"
+   (keydown)="onTileKeydown($event, menuPopover)"
    [class.tb-toggled]="section.opened && !collapsed"
    [class.tb-hovered]="collapsed && menuPopover?.component?.tbVisible"
    [class.tb-active]="toggleSectionActive()"
-   (click)="toggleSection($event)"
+   [attr.aria-current]="toggleSectionActive() ? 'page' : null"
+   (click)="collapsed ? onTileClick($event, menuPopover) : toggleSection($event)"
    tb-popover
    #menuPopover="tbPopover"
    [tbPopoverTrigger]="collapsed ? 'hover' : null"
-   [tbPopoverMouseLeaveDelay]="0.05"
+   [tbPopoverMouseEnterDelay]="0.1"
+   [tbPopoverMouseLeaveDelay]="0.3"
    [tbPopoverMenu]="true"
-   [tbPopoverOverlayStyle]="{marginTop: '-8px'}"
+   [tbPopoverOverlayStyle]="{marginTop: '-8px', paddingLeft: '26px'}"
    [tbPopoverContent]="menuToggleMenuTpl"
    [tbPopoverPlacement]="'rightTop'"
+   role="button"
+   [attr.aria-haspopup]="collapsed ? 'menu' : null"
+   [attr.aria-expanded]="collapsed ? (menuPopover?.component?.tbVisible ? 'true' : 'false') : null"
+   [attr.aria-label]="collapsed ? (section.customTranslate ? (section.name | customTranslate) : (section.name | translate)) : null"
    [class.is-new]="section.isNew">
   @if (section.icon !== null) {
     <tb-icon matButtonIcon>{{section.icon}}</tb-icon>
   }
   <span>{{section.customTranslate ? (section.name | customTranslate) : (section.name | translate)}}</span>
-  <span class="pull-right fa fa-chevron-down tb-toggle-icon"
-  [class.tb-toggled]="section.opened"></span>
+  <!-- AIRLINQ (AC-12): 16x16 chevron, pointing RIGHT when the section is closed and
+       rotating down when it opens. The canvas draws a right chevron (m9 6 6 6-6 6),
+       not a down-caret, so the closed state must not be pre-rotated. Inline SVG keeps
+       the glyph identical in both themes and avoids the Font Awesome glyph metrics. -->
+  <span class="tb-toggle-icon" [class.tb-toggled]="section.opened"
+        aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+         stroke="currentColor" stroke-width="1.75"
+         stroke-linecap="round" stroke-linejoin="round">
+      <path d="m9 6 6 6-6 6"/>
+    </svg>
+  </span>
 </a>
-<ul id="docs-menu-{{section.name | nospace}}" class="tb-menu-toggle-list" [style.height]="sectionHeight()">
+<!-- AIRLINQ (AC-29c): the closed list is height:0 + overflow:hidden, which hides it
+     visually but leaves its links in the tab order - Tab then walked through invisible
+     rows instead of reaching the rail flyout. `visibility: hidden` drops them from the
+     sequential focus order without disturbing the height transition. -->
+<ul id="docs-menu-{{section.name | nospace}}" class="tb-menu-toggle-list"
+    [style.height]="sectionHeight()"
+    [style.visibility]="section.opened && !collapsed ? null : 'hidden'">
   @for (page of section.pages; track page.id) {
     <li>
       <tb-menu-link [section]="page"></tb-menu-link>
@@ -45,7 +69,9 @@
 </ul>
 
 <ng-template #menuToggleMenuTpl>
-  <div class="tb-menu-content tb-toggle-menu-items">
+  <div class="tb-menu-content tb-toggle-menu-items" role="menu"
+       tabindex="-1"
+       (keydown)="onTileKeydown($event, menuPopover)">
     <div class="tb-menu-toggle-header">
       <span>{{section.customTranslate ? (section.name | customTranslate) : (section.name | translate)}}</span>
     </div>

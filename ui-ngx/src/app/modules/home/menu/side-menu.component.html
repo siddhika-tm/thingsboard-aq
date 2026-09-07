@@ -20,13 +20,20 @@
     <li>
       @switch (section.type) {
         @case ('link') {
-          <tb-menu-link [section]="section" [collapsed]="collapsed"></tb-menu-link>
+          <tb-menu-link [section]="section" [collapsed]="collapsed"
+                        [badgeCount]="section.badge === 'alarmCount' ? (alarmCount$ | async) : null"></tb-menu-link>
         }
         @case ('toggle') {
           <tb-menu-toggle [section]="section" [collapsed]="collapsed"></tb-menu-toggle>
         }
         @case ('divider') {
           <mat-divider></mat-divider>
+        }
+        <!-- AIRLINQ: non-interactive section heading (Option A sectioned menu). -->
+        @case ('section') {
+          <div class="tb-menu-section" role="presentation">
+            {{ section.customTranslate ? (section.name | customTranslate) : (section.name | translate) }}
+          </div>
         }
       }
     </li>

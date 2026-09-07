@@ -22,17 +22,40 @@
       border-bottom: 1px solid rgba(0, 0, 0, 0.05);
       --mat-button-text-label-text-weight: 500;
     }
+    // AIRLINQ (AC-12): 16x16 chevron. Closed points right; open rotates a quarter
+    // turn to point down. (The stock rule was a 12px Font Awesome down-caret flipped
+    // 180deg, which pointed UP when open.)
     .tb-toggle-icon {
-      display: inline-block;
-      width: 12px;
-      min-width: 12px;
-      font-size: 12px;
-      margin: auto 0 auto auto;
-      background-size: 100% auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: none;
+      width: 16px;
+      min-width: 16px;
+      height: 16px;
+      // the tile is a flex row with `align-items: stretch` from the Material button,
+      // so the box needs an explicit cross-axis alignment or it grows to the row.
+      align-self: center;
+      margin: 0 0 0 auto;
+      // the tile's button label rules push 12px of vertical padding and a 40px
+      // line-height onto this span; with `box-sizing: border-box` that inflated the
+      // declared 16px box to 24px. Zero both so the measured box is the icon.
+      padding: 0;
+      line-height: 16px;
+      box-sizing: border-box;
+      color: var(--aq-text-3);
       transition: transform .3s ease-in-out;
-      &.tb-toggled {
-        transform: rotateZ(180deg);
+      svg {
+        display: block;
+        width: 16px;
+        height: 16px;
       }
+      &.tb-toggled {
+        transform: rotateZ(90deg);
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .tb-toggle-icon { transition: none; }
     }
     &.is-new::after {
       position: absolute;
@@ -69,32 +92,63 @@
   }
 }
 
+// AIRLINQ: rail flyout panel. Rendered in a CDK overlay outside this host, so it
+// must stay a global rule. Colours are `--aq-*` tokens; only the elevation shadow
+// is a literal (D4 - it is deliberately not theme-swapped).
 .tb-toggle-menu-items {
-  min-width: 250px;
+  min-width: 220px;
+  width: 220px;
+  padding: 6px;
+  border-radius: 12px;
+  background: var(--aq-surface-2);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .25);
   display: flex;
   flex-direction: column;
   .tb-menu-toggle-header {
     display: flex;
     align-items: center;
     cursor: default;
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 20px;
-    height: 40px;
-    padding: 8px 16px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-  }
-  a.mat-mdc-button {
+    height: auto;
+    padding: 8px 12px 4px;
     border-bottom: none;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .08em;
+    line-height: 16px;
+    text-transform: uppercase;
+    color: var(--aq-text-3);
+  }
+  // The overlay panel carries BOTH `tb-menu-content` and `tb-toggle-menu-items`
+  // (menu-toggle.component.html:72), so popover.component.scss's fully-nested
+  // `.tb-popover.tb-menu .tb-menu-content .mat-mdc-button:not(.mat-mdc-icon-button)`
+  // - specificity 0,5,0, since `:not()` contributes its argument's weight - outranks a
+  // plain `.tb-toggle-menu-items a.mat-mdc-button` (0,2,1) and wins the padding.
+  // Match that depth on our own panel classes (0,5,1) rather than escalate to
+  // !important; the shared popover rule is deliberately left untouched.
+  &.tb-menu-content a.mat-mdc-button.mat-mdc-button-base:not(.mat-mdc-icon-button),
+  a.mat-mdc-button {
+    height: 36px;
+    margin: 0;
+    padding: 0 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    border-bottom: none;
+    --mat-button-text-label-text-color: var(--aq-text-2);
+    .mat-icon, tb-icon {
+      display: none;
+    }
     &:hover {
-      background-color: rgba(0, 0, 0, .07);
+      background-color: var(--aq-hover);
+      --mat-button-text-label-text-color: var(--aq-text);
       border-bottom: none;
     }
     &:focus {
       border-bottom: none;
     }
     &.tb-active {
-      background-color: rgba(0, 0, 0, .05);
+      background-color: var(--aq-hover);
+      --mat-button-text-label-text-color: var(--aq-text);
     }
   }
 }

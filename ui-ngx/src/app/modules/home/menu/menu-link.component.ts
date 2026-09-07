@@ -33,6 +33,9 @@ export class MenuLinkComponent {
   @coerceBoolean()
   collapsed = false;
 
+  /** AIRLINQ: live count rendered as a badge (expanded) or a dot (collapsed). */
+  @Input() badgeCount: number | null = null;
+
   constructor() {
   }
 

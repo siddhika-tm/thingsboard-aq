@@ -18,7 +18,7 @@ import { AuthState } from '@core/auth/auth.models';
 import { Authority } from '@shared/models/authority.enum';
 import { deepClone } from '@core/utils';
 
-export declare type MenuSectionType = 'link' | 'toggle' | 'divider';
+export declare type MenuSectionType = 'link' | 'toggle' | 'divider' | 'section';
 
 export interface MenuSection {
   id: MenuId | string;
@@ -33,6 +33,8 @@ export interface MenuSection {
   isNew?: boolean;
   customTranslate?: boolean;
   active?: boolean;
+  /** Marks the row that carries a live count badge. Data-driven so no template compares ids. */
+  badge?: 'alarmCount';
 }
 
 export interface MenuReference {
@@ -114,6 +116,10 @@ export enum MenuId {
   trendz_settings = 'trendz_settings',
   ai_models = 'ai_models',
   iot_hub = 'iot_hub',
+  monitor_label = 'monitor_label',
+  devices_assets_label = 'devices_assets_label',
+  operations_label = 'operations_label',
+  administration_label = 'administration_label',
   divider = 'divider'
 }
 
@@ -559,7 +565,8 @@ export const menuSectionMap = new Map<MenuId, MenuSection>([
       name: 'alarm.alarm-list',
       type: 'link',
       path: '/alarms/alarms',
-      icon: 'mdi:alert-outline'
+      icon: 'mdi:alert-outline',
+      badge: 'alarmCount'
     }
   ],
   [
@@ -826,6 +833,48 @@ export const menuSectionMap = new Map<MenuId, MenuSection>([
       path: 'divider',
       icon: ''
     }
+  ],
+  // AIRLINQ: section headings. Non-interactive labels that group the flattened
+  // menu rows; they carry no path and are skipped by the Home-page builder.
+  [
+    MenuId.monitor_label,
+    {
+      id: MenuId.monitor_label,
+      name: 'monitor.monitor',
+      type: 'section',
+      path: '',
+      icon: null
+    }
+  ],
+  [
+    MenuId.devices_assets_label,
+    {
+      id: MenuId.devices_assets_label,
+      name: 'entity.devices-and-assets',
+      type: 'section',
+      path: '',
+      icon: null
+    }
+  ],
+  [
+    MenuId.operations_label,
+    {
+      id: MenuId.operations_label,
+      name: 'admin.operations',
+      type: 'section',
+      path: '',
+      icon: null
+    }
+  ],
+  [
+    MenuId.administration_label,
+    {
+      id: MenuId.administration_label,
+      name: 'admin.administration',
+      type: 'section',
+      path: '',
+      icon: null
+    }
   ]
 ]);
 
@@ -860,6 +909,206 @@ const menuFilters = new Map<MenuId, MenuFilter>([
 ]);
 
 const defaultUserMenuMap = new Map<Authority, MenuReference[]>([
+  [
+    Authority.SYS_ADMIN,
+    [
+      {id: MenuId.home},
+      {
+        id: MenuId.tenants_section,
+        pages: [
+          {id: MenuId.tenants},
+          {id: MenuId.tenant_profiles},
+        ]
+      },
+      {
+        id: MenuId.notifications_center,
+        pages: [
+          {id: MenuId.notification_inbox},
+          {id: MenuId.notification_sent},
+          {id: MenuId.notification_recipients},
+          {id: MenuId.notification_templates},
+          {id: MenuId.notification_rules}
+        ]
+      },
+      {
+        id: MenuId.resources,
+        pages: [
+          {
+            id: MenuId.widget_library,
+            pages: [
+              {id: MenuId.widget_types},
+              {id: MenuId.widgets_bundles}
+            ]
+          },
+          {id: MenuId.images},
+          {id: MenuId.scada_symbols},
+          {id: MenuId.javascript_library},
+          {id: MenuId.resources_library}
+        ]
+      },
+      {
+        id: MenuId.security_settings,
+        pages: [
+          {id: MenuId.security_settings_general},
+          {id: MenuId.two_fa},
+          {
+            id: MenuId.oauth2,
+            pages: [
+              {id: MenuId.domains},
+              {id: MenuId.clients}
+            ]
+          },
+          {id: MenuId.audit_log}
+        ]
+      },
+      {
+        id: MenuId.platform,
+        pages: [
+          {id: MenuId.general},
+          {id: MenuId.mail_server},
+          {id: MenuId.notification_settings},
+          {id: MenuId.queues}
+        ]
+      },
+      {
+        id: MenuId.mobile_center,
+        pages: [
+          {id: MenuId.mobile_bundles},
+          {id: MenuId.mobile_apps},
+          {id: MenuId.mobile_qr_code_widget}
+        ]
+      }
+    ]
+  ],
+  [
+    Authority.TENANT_ADMIN,
+    [
+      {id: MenuId.home},
+      {id: MenuId.iot_hub},
+      {id: MenuId.divider},
+      {id: MenuId.monitor_label},
+      {id: MenuId.dashboards},
+      {id: MenuId.alarms},
+      {id: MenuId.alarm_rules},
+      {
+        id: MenuId.notifications_center,
+        pages: [
+          {id: MenuId.notification_inbox},
+          {id: MenuId.notification_sent},
+          {id: MenuId.notification_recipients},
+          {id: MenuId.notification_templates},
+          {id: MenuId.notification_rules}
+        ]
+      },
+      {id: MenuId.devices_assets_label},
+      {id: MenuId.devices},
+      {id: MenuId.gateways},
+      {id: MenuId.assets},
+      {id: MenuId.entity_views},
+      {id: MenuId.otaUpdates},
+      {
+        id: MenuId.profiles,
+        pages: [
+          {id: MenuId.device_profiles},
+          {id: MenuId.asset_profiles}
+        ]
+      },
+      {id: MenuId.operations_label},
+      {id: MenuId.customers_and_users},
+      {
+        id: MenuId.data_processing,
+        pages: [
+          {id: MenuId.calculated_fields},
+          {id: MenuId.rule_chains}
+        ]
+      },
+      {
+        id: MenuId.resources,
+        pages: [
+          {
+            id: MenuId.widget_library,
+            pages: [
+              {id: MenuId.widget_types},
+              {id: MenuId.widgets_bundles}
+            ]
+          },
+          {id: MenuId.images},
+          {id: MenuId.scada_symbols},
+          {id: MenuId.javascript_library},
+          {id: MenuId.resources_library}
+        ]
+      },
+      {
+        id: MenuId.edge_management,
+        pages: [
+          {id: MenuId.edges},
+          {id: MenuId.rulechain_templates}
+        ]
+      },
+      {id: MenuId.administration_label},
+      {
+        id: MenuId.security_settings,
+        pages: [
+          {
+            id: MenuId.oauth2,
+            pages: [
+              {id: MenuId.clients}
+            ]
+          },
+          {id: MenuId.audit_log}
+        ]
+      },
+      {
+        id: MenuId.platform_section,
+        pages: [
+          {id: MenuId.version_control},
+          {
+            id: MenuId.settings,
+            pages: [
+              {id: MenuId.home_settings},
+              {id: MenuId.notification_settings},
+              {id: MenuId.repository_settings},
+              {id: MenuId.auto_commit_settings},
+              {id: MenuId.trendz_settings},
+              {id: MenuId.ai_models}
+            ]
+          },
+          {id: MenuId.api_usage}
+        ]
+      },
+      {
+        id: MenuId.mobile_center,
+        pages: [
+          {id: MenuId.mobile_bundles},
+          {id: MenuId.mobile_apps}
+        ]
+      }
+    ]
+  ],
+  [
+    Authority.CUSTOMER_USER,
+    [
+      {id: MenuId.home},
+      {id: MenuId.monitor_label},
+      {id: MenuId.dashboards},
+      {id: MenuId.alarms},
+      {id: MenuId.notification_inbox},
+      {id: MenuId.devices_assets_label},
+      {id: MenuId.devices},
+      {id: MenuId.assets},
+      {id: MenuId.entity_views},
+      {id: MenuId.edge_instances}
+    ]
+  ]
+]);
+
+// AIRLINQ: the Home page is explicitly out of scope for the side-menu reshape (D9).
+// `defaultUserMenuMap` above was flattened into `section` headings + rows for the rail,
+// which destroys the grouping the Home cards are built from. This map preserves the
+// PRE-RESHAPE reference tree verbatim, and is the ONLY input to `buildUserHome`, so the
+// Home page keeps rendering the exact same cards, titles and ordered places as before.
+// Keep it in sync with upstream ThingsBoard's `defaultUserMenuMap`, not with the rail.
+const homeMenuMap = new Map<Authority, MenuReference[]>([
   [
     Authority.SYS_ADMIN,
     [
@@ -1082,9 +1331,13 @@ export const buildUserMenu = (authState: AuthState): Array<MenuSection> => {
   return (references || []).map(ref => referenceToMenuSection(authState, ref)).filter(section => !!section);
 };
 
-export const buildUserHome = (currentMenuSections: MenuSection[]): Array<HomeSection> => {
-  return (currentMenuSections || []).map(section =>
-    menuSectionToHomeSection(section)).filter(section => !!section);
+export const buildUserHome = (authState: AuthState): Array<HomeSection> => {
+  // AIRLINQ: built from `homeMenuMap` (the pre-reshape reference tree), never from the
+  // flattened side-menu sections, so the Home cards are unaffected by the rail reshape.
+  const references = homeMenuMap.get(authState.authUser.authority);
+  return (references || []).map(ref => referenceToMenuSection(authState, ref))
+    .filter(section => !!section)
+    .map(section => menuSectionToHomeSection(section)).filter(section => !!section);
 };
 
 const referenceToMenuSection = (authState: AuthState, reference: MenuReference): MenuSection | undefined => {

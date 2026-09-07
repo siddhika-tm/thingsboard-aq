@@ -2090,3 +2090,46 @@ pre.tb-highlight {
   /* entity name column: keep identifiers on one line */
   .mat-mdc-cell.mat-column-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 }
+
+/* =====================================================================
+ * AIRLINQ LEFT-RAIL INTERACTION (both themes)
+ * Hover lift (AC-24) and keyboard focus ring (AC-29c) for the side-menu
+ * tiles. These were originally authored inside the `.tb-dark` block above,
+ * which made them dead in the DEFAULT (light) theme — in particular leaving
+ * keyboard users with no visible focus indicator on the rail. AC-31 requires
+ * every criterion to hold in BOTH themes, so they live here instead.
+ *
+ * Both rules reference only `--aq-shadow-1` and `--aq-accent`, which are
+ * defined in BOTH theme blocks, so a single shared selector is theme-safe;
+ * duplicating them into a separate `.tb-default` block would only reintroduce
+ * the specificity conflicts this file already documents.
+ * ===================================================================== */
+.tb-default, .tb-dark {
+
+  /* AC-24: rail-tile hover lift. The tile rises and casts a shadow, so the
+     hover state is measurable as more than a colour change. `:not(.tb-active)`
+     keeps the selected pill flat while a neighbouring tile is hovered. */
+  .tb-site-sidenav a.mat-mdc-button {
+    transition: background-color 150ms ease, color 150ms ease,
+                transform 150ms ease, box-shadow 150ms ease;
+  }
+  .tb-site-sidenav .tb-side-menu.tb-collapsed a.mat-mdc-button:hover:not(.tb-active) {
+    transform: translateY(-1px);
+    box-shadow: var(--aq-shadow-1);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tb-site-sidenav a.mat-mdc-button { transition: none; }
+    .tb-site-sidenav .tb-side-menu.tb-collapsed a.mat-mdc-button:hover:not(.tb-active) {
+      transform: none;
+    }
+  }
+
+  /* AC-29c: a visible keyboard ring on the rail tiles. Material's anchor
+     buttons carry no default outline, so focus was invisible; :focus-visible
+     keeps it off the mouse path. */
+  .tb-site-sidenav a.mat-mdc-button:focus-visible,
+  .tb-site-sidenav a.tb-button-toggle:focus-visible {
+    outline: 2px solid var(--aq-accent);
+    outline-offset: 2px;
+  }
+}

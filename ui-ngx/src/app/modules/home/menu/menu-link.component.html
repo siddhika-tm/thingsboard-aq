@@ -15,7 +15,8 @@
     limitations under the License.
 
 -->
-<a mat-button routerLinkActive="tb-active" [routerLinkActiveOptions]="{paths: 'subset', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'ignored'}" routerLink="{{section.path}}"
+<a mat-button routerLinkActive="tb-active" #rla="routerLinkActive"
+   [attr.aria-current]="rla.isActive ? 'page' : null" [routerLinkActiveOptions]="{paths: 'subset', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'ignored'}" routerLink="{{section.path}}"
    [matTooltip]="collapsed ? (section.customTranslate ? (section.name | customTranslate) : (section.name | translate)) : null"
    matTooltipPosition="right"
    [class.is-new]="section.isNew">
@@ -23,4 +24,13 @@
     <tb-icon matButtonIcon>{{section.icon}}</tb-icon>
   }
   <span>{{section.customTranslate ? (section.name | customTranslate) : (section.name | translate)}}</span>
+  <!-- AIRLINQ: live count. Hidden at zero; the collapsed dot carries a text alternative. -->
+  @if ((badgeCount ?? 0) > 0) {
+    @if (collapsed) {
+      <span class="tb-menu-dot" aria-hidden="true"></span>
+      <span class="cdk-visually-hidden">{{ badgeCount }}</span>
+    } @else {
+      <span class="tb-menu-badge">{{ badgeCount }}</span>
+    }
+  }
 </a>

@@ -56,3 +56,6 @@ ui-ngx/src/assets/.orig-tb-logos/
 
 # server credentials for the demo box (never commit)
 env
+
+# seeded design-canvas pages (2.5 MB generated payload; the .dc.html artboards are the spec)
+docs/design/**/airlinq-*.html

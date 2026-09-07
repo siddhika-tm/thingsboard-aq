@@ -111,7 +111,11 @@ export class RouterTabsComponent extends PageComponent implements OnInit {
     if (found) {
       const rootPath = sectionPath.substring(0, sectionPath.length - found.path.length);
       const isRoot = rootPath === '';
-      const tabs: Array<MenuSection> = found ? found.pages.filter(page => !page.rootOnly || isRoot) : [];
+      // A section flattened to a top-level `type: 'link'` has no `pages` (the menu model
+      // marks the field optional and `findRootSection` already treats it so). Such a
+      // section owns no sub-pages, so it renders no tab strip - the template's
+      // `.length > 1` guard already expects that. Dereferencing it unguarded threw.
+      const tabs: Array<MenuSection> = found.pages?.filter(page => !page.rootOnly || isRoot) ?? [];
       return tabs.map((tab) => ({...tab, path: rootPath + tab.path}));
     }
     return [];

@@ -14,12 +14,13 @@
 /// limitations under the License.
 ///
 
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { MenuSection } from '@core/services/menu.models';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 import { ActionPreferencesUpdateOpenedMenuSection } from '@core/auth/auth.actions';
 import { coerceBoolean } from '@shared/decorators/coercion';
+import { TbPopoverDirective } from '@shared/components/popover.component';
 
 @Component({
     selector: 'tb-menu-toggle',
@@ -35,6 +36,18 @@ export class MenuToggleComponent {
   @Input()
   @coerceBoolean()
   collapsed = false;
+
+  /**
+   * AIRLINQ: the rail tile, so Escape in the flyout can return focus to it (AC-29c)
+   * and so Enter/Space can tell the tile apart from the flyout rows (AC-29c).
+   *
+   * `read: ElementRef` is REQUIRED. The template ref sits on an `<a mat-button>`, and
+   * `MatButton` is an exportable directive on that element, so a bare `@ViewChild`
+   * resolves to the MatButton INSTANCE - whose `.nativeElement` is `undefined`. Every
+   * comparison against it then silently failed, which is why Enter/Space did nothing.
+   */
+  @ViewChild('toggleTile', { static: false, read: ElementRef })
+  toggleTile: ElementRef<HTMLElement>;
 
   constructor(private store: Store<AppState>) {
   }
@@ -57,6 +70,68 @@ export class MenuToggleComponent {
         path: this.section.path,
         opened: this.section.opened
       }));
+    }
+  }
+
+  /**
+   * AIRLINQ: with trigger 'hover' the popover registers mouseenter/mouseleave and
+   * never click, so the collapsed rail's click-to-open path is driven manually.
+   * show()/hide() are idempotent and delayEnterLeave clears its own timer, so a
+   * click while the hover popover is open closes it rather than re-opening it.
+   */
+  onTileClick(event: MouseEvent, popover: TbPopoverDirective) {
+    if (!this.collapsed) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    if (popover?.component?.tbVisible) {
+      popover.hide();
+    } else {
+      popover?.show();
+    }
+  }
+
+  /**
+   * AIRLINQ (AC-29c): the single keydown handler for the collapsed rail tile and its
+   * flyout. Escape (from either) closes the flyout and returns focus to the tile.
+   * Enter/Space open or close it from the tile only - the tile is an anchor with no
+   * href, so it fires no synthetic click on Enter and none at all on Space. Expanded,
+   * the section toggle keeps the native path and this handler does nothing.
+   * Not a focus trap - Tab still leaves the flyout.
+   */
+  onTileKeydown(event: KeyboardEvent, popover: TbPopoverDirective) {
+    if (!this.collapsed) {
+      return;
+    }
+    const isOpen = !!popover?.component?.tbVisible;
+    if (event.key === 'Escape' || event.key === 'Esc') {
+      if (!isOpen) {
+        return;
+      }
+      event.stopPropagation();
+      popover.hide();
+      this.toggleTile?.nativeElement?.focus();
+      return;
+    }
+    if (event.key !== 'Enter' && event.key !== ' ' && event.key !== 'Spacebar') {
+      return;
+    }
+    // Enter/Space only act on the tile itself; inside the flyout they must reach the
+    // links. Compare against the event TARGET's owning tile rather than only
+    // `currentTarget`, so a keypress landing on a child of the anchor (the icon or the
+    // label span) still counts as the tile.
+    const tile = this.toggleTile?.nativeElement;
+    const target = event.target as HTMLElement;
+    if (!tile || !(target === tile || tile.contains(target))) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    if (isOpen) {
+      popover.hide();
+    } else {
+      popover?.show();
     }
   }
 

@@ -16,6 +16,7 @@
 
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { MenuService } from '@core/services/menu.service';
+import { AlarmBadgeService } from '@core/services/alarm-badge.service';
 import { coerceBoolean } from '@shared/decorators/coercion';
 
 @Component({
@@ -33,7 +34,11 @@ export class SideMenuComponent {
 
   menuSections$ = this.menuService.menuSections();
 
-  constructor(private menuService: MenuService) {
+  // AIRLINQ: shared 60s poll; every badged row is a subscriber to this one stream.
+  alarmCount$ = this.alarmBadgeService.activeAlarmCount$;
+
+  constructor(private menuService: MenuService,
+              private alarmBadgeService: AlarmBadgeService) {
   }
 
 }

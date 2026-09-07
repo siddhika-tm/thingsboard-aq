@@ -99,6 +99,8 @@
         "none": "None"
     },
     "admin": {
+        "administration": "Administration",
+        "operations": "Operations",
         "settings": "Settings",
         "platform": "Platform",
         "general": "General",

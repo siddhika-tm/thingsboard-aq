@@ -74,6 +74,20 @@ export class UserMenuComponent implements OnInit, OnDestroy {
     map((user) => user?.email)
   );
 
+  /**
+   * AIRLINQ: initials for the foot avatar (AC-16). Derived from the display name so
+   * it follows first/last name and falls back to the email local part, matching
+   * whatever `getUserDisplayName` produced. Rendered via interpolation only.
+   */
+  userInitials$ = this.userDisplayName$.pipe(
+    map((name) => (name || '')
+      .split(/[\s@._-]+/)
+      .filter((part) => !!part)
+      .slice(0, 2)
+      .map((part) => part.charAt(0).toUpperCase())
+      .join(''))
+  );
+
   constructor(private store: Store<AppState>,
               private router: Router,
               private authService: AuthService,

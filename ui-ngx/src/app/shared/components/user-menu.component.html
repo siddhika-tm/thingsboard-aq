@@ -23,7 +23,8 @@
         [tbPopoverContent]="userMenuTpl"
         [tbPopoverOverlayClassName]="collapsed ? 'tb-user-menu-collapsed' : ''"
         [tbPopoverPlacement]="collapsed ? 'right' : 'topLeft'">
-  <tb-icon class="material-icons tb-mini-avatar">mdi:account-circle-outline</tb-icon>
+  <!-- AIRLINQ: initials avatar (AC-16/AC-23). Interpolated, so it is escaped - ADR 0002. -->
+  <div class="tb-user-avatar" aria-hidden="true">{{ userInitials$ | async }}</div>
   <div class="tb-user-info">
     @if (userDisplayName$ | async; as userDisplayName) {
       <span class="tb-user-display-name">{{ userDisplayName }}</span>
@@ -32,6 +33,9 @@
       <span class="tb-user-authority">{{ authorityName | translate }}</span>
     }
   </div>
+  <!-- AIRLINQ: overflow affordance (AC-18). Decorative: the whole block is already the
+       popover trigger, so a nested button would add a second tab stop for one action. -->
+  <tb-icon class="material-icons tb-user-overflow" aria-hidden="true">more_vert</tb-icon>
 </button>
 <button #menuPopoverIcon="tbPopover" mat-icon-button class="tb-user-menu-icon"
         (click)="$event.stopPropagation();"

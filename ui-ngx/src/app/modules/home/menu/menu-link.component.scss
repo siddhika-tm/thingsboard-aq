@@ -33,4 +33,29 @@
     opacity: 1;
     transition: opacity $sidenav-anim-timing;
   }
+
+  // AIRLINQ: live alarm count. Expanded rows show a pill; the rail shows a dot
+  // (with a visually-hidden number, so meaning is never colour-only).
+  .tb-menu-badge {
+    margin-left: auto;
+    flex: none;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    line-height: 14px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--aq-accent-container);
+    color: var(--aq-on-accent-container);
+  }
+
+  .tb-menu-dot {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--aq-error);
+  }
 }

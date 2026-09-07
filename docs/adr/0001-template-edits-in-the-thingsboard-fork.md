@@ -131,3 +131,70 @@ and the severity cell must not pass through `bypassSecurityTrustHtml`.**
   D19). This ADR covers only the severity-chip half.
 - The reachability lesson repeats a third time in this work item: **check which layer actually owns
   a property before promising a criterion is reachable in another.**
+
+---
+
+## Addendum — 2026-09-06: the rail head in `home.component`
+
+**Status:** accepted · **Work item:** left-menu-and-favicon · **Decision:** requirement §9 D14
+
+### Context
+
+The left-menu work item scoped fork-local template edits to the three menu components
+(`menu-link`, `menu-toggle`, `side-menu`) plus `user-menu`. Verification against the canvas
+found the **rail head** could not be reached from that set: the head is not rendered by any
+menu component. It is rendered by `home.component.html` (`:27-29`), which draws the
+144px `<tb-logo>` raster image in the expanded state.
+
+The canvas specifies a **64px head band**, padding `0 12px 0 16px`, a **24x24 brand mark**
+beside an **"AIRLINQ" wordmark at 13px / 700 / letter-spacing .12em**, and a **32px pin
+control** with an 8px radius and a 16px glyph in `--aq-text-3`. None of that is expressible
+without editing the element that owns it — the same "spec-vs-constraint reachability"
+failure already recorded twice in this repo's team memory.
+
+### Decision
+
+ADR 0001's scope is **widened** to permit a minimal, additive edit to
+`home.component.{html,scss}`, **confined to the rail head** — the `<header class="tb-nav-header">`
+block and its toolbar. Specifically:
+
+- the `<tb-logo>` element in the **expanded** head is replaced by a `.tb-brand` block
+  (24px `<img>` mark reusing the existing `collapsedLogo` asset + a `.tb-brand-wordmark`
+  span), so both rail states show the same mark;
+- the head band becomes 64px with the canvas padding, and the pin button is laid out by the
+  head's flex flow (`margin-left: auto`) instead of absolute positioning;
+- the pin glyph is sized by swapping the template's `tb-mat-20` utility class for
+  `tb-mat-16` — the sanctioned sizing mechanism — rather than a CSS override that would
+  have to out-specify the `tb-mat-*` mixin in `styles.scss`.
+
+**Nothing else in `home.component` is in scope.** The collapsed head keeps the mark +
+chevron already shipped.
+
+The wordmark is a **translation-safe literal** ("AIRLINQ"), not an i18n key: a product name
+is not translated, and routing it through a locale file would let a translation change the
+brand. The mark carries `alt=""` + `aria-hidden`, with the accessible name on the
+`.tb-brand` container, so the pair is announced once.
+
+ADR 0002 applies unchanged: no entity-derived value in the new markup, no `style=""`
+attributes, and all colour via `--aq-*` tokens defined in **both** theme blocks.
+
+### Consequences
+
+**Positive**
+
+- The head criteria (AC-13, AC-14) become reachable at all, and the expanded and collapsed
+  rail states finally share one brand mark instead of two different logo assets.
+- Dropping the 144px raster for a 24px mark + text removes the widest element in the rail
+  head, which is what forced the pin into absolute positioning in the first place.
+
+**Negative / accepted costs**
+
+- A **third** area of the fork now carries local template edits and will conflict on rebase.
+  The edit is deliberately small and marked with `AIRLINQ` comments naming the criterion.
+- `home.component.html` is a high-traffic upstream file; a future ThingsBoard release that
+  restructures the sidenav header will require re-applying this by hand.
+
+**Neutral**
+
+- `logo` / `logo_title_*.svg` remain bound in `home.component.ts` and are still used by the
+  login page; only the sidenav head stops consuming them.
