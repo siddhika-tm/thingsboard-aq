@@ -904,7 +904,7 @@
                             <exclude>container-sim/requirements.txt</exclude>
                             <!-- Design-canvas spec artboards: static HTML we implement AGAINST.
                                  license:format would inject headers and corrupt the source of truth. -->
-                            <exclude>docs/design/**/*.dc.html</exclude>
+                            <exclude>docs/design/**/*.html</exclude>
                             <exclude>src/test/resources/**</exclude>
                             <exclude>src/vendor/**</exclude>
                             <exclude>src/font/**</exclude>
