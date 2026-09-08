@@ -1,0 +1,161 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; font-family: Roboto, "Helvetica Neue", Arial, sans-serif; }
+    a { color: var(--primary); text-decoration: none; } a:hover { text-decoration: underline; }
+    /* Airlinq Blue — LIGHT theme only. Product props on the left, app token on the right. */
+    .aq {
+      --leftbar:#0a1435; --topheader:#1c2545; --topheadercolor:#dbe4f5; --headerBorder:#596489;
+      --primary:#2067ff; --close:#dc4848; --notif:#07bc0c; --inputBorder:#e3e3e3;
+      --text:#333333; --submenu:#f7f8fa;
+      --grad:linear-gradient(to right, #7641f7 0%, #2f6ff0 100%);
+      --filter-hover:#f7fafc; --search-hover:#ecedfd; --dd-hover:#eef4ff; --select-hover:#f8f8f8;
+      --group-name:#6e4cf6; --account-name:#428bca;
+      /* derived, layout unchanged */
+      --bg:#eef1f7; --sheet:#ffffff; --surface:#f7f8fa; --surface-2:#eef4ff;
+      --text-2:#525c6e; --text-3:#6e7891; --border:#e3e3e3; --border-subtle:#eef1f4;
+      --c1:#0166ff; --c2:#fa9f42; --c3:#14b875; --c4:#9a12b3; --c5:#e26a6a; --c6:#18dbf2;
+      --shadow:0 1px 2px rgba(10,20,53,.08);
+    }
+    .ico { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+    .ico.s { width: 16px; height: 16px; }
+    .panel { background: var(--leftbar); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-sizing: border-box; }
+    .head { height: 64px; display: flex; align-items: center; padding: 0 12px 0 16px; gap: 8px; flex: none; border-bottom: 1px solid var(--headerBorder); }
+    .brand { font-weight: 700; font-size: 13px; letter-spacing: .12em; color: var(--topheadercolor); }
+    .sec { font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: #8f9ab8; padding: 14px 20px 6px; }
+    .item { display: flex; align-items: center; gap: 12px; height: 40px; margin: 2px 8px; padding: 0 12px; border-radius: 12px; color: #c3ccdf; font-size: 14px; font-weight: 500; }
+    .item .ico { color: #8f9ab8; }
+    .item.on { background: var(--grad); color: #ffffff; font-weight: 600; }
+    .item.on .ico { color: #ffffff; }
+    .item.hov { background: rgba(255,255,255,.08); color: #ffffff; }
+    .badge { margin-left: auto; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 999px; background: var(--close); color: #fff; }
+    .user { margin-top: auto; border-top: 1px solid var(--headerBorder); padding: 12px 12px 12px 16px; display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: #fff; font-weight: 600; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+    .sheet { background: var(--sheet); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; }
+    .topbar { height: 64px; background: var(--topheader); display: flex; align-items: center; gap: 12px; padding: 0 20px; color: var(--topheadercolor); }
+    .pill { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--headerBorder); font-size: 13px; font-weight: 500; color: var(--topheadercolor); }
+    .btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px; border-radius: 999px; background: var(--primary); color: #fff; font-size: 13px; font-weight: 600; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px 18px; box-shadow: var(--shadow); }
+    .lbl { font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
+    .val { font-size: 30px; font-weight: 600; color: var(--text); line-height: 34px; }
+    .grid { display: grid; grid-template-columns: 44px 150px 1fr 130px 120px 150px; }
+    .grid > * { display: flex; align-items: center; min-height: 44px; padding: 0 12px; border-bottom: 1px solid var(--border-subtle); box-sizing: border-box; font-size: 13px; color: var(--text); }
+    .grid.head2 > * { min-height: 40px; background: var(--surface-2); border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
+    .rowh > * { background: var(--filter-hover); }
+    .chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px 2px 7px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+    .sw { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-2); }
+    .sw i { width: 26px; height: 14px; border-radius: 3px; display: inline-block; flex: none; }
+    .note { font-size: 12px; line-height: 18px; color: var(--text-2); }
+    .k { font-family: ui-monospace, Consolas, monospace; font-size: 11px; color: var(--text-3); }
+  </style>
+</helmet>
+
+<div class="aq" style="width: 1440px; height: 900px; background: var(--bg); color: var(--text); position: relative; overflow: hidden; font-size: 14px;">
+
+  <!-- rail: navy chrome, gradient on the active row only -->
+  <div class="panel" style="position: absolute; left: 8px; top: 8px; bottom: 8px; width: 250px;">
+    <div class="head"><svg viewBox="0 0 24 24" style="width:24px;height:24px"><path d="M12 2 3 20h6l3-6 3 6h6L12 2z" fill="#2067ff"></path><path d="M12 2 9 8h6l-3-6z" fill="#18dbf2"></path></svg><span class="brand">AIRLINQ</span>
+      <svg class="ico s" viewBox="0 0 24 24" style="margin-left:auto;color:#8f9ab8"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M9 4v16M15 10l-2 2 2 2"></path></svg></div>
+    <div class="item on"><svg class="ico" viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"></path></svg>Home</div>
+    <div class="sec">Monitor</div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"></rect><rect x="13" y="3" width="8" height="5" rx="1.5"></rect><rect x="13" y="11" width="8" height="10" rx="1.5"></rect><rect x="3" y="14" width="8" height="7" rx="1.5"></rect></svg>Dashboards</div>
+    <div class="item hov"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3 2 21h20L12 3zM12 10v5M12 18v.5"></path></svg>Alarms<span class="badge">6</span></div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 21h4"></path></svg>Notifications</div>
+    <div class="sec">Devices &amp; assets</div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="5" width="12" height="14" rx="2"></rect><path d="M18 8h3v10h-3M8 15h2"></path></svg>Devices</div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><path d="M3 21V9l7-5v17M10 21h11V11h-7"></path></svg>Assets</div>
+    <div class="sec">Operations</div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7"></path></svg>Customers &amp; users</div>
+    <div class="item"><svg class="ico" viewBox="0 0 24 24"><path d="m8 8-5 4 5 4M16 8l5 4-5 4M14 5l-4 14"></path></svg>Data processing</div>
+    <div class="user"><div class="avatar">AT</div><div><div style="font-size:13px;font-weight:600;color:#e8edf8">Airlinq TenantAdmin</div><div style="font-size:11px;color:#8f9ab8">Tenant administrator</div></div></div>
+  </div>
+
+  <!-- content sheet -->
+  <div class="sheet" style="position: absolute; left: 266px; top: 8px; right: 8px; bottom: 8px;">
+    <div class="topbar">
+      <div><div style="font-size:20px;font-weight:600;color:#fff;line-height:24px">Container Operations</div><div style="font-size:12px;color:#a9b6d4">Chennai Port · 3 stacks</div></div>
+      <div style="flex:1"></div>
+      <span class="pill"><svg class="ico s" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>Realtime · last 1 hour</span>
+      <span class="btn"><svg class="ico s" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg>Add device</span>
+    </div>
+
+    <div style="flex:1; padding: 16px; display: grid; grid-template-columns: repeat(12, 1fr); grid-auto-rows: min-content; gap: 12px; overflow: hidden;">
+      <!-- KPI row -->
+      <div class="card" style="grid-column: span 3"><div class="lbl">Containers</div><div class="val">11</div><div class="note">All reporting</div></div>
+      <div class="card" style="grid-column: span 3"><div class="lbl">Stacks</div><div class="val">3</div><div class="note">Bays A · B · C</div></div>
+      <div class="card" style="grid-column: span 3; border-color: var(--close); background: rgba(220,72,72,.06)"><div class="lbl" style="color:var(--close)">Misaligned</div><div class="val" style="color:var(--close)">6</div><div class="note">of 11 · +1 since 12:00</div></div>
+      <div class="card" style="grid-column: span 3"><div class="lbl">Worst tilt</div><div class="val">5.7°</div><div class="note">Threshold 3.0°</div></div>
+
+      <!-- chart -->
+      <div class="card" style="grid-column: span 7; padding: 14px 16px;">
+        <div style="display:flex;align-items:center;gap:10px"><span style="font-size:14px;font-weight:600">Alignment — tilt magnitude</span><span class="note">degrees</span></div>
+        <div style="display:flex;gap:14px;margin:8px 0 6px;flex-wrap:wrap">
+          <span class="sw"><i style="background:var(--c1)"></i>SIM-11</span><span class="sw"><i style="background:var(--c2)"></i>SIM-10</span>
+          <span class="sw"><i style="background:var(--c3)"></i>SIM-09</span><span class="sw"><i style="background:var(--c4)"></i>SIM-08</span>
+          <span class="sw"><i style="background:var(--c5)"></i>SIM-07</span><span class="sw"><i style="background:var(--c6)"></i>SIM-06</span>
+        </div>
+        <svg viewBox="0 0 660 180" preserveAspectRatio="none" style="width:100%;height:180px;display:block">
+          <g stroke="rgba(0,0,0,.10)" stroke-width="1"><path d="M36 20h620M36 60h620M36 100h620M36 140h620"></path></g>
+          <path d="M36 88h620" stroke="var(--close)" stroke-width="1" stroke-dasharray="4 4"></path>
+          <text x="652" y="84" font-size="10" fill="var(--close)" text-anchor="end">alarm 3.0°</text>
+          <g font-size="10" fill="rgba(0,0,0,.54)"><text x="28" y="24" text-anchor="end">6</text><text x="28" y="104" text-anchor="end">3</text><text x="28" y="164" text-anchor="end">0</text></g>
+          <g fill="none" stroke-width="2" stroke-linejoin="round">
+            <path stroke="var(--c1)" d="M36 34 116 30 196 36 276 28 356 34 436 30 516 36 596 30 656 33"></path>
+            <path stroke="var(--c2)" d="M36 44 116 48 196 40 276 46 356 40 436 48 516 42 596 46 656 42"></path>
+            <path stroke="var(--c3)" d="M36 150 116 120 196 158 276 96 356 148 436 110 516 156 596 128 656 150"></path>
+            <path stroke="var(--c4)" d="M36 132 116 158 196 112 276 152 356 118 436 156 516 122 596 150 656 130"></path>
+            <path stroke="var(--c5)" d="M36 162 116 156 196 164 276 152 356 160 436 150 516 164 596 158 656 161"></path>
+            <path stroke="var(--c6)" d="M36 142 116 136 196 148 276 130 356 144 436 132 516 150 596 138 656 145"></path>
+          </g>
+        </svg>
+      </div>
+
+      <!-- grid -->
+      <div style="grid-column: span 5; background: var(--sheet); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden;">
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border)"><span style="font-size:14px;font-weight:600">Devices</span><span style="font-size:12px;font-weight:600;color:var(--primary);background:var(--surface-2);padding:1px 8px;border-radius:999px">20</span>
+          <div style="flex:1"></div><span style="font-size:12px;color:var(--account-name)">View all</span></div>
+        <div class="grid head2" style="grid-template-columns:1fr 110px 120px"><span>Name</span><span>State</span><span>Customer</span></div>
+        <div class="grid" style="grid-template-columns:1fr 110px 120px"><span>CONTAINER-SIM-11</span><span><span class="chip" style="background:rgba(20,184,117,.14);color:#136c45"><i class="dot" style="background:#14b875"></i>Active</span></span><span>Customer A</span></div>
+        <div class="grid rowh" style="grid-template-columns:1fr 110px 120px"><span>CONTAINER-SIM-10</span><span><span class="chip" style="background:rgba(220,72,72,.12);color:#a82323"><i class="dot" style="background:var(--close)"></i>Alarm</span></span><span>—</span></div>
+        <div class="grid" style="grid-template-columns:1fr 110px 120px"><span>CONTAINER-SIM-09</span><span><span class="chip" style="background:rgba(250,159,66,.16);color:#8a4b06"><i class="dot" style="background:var(--c2)"></i>Watch</span></span><span>—</span></div>
+        <div class="grid" style="grid-template-columns:1fr 110px 120px;border-bottom:0"><span>CONTAINER-SIM-08</span><span><span class="chip" style="background:rgba(20,184,117,.14);color:#136c45"><i class="dot" style="background:#14b875"></i>Active</span></span><span>—</span></div>
+      </div>
+
+      <!-- token mapping -->
+      <div class="card" style="grid-column: span 12; padding: 14px 18px;">
+        <div style="font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3);margin-bottom:10px">Prop → token mapping (light theme only)</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px 24px;font-size:12px;line-height:17px">
+          <div><span class="k">--leftbar</span> → <b>--aq-sidebar</b> #0a1435</div>
+          <div><span class="k">--topheader</span> → <b>--aq-header</b> #1c2545</div>
+          <div><span class="k">--topheadercolor</span> → rail/header ink #dbe4f5</div>
+          <div><span class="k">--headerBorder</span> → chrome divider #596489</div>
+          <div><span class="k">--primaryColor</span> → <b>--aq-accent</b> #2067ff</div>
+          <div><span class="k">--hoverbackground</span> → active nav row only</div>
+          <div><span class="k">--closeColor</span> → <b>--aq-error</b> #dc4848</div>
+          <div><span class="k">--notificationColor</span> → <b>--aq-success</b> fill #07bc0c</div>
+          <div><span class="k">--text-color</span> → <b>--aq-text</b> #333333</div>
+          <div><span class="k">--submenubackground</span> → <b>--aq-surface</b> #f7f8fa</div>
+          <div><span class="k">--inputBorder</span> → <b>--aq-border</b> #e3e3e3</div>
+          <div><span class="k">--dd1/search/filter hovers</span> → row + menu hovers</div>
+          <div><span class="k">--chart-color-1..14</span> → <b>--aq-chart</b> series, order kept</div>
+          <div><span class="k">--account-name-color</span> → link #428bca</div>
+          <div><span class="k">--group-name-color</span> → group label #6e4cf6</div>
+          <div><span class="k">--chart-success/failure</span> → chart status</div>
+        </div>
+        <div class="note" style="margin-top:10px"><b>Three text-contrast substitutions</b> (fills keep your exact hues; only small text darkens, so WCAG AA holds): status text on green chips uses #136c45 not #14b875 (2.6:1); on red chips #a82323 not #dc4848 (4.2:1); on amber chips #8a4b06. Active-row gradient is capped purple→blue (#7641f7→#2f6ff0) so white text clears AA (4.5:1+) at every position — the canvas-exact cyan end was 1.69:1. Dark theme is untouched.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

@@ -50,7 +50,10 @@
 
   // ---- header band -------------------------------------------------------
   .aq-head {
-    background: var(--aq-surface-2);
+    // AIRLINQ BLUE: own token, not --aq-header (whose dark value is
+    // `transparent` and would change the dark login band). Dark value is
+    // #232a34 = today's resolved dark --aq-surface-2.
+    background: var(--aq-login-head);
     border-bottom: 1px solid var(--aq-border);
     padding: 18px 24px 14px;
   }
@@ -63,16 +66,8 @@
     border-bottom: 0;
 
     .aq-mark  { height: 24px; width: 24px; display: block; }
-    .aq-brand { font-size: 19px; font-weight: 700; color: var(--aq-text); line-height: 1; }
-    .aq-prod  { font-size: 19px; font-weight: 400; color: var(--aq-text-2); line-height: 1; }
-  }
-
-  .aq-strip {
-    margin-top: 7px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: .13em;
-    color: var(--aq-text-3);
+    .aq-brand { font-size: 19px; font-weight: 700; color: var(--aq-login-head-ink); line-height: 1; }
+    .aq-prod  { font-size: 19px; font-weight: 400; color: var(--aq-login-head-ink-2); line-height: 1; }
   }
 
   // ---- body --------------------------------------------------------------
@@ -124,12 +119,16 @@
 
     &:focus {
       border-color: var(--aq-accent);
-      box-shadow: 0 0 0 3px rgba(11, 107, 120, .13);
+      // Tokenised: this literal was THEME-BLIND and painted the light teal
+      // ring in dark too. --aq-focus-ring's dark value is that same literal
+      // verbatim, so dark is byte-identical; the pre-existing dark-ring bug
+      // is preserved deliberately and logged as a follow-up.
+      box-shadow: 0 0 0 3px var(--aq-focus-ring);
     }
 
     &.aq-invalid {
       border-color: var(--aq-error);
-      &:focus { box-shadow: 0 0 0 3px rgba(163, 24, 42, .13); }
+      &:focus { box-shadow: 0 0 0 3px var(--aq-error-ring); }
     }
 
     // the browser autofill wash fights the light surface
@@ -164,7 +163,9 @@
   .aq-error {
     margin-top: 5px;
     font-size: 11.5px;
-    color: var(--aq-error);
+    // D4: error TEXT is #c23333 (5.50:1 on the sheet); --aq-error #dc4848 is
+    // the border/fill colour and measures only 4.15:1 as text.
+    color: var(--aq-error-text);
   }
 
   .aq-submit {
@@ -192,7 +193,9 @@
     a {
       font-size: 12.5px;
       font-weight: 600;
-      color: var(--aq-accent);
+      // R-C: --aq-link is #2067ff (4.72:1). The canvas named #428bca, which
+      // measures 3.63:1 on white — a NEW AA regression, so it is declined.
+      color: var(--aq-link);
       // A global anchor rule sets both an underline and a bottom border; the
       // border is what actually showed, so text-decoration alone was not enough.
       text-decoration: none !important;

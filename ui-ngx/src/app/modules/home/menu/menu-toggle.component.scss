@@ -152,3 +152,58 @@
     }
   }
 }
+
+// AIRLINQ BLUE (G3 finding F1): the collapsible section TILE is
+// `<a mat-button class="tb-button-toggle">` at menu-toggle.component.html:18 and
+// is owned by THIS component (verified on the real /home route: the tile carries
+// `_ngcontent-ng-c2149650991`, this component's host is `_nghost-ng-c2149650991`,
+// while tb-side-menu is `_nghost-ng-c3162484443`). A rule in
+// side-menu.component.scss compiles with side-menu's host prefix and cannot
+// match it, so the tile kept --mat-button-text-label-text-color #525c6e =
+// 2.68:1 on the navy rail.
+//
+// Specificity target, measured on the real route: Material's
+// `.mat-toolbar .mat-mdc-button-base.mat-mdc-button-base.mat-unthemed` (0,4,0)
+// is the rule that paints #525c6e (the rail <ul> lives inside
+// mat-toolbar.tb-side-menu-toolbar). Matching its class count plus the host
+// attribute lands this at (0,7,1), which wins with no !important.
+// Count: :host-context()'s argument `.tb-site-sidenav` = 1 class, the emitted
+// `_nghost-*` attribute = 1 (attributes weigh the same as classes), then the
+// selector's own 4 Material classes - .mat-mdc-button, .mat-mdc-button-base,
+// .mat-mdc-button-base AGAIN (the duplicate is Material's deliberate
+// specificity-bump idiom and counts a second time), .mat-unthemed - plus
+// :not(.tb-active), which contributes its argument's weight = 1 class.
+// 1 + 1 + 4 + 1 = 7 classes, and `a` = 1 element: (0,7,1) vs Material's (0,4,0).
+//
+// Scoped to `.tb-site-sidenav` so the CDK-overlay flyout - rendered from the
+// #menuToggleMenuTpl template OUTSIDE the sidenav onto the light sheet - keeps
+// the inks it has today.
+//
+// Dark safety is BY VALUE (no `:not(.tb-dark)` guard, so it applies in dark too):
+//   --aq-chrome-ink-2 dark #aeb8c5 == dark --aq-text-2 #aeb8c5
+//   --aq-chrome-ink-3 dark #8892a0 == dark --aq-text-3 #8892a0
+// so the dark resolved value is unchanged to the byte (AC-3 / AC-4).
+// MUST exclude `.tb-active`: this rule is (0,7,1) and would otherwise beat
+// side-menu.component.scss's `.tb-active` white-label rule at (0,6,0)... it
+// does NOT beat it on specificity, but it DOES win the custom-property
+// cascade at the anchor because it is emitted later. Measured on the real
+// /home route without the guard: the active Home row's label fell from white
+// to --aq-chrome-ink-2 #c3ccdf and its contrast across the gradient dropped
+// from 4.67:1 to 2.92:1 - a NEW AA failure. The active pill keeps
+// --aq-on-accent-container (white), which is what the gradient budget was
+// capped for (ruling R-E).
+:host-context(.tb-site-sidenav) ::ng-deep
+a.mat-mdc-button.mat-mdc-button-base.mat-mdc-button-base.mat-unthemed:not(.tb-active) {
+  --mat-button-text-label-text-color: var(--aq-chrome-ink-2);
+}
+:host-context(.tb-site-sidenav) ::ng-deep a.mat-mdc-button.mat-mdc-button-base:not(.tb-active) {
+  .mat-icon {
+    color: var(--aq-chrome-ink-3);
+  }
+  // the inline-SVG chevron inherits `currentColor` from this span, which
+  // menu-toggle.component.scss:47 points at --aq-text-3 (#6b7789 = 3.97:1 on
+  // the rail). --aq-chrome-ink-3 dark #8892a0 IS dark --aq-text-3 -> dark no-op.
+  .tb-toggle-icon {
+    color: var(--aq-chrome-ink-3);
+  }
+}

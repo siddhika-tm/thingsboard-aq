@@ -33,6 +33,27 @@
   }
 }
 
+// AIRLINQ light theme: the toolbar variant of the user block sits on the navy
+// --aq-header (#1c2545), where the unscoped rgba(0, 0, 0, 0.54) at :73 below
+// composites to #0d1120 = 1.25:1. Reachable whenever forceFullscreen is true
+// (public users, and users with a forced default dashboard —
+// auth.service.ts:405/427 -> home.component.html:104).
+//
+// Scoped to .tb-primary-toolbar ONLY, deliberately NOT to the
+// .tb-dashboard-action-panel half of the selector above: that panel renders
+// inside tb-dashboard-toolbar, which declares no background and so inherits
+// the light sheet, where rgba(0, 0, 0, 0.54) is the correct ink. A blanket
+// substitution on :73 would break that variant.
+//
+// :not(.tb-dark) keeps this structurally light-only per ADR 0004; the dark
+// theme already handles this chrome via styles.scss's dark block.
+.tb-default:not(.tb-dark) .tb-primary-toolbar {
+  button.mat-mdc-button:not(.mat-mdc-icon-button).tb-user-menu {
+    span.tb-user-display-name { color: var(--aq-chrome-ink); }     // 11.73:1
+    span.tb-user-authority    { color: var(--aq-chrome-ink-2); }   //  9.30:1
+  }
+}
+
 tb-user-menu {
   width: 100%;
   .tb-user-menu-icon {
@@ -167,13 +188,27 @@ tb-user-menu {
         gap: 2px;
       }
 
-      // AC-17.
+      // AC-17. Chrome ink, not sheet ink: this block is inside
+      // .tb-site-sidenav, whose background is the navy --aq-sidebar (#0a1435)
+      // in the light theme. --aq-text #333333 measured 1.43:1 there and
+      // --aq-text-3 #6b7789 measured 3.97:1 — below the 4.5:1 AA floor for
+      // this 11-12px text. --aq-chrome-ink #dbe4f5 = 14.11:1 and
+      // --aq-chrome-ink-3 #a9b6d4 = 8.87:1.
+      //
+      // Dark is unaffected: each chrome-ink dark value is a byte-copy of the
+      // --aq-text* dark value it replaces (--aq-chrome-ink -> #e9edf3 = dark
+      // --aq-text; --aq-chrome-ink-3 -> #8892a0 = dark --aq-text-3), so the
+      // dark resolved colour is unchanged. See styles.scss token block and
+      // docs/adr/0004.
+      //
+      // Fixed here rather than in styles.scss because this rule compiles to
+      // (0,5,1) and outranks any global .tb-default:not(.tb-dark) form.
       span.tb-user-display-name {
         font-size: 13px;
         font-weight: 600;
         line-height: 16px;
         letter-spacing: normal;
-        color: var(--aq-text);
+        color: var(--aq-chrome-ink);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -184,7 +219,7 @@ tb-user-menu {
         font-weight: 400;
         line-height: 14px;
         letter-spacing: normal;
-        color: var(--aq-text-3);
+        color: var(--aq-chrome-ink-3);
       }
 
       // AC-18: 16x16 vertical three-dot overflow affordance.
@@ -197,7 +232,12 @@ tb-user-menu {
         margin: 0;
         font-size: 16px;
         line-height: 16px;
-        color: var(--aq-text-3);
+        // Same navy rail as the two spans above. As a decorative 16px glyph
+        // this only owes the 3:1 non-text floor, which --aq-text-3 #6b7789
+        // (3.97:1) already met — but it sits immediately beside the authority
+        // line, so it takes the same chrome-ink-3 ramp step (8.87:1) to avoid a
+        // visible mismatch. Dark value byte-identical, as above.
+        color: var(--aq-chrome-ink-3);
         opacity: 1;
         transition: opacity $sidenav-anim-timing;
       }

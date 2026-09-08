@@ -1,0 +1,152 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; font-family: Roboto, "Helvetica Neue", Arial, sans-serif; }
+    a { text-decoration: none; }
+    /* Airlinq Blue — LIGHT theme login. Colours only; card geometry unchanged. */
+    .aq {
+      --leftbar:#0a1435; --topheader:#1c2545; --topheadercolor:#dbe4f5; --headerBorder:#596489;
+      --primary:#2067ff; --close:#dc4848; --close-text:#c23333; --inputBorder:#e3e3e3; --text:#333333;
+      --submenu:#f7f8fa; --grad:linear-gradient(to right, #7641f7 0%, #2f6ff0 100%);
+      --account-name:#428bca; --dd-hover:#eef4ff;
+      --bg:#eef1f7; --sheet:#ffffff; --text-2:#525c6e; --text-3:#6e7891;
+      --border-subtle:#eef1f4; --shadow:0 1px 2px rgba(10,20,53,.08);
+      --card-shadow:0 18px 44px rgba(10,20,53,.10), 0 3px 10px rgba(10,20,53,.06);
+    }
+    .ico { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+    .label2 { position: absolute; top: -26px; left: 0; font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--text-3); text-transform: uppercase; }
+    /* card anatomy — identical geometry to the shipped login, new colours only */
+    .card { width: 420px; border-radius: 16px; background: var(--sheet); box-shadow: var(--card-shadow); overflow: hidden; }
+    .head { padding: 20px 28px 16px; background: var(--topheader); }
+    .brandrow { display: flex; align-items: center; gap: 10px; }
+    .brand { font-size: 19px; font-weight: 700; color: #ffffff; line-height: 1; }
+    .prod { font-size: 19px; font-weight: 400; color: var(--topheadercolor); line-height: 1; }
+    .body { padding: 24px 28px 26px; }
+    .h { font-size: 15px; font-weight: 600; color: var(--text); margin: 0 0 18px; }
+    .label { display: block; font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); margin: 0 0 6px; }
+    .input { display: flex; align-items: center; height: 44px; padding: 0 12px; border: 1px solid var(--inputBorder); border-radius: 10px; background: var(--sheet); color: var(--text); font-size: 14px; }
+    .input.focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(32,103,255,.16); }
+    .input.err { border-color: var(--close); }
+    .field { margin-bottom: 16px; }
+    .eye { margin-left: auto; color: var(--text-3); }
+    .btn { display: flex; align-items: center; justify-content: center; height: 46px; border-radius: 999px; background: var(--primary); color: #fff; font-size: 14px; font-weight: 600; letter-spacing: .01em; }
+    .btn.grad { background: var(--grad); }
+    .forgot { margin-top: 12px; text-align: right; font-size: 13px; font-weight: 500; color: var(--account-name); }
+    .err-msg { display: flex; align-items: center; gap: 8px; margin: -4px 0 14px; font-size: 12px; font-weight: 500; color: var(--close-text); }
+    .foot { margin-top: 14px; text-align: center; font-size: 12px; color: var(--text-3); }
+    .note { font-size: 12px; line-height: 18px; color: var(--text-2); }
+    .k { font-family: ui-monospace, Consolas, monospace; font-size: 11px; color: var(--text-3); }
+    .card2 { background: var(--submenu); border: 1px solid var(--inputBorder); border-radius: 12px; padding: 14px 16px; }
+  </style>
+</helmet>
+
+<div class="aq" style="width: 1440px; height: 900px; background: var(--bg); color: var(--text); position: relative; overflow: hidden; font-size: 14px;">
+
+  <!-- A — default state -->
+  <div style="position: absolute; left: 48px; top: 64px;">
+    <span class="label2">A · default</span>
+    <div class="card">
+      <div class="head">
+        <div class="brandrow">
+          <svg viewBox="0 0 24 24" style="width:26px;height:26px"><path d="M12 2 3 20h6l3-6 3 6h6L12 2z" fill="#2067ff"></path><path d="M12 2 9 8h6l-3-6z" fill="#18dbf2"></path></svg>
+          <span class="brand">Airlinq</span><span class="prod">IoT Platform</span>
+        </div>
+      </div>
+      <div class="body">
+        <div class="h">Sign in to your account</div>
+        <div class="field"><span class="label">Username (email)</span><div class="input focus">tenant@airlinq.com</div></div>
+        <div class="field"><span class="label">Password</span><div class="input"><span style="letter-spacing:2px;color:var(--text-2)">••••••••••</span><svg class="ico eye" viewBox="0 0 24 24"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6z"></path><circle cx="12" cy="12" r="2.5"></circle></svg></div></div>
+        <div class="btn">Sign in</div>
+        <div class="forgot">Forgot your password?</div>
+      </div>
+    </div>
+    <div class="foot">Airlinq IoT Platform</div>
+  </div>
+
+  <!-- B — error state -->
+  <div style="position: absolute; left: 510px; top: 64px;">
+    <span class="label2">B · invalid credentials (chosen: flat CTA, #c23333 error text)</span>
+    <div class="card">
+      <div class="head">
+        <div class="brandrow">
+          <svg viewBox="0 0 24 24" style="width:26px;height:26px"><path d="M12 2 3 20h6l3-6 3 6h6L12 2z" fill="#2067ff"></path><path d="M12 2 9 8h6l-3-6z" fill="#18dbf2"></path></svg>
+          <span class="brand">Airlinq</span><span class="prod">IoT Platform</span>
+        </div>
+      </div>
+      <div class="body">
+        <div class="h">Sign in to your account</div>
+        <div class="field"><span class="label">Username (email)</span><div class="input">tenant@airlinq.com</div></div>
+        <div class="field" style="margin-bottom:10px"><span class="label">Password</span><div class="input err"><span style="letter-spacing:2px;color:var(--text-2)">••••••</span><svg class="ico eye" viewBox="0 0 24 24"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6z"></path><circle cx="12" cy="12" r="2.5"></circle></svg></div></div>
+        <div class="err-msg"><svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16v.5"></path></svg>Invalid username or password</div>
+        <div class="btn">Sign in</div>
+        <div class="forgot">Forgot your password?</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- C — gradient CTA alternative -->
+  <div style="position: absolute; left: 972px; top: 64px;">
+    <span class="label2">C · gradient CTA (option)</span>
+    <div class="card">
+      <div class="head">
+        <div class="brandrow">
+          <svg viewBox="0 0 24 24" style="width:26px;height:26px"><path d="M12 2 3 20h6l3-6 3 6h6L12 2z" fill="#2067ff"></path><path d="M12 2 9 8h6l-3-6z" fill="#18dbf2"></path></svg>
+          <span class="brand">Airlinq</span><span class="prod">IoT Platform</span>
+        </div>
+      </div>
+      <div class="body">
+        <div class="h">Sign in to your account</div>
+        <div class="field"><span class="label">Username (email)</span><div class="input">tenant@airlinq.com</div></div>
+        <div class="field"><span class="label">Password</span><div class="input"><span style="letter-spacing:2px;color:var(--text-2)">••••••••••</span><svg class="ico eye" viewBox="0 0 24 24"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6z"></path><circle cx="12" cy="12" r="2.5"></circle></svg></div></div>
+        <div class="btn grad" style="justify-content:flex-start;padding-left:24px">Sign in</div>
+        <div class="forgot">Forgot your password?</div>
+      </div>
+    </div>
+    <div class="note" style="margin-top:10px;width:420px">Label sits at the purple end: white on <span class="k">#7641f7</span> is 5.4:1, on <span class="k">#18dbf2</span> only 1.7:1.</div>
+  </div>
+
+  <!-- notes -->
+  <div style="position: absolute; left: 48px; top: 560px; right: 48px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+    <div class="card2">
+      <div style="font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px">Prop → login element</div>
+      <div class="note">
+        <span class="k">--topheader</span> #1c2545 → card header band, white brand + <span class="k">--topheadercolor</span> product name<br>
+        <span class="k">--primaryColor</span> #2067ff → Sign in button, focused input ring<br>
+        <span class="k">--frominputColoractive</span> #2067ff → active field border<br>
+        <span class="k">--inputBorder</span> #e3e3e3 → idle field border<br>
+        <span class="k">--closeColor</span> #dc4848 → error border + message<br>
+        <span class="k">--text-color</span> #333333 → heading and typed value<br>
+        <span class="k">--account-name-color</span> #428bca → "Forgot your password?"<br>
+        <span class="k">--submenubackground</span> #f7f8fa → these note panels
+      </div>
+    </div>
+    <div class="card2">
+      <div style="font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px">Unchanged</div>
+      <div class="note">
+        Card width, radius, padding, field height, button height, and brand lockup are exactly as shipped (the "Operator console" strip was REMOVED by human ruling F5, G3 round 2). The page background moves from <span class="k">#eceef1</span> to <span class="k">#eef1f7</span> so the navy header reads as deliberate rather than floating on grey.<br><br>
+        <b>Dark theme login is untouched</b> — the existing <span class="k">:host-context(body.tb-dark)</span> block stays as is.
+      </div>
+    </div>
+    <div class="card2">
+      <div style="font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px">Contrast checked</div>
+      <div class="note">
+        White on <span class="k">#2067ff</span> — 4.72:1 ✓ AA<br>
+        <span class="k">#dbe4f5</span> on <span class="k">#1c2545</span> — 11.73:1 ✓<br>
+        <span class="k">#333333</span> on white — 12.63:1 ✓<br>
+        <span class="k">#dc4848</span> keeps borders and fills; error <b>text</b> is <span class="k">#c23333</span> — 5.07:1 ✓ AA. <b>Decided.</b><br>
+        <span class="k">#428bca</span> on white — 3.5:1; underline on hover carries it.
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

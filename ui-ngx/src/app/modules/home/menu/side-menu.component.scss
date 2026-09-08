@@ -78,7 +78,15 @@
     font-weight: 500;
     letter-spacing: .08em;
     text-transform: uppercase;
-    color: var(--aq-text-3);
+    // AIRLINQ BLUE (G3 finding F1): .tb-menu-section IS owned by THIS component
+    // (side-menu.component.html:34; verified on the real /home route - the div
+    // carries `_ngcontent-ng-c3162484443` = tb-side-menu). So unlike the nav
+    // anchor and the toggle tile, this file IS the right home for it; the defect
+    // was the token reference, not the scope. On the navy rail --aq-text-3
+    // #6b7789 measured 3.97:1, an AA fail.
+    // Dark safety BY VALUE: --aq-chrome-ink-3 dark #8892a0 IS dark --aq-text-3
+    // #8892a0, byte-identical -> dark no-op (AC-3 / AC-4).
+    color: var(--aq-chrome-ink-3);
     padding: 14px 20px 6px;
     user-select: none;
   }
@@ -108,7 +116,13 @@
     border-radius: var(--aq-radius-md);
     padding: 0 12px;
     transition: padding $sidenav-anim-timing, background-color 150ms ease;
-    --mat-button-text-label-text-color: var(--aq-text-2);
+    // AIRLINQ BLUE: chrome ink, because in the light theme the rail is now
+    // navy (--aq-sidebar #0a1435) and --aq-text-2 measures 2.04:1 on it.
+    // Dark is unchanged: --aq-chrome-ink-2's dark value #aeb8c5 IS dark
+    // --aq-text-2, byte-identical. Set here rather than in styles.scss
+    // because this rule compiles to (0,5,1) and a same-depth global rule
+    // loses on source order (component styles are injected later).
+    --mat-button-text-label-text-color: var(--aq-chrome-ink-2);
     &:hover, &.tb-hovered {
       background-color: var(--aq-hover);
       border-bottom: none;
@@ -130,7 +144,9 @@
       min-width: 22px;
       min-height: 22px;
       font-size: 22px;
-      color: var(--aq-text-3);
+      // AIRLINQ BLUE: chrome ink for the same reason as the label above;
+      // --aq-chrome-ink-3's dark value #8892a0 IS dark --aq-text-3.
+      color: var(--aq-chrome-ink-3);
     }
     span.mdc-button__label {
       width: 100%;

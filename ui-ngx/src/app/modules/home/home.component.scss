@@ -159,7 +159,15 @@
             font-weight: 700;
             line-height: 16px;
             letter-spacing: .12em;
-            color: var(--aq-text);
+            // AIRLINQ BLUE (G3 finding F1): this element is owned by THIS
+            // component - verified on the real /home route, it carries
+            // `_ngcontent-ng-c935555661` (home.component), not tb-side-menu's
+            // `_ngcontent-ng-c3162484443` - so the fix belongs here. It sits on
+            // the navy rail head (--aq-sidebar #0a1435) where --aq-text #333333
+            // measured 1.43:1, effectively invisible.
+            // Dark safety BY VALUE: --aq-chrome-ink dark #e9edf3 IS dark
+            // --aq-text #e9edf3, byte-identical -> dark no-op (AC-3 / AC-4).
+            color: var(--aq-chrome-ink);
             overflow: hidden;
             text-overflow: ellipsis;
           }

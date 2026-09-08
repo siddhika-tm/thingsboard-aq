@@ -1,0 +1,11 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "title": "Airlinq Blue · app light", "x": 0, "y": 0, "w": 1440, "h": 900 },
+    { "file": "Login.dc.html", "title": "Airlinq Blue · login light", "x": 0, "y": 1040, "w": 1440, "h": 900 }
+  ],
+  "annotations": [
+    { "id": "scope", "x": 1540, "y": 0, "w": 320, "text": "Colours only — layout, geometry and radii unchanged from the shipped shell and login card.\nLIGHT theme only; the dark token block and the login's tb-dark block are not touched.\nNavy chrome per --leftbar/--topheader; content sheet stays light.\nGradient --hoverbackground: active nav row only (and optionally the login CTA, option C)." },
+    { "id": "login-note", "x": 1540, "y": 1040, "w": 320, "text": "Login: three states — default, invalid credentials, and a gradient-CTA option.\nPick A (flat #2067ff button) or C (gradient button) for the Sign in CTA." }
+  ],
+  "launch": { "view": "canvas" }
+}

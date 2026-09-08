@@ -17,6 +17,28 @@
 @import "constants";
 
 :host ::ng-deep {
+  // AIRLINQ BLUE (G3 finding F1): the nav anchor is OWNED BY THIS COMPONENT
+  // (menu-link.component.html:18). Angular compiles every rule below with THIS
+  // component's own `_nghost-*` prefix, so a rule written in
+  // side-menu.component.scss - a DIFFERENT component - carries a different host
+  // prefix and can never match this anchor, however specific it looks. That is
+  // why the round-2 fix at side-menu.component.scss:117 left the anchor on
+  // --mat-button-text-label-text-color #525c6e = 2.68:1 on the navy rail
+  // (--aq-sidebar #0a1435).
+  //
+  // Scoped to `.tb-site-sidenav` (home.component.html:20) on purpose: the rail
+  // is the only navy surface this component paints on. The collapsed-rail
+  // flyout renders its rows from menu-toggle's OWN template into a CDK overlay
+  // outside the sidenav, so those keep the light-sheet inks they have today.
+  //
+  // Dark safety is BY VALUE, not by selector: there is no `:not(.tb-dark)`
+  // guard, so this also applies in dark - and it must, because each
+  // --aq-chrome-ink* DARK value is a byte-copy of the --aq-text* value that
+  // resolves at this element in dark today:
+  //   --aq-chrome-ink-2 dark #aeb8c5 == dark --aq-text-2 #aeb8c5
+  //   --aq-chrome-ink-3 dark #8892a0 == dark --aq-text-3 #8892a0
+  // so the dark resolved value is unchanged to the byte (AC-3 / AC-4).
+
   a.is-new::after {
     position: absolute;
     right: 16px;
@@ -57,5 +79,46 @@
     height: 6px;
     border-radius: 50%;
     background: var(--aq-error);
+  }
+}
+
+// AIRLINQ BLUE (G3 finding F1) - continued. `.tb-site-sidenav` is an ANCESTOR of
+// this component's host, so it is reached with :host-context(), NOT as a
+// descendant inside `:host ::ng-deep` (that would compile to
+// `[_nghost-x] .tb-site-sidenav ...` and match nothing).
+// The rule that actually painted #525c6e is Material's own, measured on the real
+// authenticated /home route:
+//   .mat-toolbar .mat-mdc-button-base.mat-mdc-button-base.mat-unthemed {
+//     --mat-button-text-label-text-color: var(--mat-toolbar-container-text-color, ...)
+//   }
+// = (0,4,0). The rail's <ul> sits inside `mat-toolbar.tb-side-menu-toolbar`, so
+// that rule matches every nav anchor, and --mat-toolbar-container-text-color
+// resolves to --aq-text-2 #525c6e = 2.68:1 on the navy rail. It outranks
+// side-menu.component.scss:96's (0,3,1), which is why BOTH the round-2 fix and a
+// (0,3,1) form here lost. Matching its class count and adding the host attribute
+// puts this rule at (0,7,1) - it wins on specificity, no !important needed.
+// Count: :host-context()'s argument `.tb-site-sidenav` = 1 class, the emitted
+// `_nghost-*` attribute = 1 (attributes weigh the same as classes), then the
+// selector's own 4 Material classes - .mat-mdc-button, .mat-mdc-button-base,
+// .mat-mdc-button-base AGAIN (the duplicate is Material's deliberate
+// specificity-bump idiom and counts a second time), .mat-unthemed - plus
+// :not(.tb-active), which contributes its argument's weight = 1 class.
+// 1 + 1 + 4 + 1 = 7 classes, and `a` = 1 element: (0,7,1) vs Material's (0,4,0).
+// MUST exclude `.tb-active`: this rule is (0,7,1) and would otherwise beat
+// side-menu.component.scss's `.tb-active` white-label rule at (0,6,0)... it
+// does NOT beat it on specificity, but it DOES win the custom-property
+// cascade at the anchor because it is emitted later. Measured on the real
+// /home route without the guard: the active Home row's label fell from white
+// to --aq-chrome-ink-2 #c3ccdf and its contrast across the gradient dropped
+// from 4.67:1 to 2.92:1 - a NEW AA failure. The active pill keeps
+// --aq-on-accent-container (white), which is what the gradient budget was
+// capped for (ruling R-E).
+:host-context(.tb-site-sidenav) ::ng-deep
+a.mat-mdc-button.mat-mdc-button-base.mat-mdc-button-base.mat-unthemed:not(.tb-active) {
+  --mat-button-text-label-text-color: var(--aq-chrome-ink-2);
+}
+:host-context(.tb-site-sidenav) ::ng-deep a.mat-mdc-button.mat-mdc-button-base:not(.tb-active) {
+  .mat-icon {
+    color: var(--aq-chrome-ink-3);
   }
 }

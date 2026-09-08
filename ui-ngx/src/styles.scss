@@ -1426,18 +1426,18 @@ pre.tb-highlight {
 
 /* ---- LIGHT tokens: reproduce the existing light theme exactly ---- */
 .tb-default {
-  --aq-bg:            #e9edf1;   /* canvas behind rail + sheet */
+  --aq-bg:            #eef1f7;   /* canvas behind rail + sheet */
   --aq-sheet:         #ffffff;   /* the floating content sheet */
-  --aq-sidebar:       #ffffff;   /* floating nav rail          */
-  --aq-header:        transparent;
-  --aq-surface:       #f6f8fa;   /* card / primary surface (tonal step on the sheet) */
-  --aq-surface-2:     #eceff3;   /* table header, insets     */
+  --aq-sidebar:       #0a1435;   /* floating nav rail  (--leftbar)   */
+  --aq-header:        #1c2545;   /* top toolbar (--topheader) */
+  --aq-surface:       #f7f8fa;   /* card / primary surface (tonal step on the sheet) */
+  --aq-surface-2:     #eef4ff;   /* table header, insets     */
   --aq-panel:         #f7f8fa;   /* nested panel             */
   --aq-elevated:      #ffffff;   /* menus, dialogs, tooltips */
-  --aq-hover:         rgba(15, 23, 32, .05);
-  --aq-selected:      rgba(11, 107, 120, .10);
-  --aq-accent-container:    #bff1fb;   /* active nav pill */
-  --aq-on-accent-container: #00363e;
+  --aq-hover:         rgba(10, 20, 53, .04);   /* R-A: the ONE hover mechanism; = --filter-panel-hover-bg #f7fafc as alpha */
+  --aq-selected:      rgba(32, 103, 255, .10);
+  --aq-accent-container:    #2067ff;   /* active nav pill FLAT fill; the gradient is --aq-nav-active-grad, NOT this */
+  --aq-on-accent-container: #ffffff;   /* on #2067ff = 4.72:1 */
 
   /* shape + depth (identical in both schemes) */
   --aq-gap:        8px;
@@ -1448,47 +1448,136 @@ pre.tb-highlight {
   --aq-rail-w:     64px;
   --aq-rail-w-open: 250px;
 
-  --aq-text:          #14181f;
-  --aq-text-2:        #414b5a;
+  --aq-text:          #333333;
+  --aq-text-2:        #525c6e;
   --aq-text-3:        #6b7789;
   --aq-text-disabled: #9aa5b4;
   --aq-on-accent:     #ffffff;
 
-  --aq-border:        #dde1e8;
-  --aq-border-subtle: #eef1f4;
-  --aq-divider:       #e4e7ec;
+  /* ---- Airlinq Blue chrome ink + login-band + ring/link tokens ----------
+     Added in BOTH theme blocks (T3 / AC-22). Rationale and the full mapping
+     table live in docs/design/airlinq-blue-light-recolour.md section 1.2.
 
-  --aq-accent:        #0b6b78;
-  --aq-accent-strong: #0e7f8e;
-  --aq-focus:         #0e7f8e;
-  --aq-success:       #17603a;
+     WHY these exist rather than reusing --aq-text* : in the light theme the
+     rail (--aq-sidebar #0a1435) and the top toolbar (--aq-header #1c2545) are
+     now NAVY, but --aq-text/-2/-3 are dark inks meant for the white sheet.
+     Recomputed against the shipped --aq-sidebar #0a1435 they are
+     1.43 / 2.68 / 3.97:1, and against --aq-header #1c2545
+     1.19 / 2.22 / 3.30:1 — every one below the 4.5:1 AA floor. Chrome ink is
+     therefore a SEPARATE ink ramp for the navy chrome only.
+
+     EVERY dark value below is a byte-copy of the value that already resolves
+     at that element in the dark theme today, so substituting the token for the
+     old reference is a provable dark no-op. That is the mechanism behind
+     AC-3 / AC-4 — see the per-token note on each line. */
+  --aq-chrome-ink:          #dbe4f5;   /* = dark --aq-text          #e9edf3 -> dark no-op */
+  --aq-chrome-ink-2:        #c3ccdf;   /* = dark --aq-text-2        #aeb8c5 -> dark no-op */
+  --aq-chrome-ink-3:        #a9b6d4;   /* = dark --aq-text-3        #8892a0 -> dark no-op */
+  --aq-chrome-ink-disabled: #7d88a6;   /* = dark --aq-text-disabled #59636f -> dark no-op */
+  --aq-chrome-divider:      #6b76a0;   /* = dark --aq-divider       #212a35 -> dark no-op.
+                                          Canvas said #596489 = 2.58:1 on #1c2545, below the
+                                          3:1 non-text floor; #6b76a0 = 4.06 rail / 3.37 header.
+                                          Recorded deviation, justified by AC-18. */
+
+  /* Active nav row gradient. STRUCTURAL no-op in dark: `none` is the initial
+     value of background-image, so the dark block's flat pill at :1681 still
+     paints dark exactly as today. Exactly ONE consumer (see AC-11) — never
+     reuse --aq-accent-container for it, that token has five other consumers.
+     Value is the HUMAN-CAPPED gradient (ruling R-E): the canvas-exact
+     #7641f7 -> #18dbf2 ends at 1.69:1 for the white label, so the cyan stop is
+     capped at #2f6ff0, which holds >= 4.5:1 at every label position. */
+  --aq-nav-active-grad:     linear-gradient(to right, #7641f7 0%, #2f6ff0 100%);
+
+  /* Focus / error rings. These replace two THEME-BLIND literals in
+     login.component.scss (:127, :132) that hardcoded the LIGHT teal/crimson
+     and therefore rendered light-teal rings in the dark theme too. D8 says
+     dark keeps its CURRENT RESOLVED values, so the dark values below are those
+     same literals verbatim — the pre-existing dark-ring bug is preserved on
+     purpose and logged as a follow-up, NOT silently fixed here (that would be
+     an unrequested dark change, breaching AC-3). */
+  --aq-focus-ring:          rgba(32, 103, 255, .16);
+  --aq-error-ring:          rgba(220, 72, 72, .13);
+
+  --aq-error-text:          #c23333;   /* = dark --aq-error   #ec6274 -> dark no-op.
+                                          D4 splits error ink from error border/fill:
+                                          #dc4848 as TEXT on the sheet is 4.15:1 (fail),
+                                          #c23333 is 5.50:1. */
+  --aq-link:                #2067ff;   /* = dark --aq-accent  #37b6c9 -> dark no-op.
+                                          R-C: NOT the canvas's #428bca, which measures
+                                          3.63:1 on white and would be a NEW AA regression. */
+
+  /* Login card header band. Cannot reuse --aq-header (dark value is
+     `transparent`, which would change the dark login band) nor --aq-chrome-ink
+     for the product word (dark #e9edf3 != today's #aeb8c5). Hence four own
+     tokens whose dark values copy dark --aq-surface-2/-text/-text-2/-text-3. */
+  --aq-login-head:          #1c2545;   /* = dark --aq-surface-2 #232a34 -> dark no-op */
+  --aq-login-head-ink:      #ffffff;   /* = dark --aq-text      #e9edf3 -> dark no-op. 15.00:1 on band */
+  --aq-login-head-ink-2:    #dbe4f5;   /* = dark --aq-text-2    #aeb8c5 -> dark no-op. 11.73:1 on band */
+
+  /* Auth-page canvas (G3 finding F3). MUST be a name the dark token block does
+     NOT declare. The six auth pages hardcode `tb-dark` on their ROOT div
+     (.component.html:18), and `.tb-dark` is a BARE CLASS selector that matches
+     that div itself - so it re-declares the whole dark token block ON the very
+     element we are painting. Measured on the real /login/resetPasswordRequest
+     route: --aq-bg on <body> = #eef1f7, but --aq-bg ON THAT ELEMENT = #0a0d12.
+     `background-color: var(--aq-bg)` therefore resolved DARK however the rule
+     was scoped - the round-2 rule matched and applied, it just read a hijacked
+     token. Because --aq-auth-bg appears ONLY here and never inside `.tb-dark`,
+     the element cannot hijack it and inherits this value from <body>.
+     Dark safety (CORRECTED at G3 round 2, DOC-4): the earlier claim here that
+     "in dark the light token block never applies" was FACTUALLY WRONG.
+     `<body class="tb-default">` is STATIC and `tb-dark` is only ADDED on top
+     (MEMORY.md line 8), so the `.tb-default` token block DOES apply in dark and
+     --aq-auth-bg DOES resolve to #eef1f7 on <body> in dark too. What makes it
+     harmless is not the token being undefined - it is that the consuming rule
+     carries a `:host-context(body:not(.tb-dark))` guard which cannot match when
+     `tb-dark` is present, so the paint never happens and dark still shows the
+     component's own #eee exactly as today. The token resolving is inert; the
+     guard is what provides dark safety.
+     AC-22 whitelist: this is a deliberately light-only COLOUR token (the only
+     one). It must stay light-only, because declaring it inside `.tb-dark` would
+     let the auth pages' hardcoded-`tb-dark` root div hijack it in exactly the
+     way described above - which is the defect this token was created to fix. */
+  --aq-auth-bg:             #eef1f7;   /* = light --aq-bg */
+
+  --aq-border:        #e3e3e3;
+  --aq-border-subtle: #eef1f4;
+  --aq-divider:       #e3e3e3;
+
+  --aq-accent:        #2067ff;
+  --aq-accent-strong: #1a58e0;
+  --aq-focus:         #2067ff;
+  --aq-success:       #07bc0c;
   --aq-warning:       #b45309;
-  --aq-error:         #a3182a;
+  --aq-error:         #dc4848;   /* D4: borders + fills. Error TEXT uses --aq-error-text */
   --aq-info:          #1d6b8a;
 
-  /* 18% tints of the semantic colours, for status chips. Pre-mixed rather
+  /* Low-alpha tints of the semantic colours, for status chips. Pre-mixed rather
      than color-mix(): color-mix needs Chrome 111 / FF 113 / Safari 16.2, but
      .browserslistrc supports Chrome 107 / FF 104 / Safari 16 — there the
-     declaration is dropped and the chip loses its background entirely. */
-  --aq-success-tint:  rgba(23, 96, 58, .18);    /* --aq-success #17603a */
-  --aq-warning-tint:  rgba(180, 83, 9, .18);    /* --aq-warning #b45309 */
-  --aq-error-tint:    rgba(163, 24, 42, .18);   /* --aq-error   #a3182a */
+     declaration is dropped and the chip loses its background entirely.
+     The Airlinq Blue chip fills carry their own per-hue alpha taken from the
+     product canvas (14 / 16 / 12%); --aq-info-tint keeps the legacy 18%. */
+  --aq-success-tint:  rgba(20, 184, 117, .14);
+  --aq-warning-tint:  rgba(250, 159, 66, .16);
+  --aq-error-tint:    rgba(220, 72, 72, .12);
   --aq-info-tint:     rgba(29, 107, 138, .18);  /* --aq-info    #1d6b8a */
 
   /* Status-chip label colours. Separate from --aq-success/--aq-warning/... on
      purpose: those are general-purpose semantic colours carrying their own
      contrast budgets against page backgrounds, whereas these are read ONLY
-     against the 18% tint above. Darkened until every chip state clears WCAG
+     against the tint above. Darkened until every chip state clears WCAG
      1.4.3 at 4.5:1 (12px/600 is not large text) on all three row backgrounds
      — base, :hover and .selected — because the row overlays composite under
-     the chip. Ratios verified by
-     .claude/team/artifacts/dashboard-and-grid-design-fidelity/contrast-check.py;
-     worst case here is neutral/selected at 4.72:1. */
-  --aq-success-chip-fg: #0f4527;   /* 7.84 / 7.16 / 6.90 */
-  --aq-warning-chip-fg: #7c3806;   /* 6.37 / 5.83 / 5.60 */
-  --aq-error-chip-fg:   #8c1424;   /* 6.40 / 5.84 / 5.60 */
-  --aq-info-chip-fg:    #154f66;   /* 6.54 / 5.97 / 5.75 */
-  --aq-neutral-chip-fg: #546070;   /* 5.43 / 4.92 / 4.72 */
+     the chip. Re-measured for the Airlinq Blue light palette (new tints and
+     the new --aq-hover / --aq-selected row overlays); worst case is now
+     success/selected at 5.00:1. Ratios verified by
+     .claude/team/artifacts/airlinq-blue-light-recolour/contrast-sweep.py. */
+  --aq-success-chip-fg: #136c45;   /* 5.64 / 5.25 / 5.00 */
+  --aq-warning-chip-fg: #8a4b06;   /* 6.07 / 5.66 / 5.39 */
+  --aq-error-chip-fg:   #a82323;   /* 6.12 / 5.68 / 5.40 */
+  --aq-info-chip-fg:    #154f66;   /* 6.89 / 6.44 / 6.13 */
+  --aq-neutral-chip-fg: #546070;   /* 6.39 / 5.91 / 5.59 */
 
   --aq-chart-grid:        rgba(0, 0, 0, .12);
   --aq-chart-axis:        rgba(0, 0, 0, .54);
@@ -1519,6 +1608,27 @@ pre.tb-highlight {
   --aq-text-3:        #8892a0;   /* ~4.9:1 — timestamps/captions */
   --aq-text-disabled: #59636f;
   --aq-on-accent:     #04141a;
+
+  /* ---- Airlinq Blue chrome/login/ring tokens — DARK side ----------------
+     Every value here is the value that ALREADY resolves at that element in
+     dark today (see docs/design/airlinq-blue-light-recolour.md section 1.2).
+     They exist so the light theme can reference a chrome-specific token
+     without the dark theme changing by a single byte. Do not "improve" any
+     value here: each one is load-bearing for the AC-3 / AC-4 dark no-op proof. */
+  --aq-chrome-ink:          #e9edf3;              /* = dark --aq-text, so dark is a no-op */
+  --aq-chrome-ink-2:        #aeb8c5;              /* = dark --aq-text-2, so dark is a no-op */
+  --aq-chrome-ink-3:        #8892a0;              /* = dark --aq-text-3, so dark is a no-op */
+  --aq-chrome-ink-disabled: #59636f;              /* = dark --aq-text-disabled, so dark is a no-op */
+  --aq-chrome-divider:      #212a35;              /* = dark --aq-divider, so dark is a no-op */
+  --aq-nav-active-grad:     none;                 /* initial value of background-image => the dark
+                                                     flat pill at :1681 still paints; structural no-op */
+  --aq-focus-ring:          rgba(11, 107, 120, .13);  /* today's literal at login.component.scss:127 */
+  --aq-error-ring:          rgba(163, 24, 42, .13);   /* today's literal at login.component.scss:132 */
+  --aq-error-text:          #ec6274;              /* = dark --aq-error, so dark is a no-op */
+  --aq-link:                #37b6c9;              /* = dark --aq-accent, so dark is a no-op */
+  --aq-login-head:          #232a34;              /* = dark --aq-surface-2, so dark is a no-op */
+  --aq-login-head-ink:      #e9edf3;              /* = dark --aq-text, so dark is a no-op */
+  --aq-login-head-ink-2:    #aeb8c5;              /* = dark --aq-text-2, so dark is a no-op */
 
   --aq-border:        #2b3542;
   --aq-border-subtle: #212a35;
@@ -1610,7 +1720,10 @@ pre.tb-highlight {
     border-radius: var(--aq-radius-md) !important;
   }
   .mat-mdc-dialog-surface { border-radius: var(--aq-radius-lg) !important; }
-  .tb-primary-toolbar .tb-breadcrumb { color: var(--aq-text); }
+  /* Chrome ink, not sheet ink: in light the toolbar is now navy (--aq-header
+     #1c2545) and --aq-text #333333 measures 1.19:1 on it. Dark is unaffected —
+     --aq-chrome-ink's dark value #e9edf3 IS dark --aq-text, byte-identical. */
+  .tb-primary-toolbar .tb-breadcrumb { color: var(--aq-chrome-ink); }
 }
 
 /* =====================================================================
@@ -1621,7 +1734,7 @@ pre.tb-highlight {
 
   /* app background wherever a route leaves <body> exposed (Material's
      app-background mixin is a light-only include). */
-  background-color: var(--aq-bg) !important;
+  @at-root body#{&} { background-color: var(--aq-bg) !important; }
   .mat-app-background { background-color: var(--aq-bg) !important; color: var(--aq-text) !important; }
 
   /* table scaffolding transparency so the card surface shows through */
@@ -1797,6 +1910,266 @@ pre.tb-highlight {
   /* scrollbars */
   ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .16) !important; }
   ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, .26) !important; }
+}
+
+/* =====================================================================
+ * AIRLINQ BLUE — LIGHT-ONLY chrome, active nav row, and bounded legacy sweep
+ *
+ * WHY THIS BLOCK EXISTS AT ALL
+ * The light theme has NO rail/toolbar chrome rules today. Every chrome rule in
+ * this stylesheet lives inside the single `.tb-dark {` block above (verified by
+ * brace scan, not by eye) and therefore never applies in light. The light rail
+ * and toolbar were WHITE/transparent, so sheet ink was readable on them. Now
+ * that --aq-sidebar is #0a1435 and --aq-header is #1c2545, the light chrome
+ * needs its own ink rules — they must be CREATED here, not edited above.
+ *
+ * WHY `.tb-default:not(.tb-dark)` AND NOT PLAIN `.tb-default`
+ * <body class="tb-default"> is STATIC: index.html sets it and theme.service.ts
+ * only adds/removes `tb-dark` on top. A `.tb-default`-scoped rule therefore
+ * ALSO matches in the dark theme. `:not(.tb-dark)` is structurally false
+ * whenever tb-dark is present, so not one declaration below can reach dark.
+ * That makes dark safety a property of the SELECTOR, not a coincidence of the
+ * values — which is what the "dark renders identically" requirement needs.
+ * See docs/adr/0004-theme-scoped-chrome-rules-and-chrome-ink-tokens.md.
+ *
+ * PLACEMENT: after the dark block closes, before the shared anatomy block, so
+ * that on a specificity tie this wins in light while the anatomy rules keep
+ * owning geometry.
+ *
+ * NO `!important` IS ADDED ANYWHERE IN THIS BLOCK. Where a rule has to win, it
+ * wins by matching or exceeding the competing selector's depth. Two rules that
+ * could NOT win that way (rail nav labels and rail icons) are deliberately
+ * ABSENT here and are solved instead by changing the token reference inside
+ * side-menu.component.scss — removing the cascade conflict rather than
+ * escalating it. See docs/design/airlinq-blue-light-recolour.md sections 2.3
+ * and 3.2.
+ * ===================================================================== */
+
+/* ---- N1: top toolbar surface + default ink ---------------------------------
+   Beats home.component.scss:249-250, which compiles to [_nghost-x]
+   .tb-primary-toolbar = (0,2,0), non-important. */
+.tb-default:not(.tb-dark) .tb-primary-toolbar,
+.tb-default:not(.tb-dark) mat-toolbar.tb-primary-toolbar {
+  background: var(--aq-header);
+  color: var(--aq-chrome-ink);
+}
+
+/* ---- N2: toolbar text: breadcrumb, tool row, page title ---- */
+.tb-default:not(.tb-dark) .tb-primary-toolbar .tb-breadcrumb,
+.tb-default:not(.tb-dark) .tb-primary-toolbar .mat-toolbar-tools,
+.tb-default:not(.tb-dark) .tb-primary-toolbar h1 {
+  color: var(--aq-chrome-ink);
+}
+
+/* ---- N3: toolbar icon glyphs -----------------------------------------------
+   Must beat Material's --mat-icon-color default rgba(0, 0, 0, .54). */
+.tb-default:not(.tb-dark) .tb-primary-toolbar .mat-mdc-icon-button .mat-icon,
+.tb-default:not(.tb-dark) .tb-primary-toolbar tb-icon,
+.tb-default:not(.tb-dark) .tb-primary-toolbar .mat-icon {
+  color: var(--aq-chrome-ink-2);
+}
+.tb-default:not(.tb-dark) .tb-primary-toolbar .mat-mdc-icon-button:hover .mat-icon {
+  color: var(--aq-chrome-ink);
+}
+
+/* ---- N4: toolbar disabled glyph (3:1 non-text floor) ---- */
+.tb-default:not(.tb-dark) .tb-primary-toolbar .mat-mdc-icon-button[disabled] .mat-icon {
+  color: var(--aq-chrome-ink-disabled);
+}
+
+/* ---- N5/N6: breadcrumb parents, dividers, current entry --------------------
+   Selectors are taken from the REAL toolbar breadcrumb markup
+   (shared/components/breadcrumb.component.html, reached via
+   home.component.html:74 -> <tb-breadcrumb>):
+
+     parent entry   bare <a [routerLink]>            — no .tb-inactive
+     separator      <span class="divider">           — NOT .state-divider
+     last separator <span class="divider last-divider">
+     current entry  bare <span>                      — no .tb-active/.state-entry
+
+   The earlier .tb-inactive / .tb-active / .state-divider / .state-entry forms
+   were dead here: .state-* exist only in the dashboard-state controllers
+   (dashboard-page/states/{entity,default}-state-controller.component.html),
+   a DIFFERENT component that is not part of this work item's scope, and
+   .tb-inactive / .tb-active are not emitted by the breadcrumb at all. They are
+   dropped rather than carried, so the ramp below is the only thing painting.
+   The dark-block equivalents at :1849-1851 keep their .state-* forms untouched.
+
+   NB: the L2 sweep rule below also matches a breadcrumb anchor and is emitted
+   later in this block, so at equal specificity it would win and paint the
+   breadcrumb parent --aq-link #2067ff — only 3.18:1 on the #1c2545 toolbar.
+   One extra class (.tb-primary-toolbar) puts these at (0,4,1) so chrome ink-2
+   wins on the toolbar while L2 still owns anchors on the sheet.
+
+   COMPOSITING: breadcrumb.component.scss:42 sets opacity:.75 on the anchors
+   and :63 on .divider (its :host compiles to an attribute selector, so it is
+   a component-scoped competitor that .tb-default:not(.tb-dark) does NOT
+   outrank — see ADR 0004). Measured on the rendered page, the DECLARED colour
+   is therefore not the painted pixel. Before this rule all four tiers
+   inherited --aq-chrome-ink and painted 7.22 / 7.22 / 11.73 / 11.73:1 — the
+   three-tier ramp was absent, not merely compressed. Neutralising the opacity
+   to 1 here (opacity is not geometry) yields a separated ramp:
+     current  --aq-chrome-ink    #dbe4f5 = 11.73:1 on #1c2545
+     parents  --aq-chrome-ink-2  #c3ccdf =  9.30:1
+     dividers --aq-chrome-ink-3  #a9b6d4 =  7.38:1
+   Leaving the opacity in place would instead give 11.73 / 5.87 / 4.82:1, with
+   the divider only 0.32 above the AA floor and the parents visually merged
+   into the current entry. Both were measured; the numbers chose this form. */
+.tb-default:not(.tb-dark) .tb-primary-toolbar .tb-breadcrumb a {
+  color: var(--aq-chrome-ink-2);
+  opacity: 1;
+}
+.tb-default:not(.tb-dark) .tb-primary-toolbar .tb-breadcrumb .divider,
+.tb-default:not(.tb-dark) .tb-primary-toolbar .tb-breadcrumb .divider.last-divider {
+  color: var(--aq-chrome-ink-3);
+  opacity: 1;
+}
+/* Current (last) entry — the bare, class-less <span> at the end of the trail.
+   MUST be `span:not([class])`, not `span:not(.divider)`: each PARENT anchor is
+   also wrapped in a <span class="flex flex-row gap-2">, which
+   `span:not(.divider)` matches too. Because breadcrumb.component.scss:44 sets
+   `color: inherit` on the anchor and component styles are injected after this
+   file, the anchor would then inherit --aq-chrome-ink from that wrapper and the
+   parents would paint 11.73:1 — identical to the current entry, merging the top
+   two tiers of the ramp. Measured that way round before narrowing the selector.
+   `:not([class])` matches only the current entry, which carries no class at all.
+
+   The inherited `a:last-child` form is DELIBERATELY NOT carried over. Against
+   this markup it is wrong twice: every parent anchor is the only child of its
+   own wrapper <span>, so `a:last-child` matches ALL of them, and at (0,4,2) it
+   outranks the parents rule above at (0,4,1) — so every parent painted
+   --aq-chrome-ink 11.73:1 instead of ink-2 9.30:1, merging the ramp's top two
+   tiers. It also never matches the real current entry, which is a <span>.
+   Measured that way round first; the browser's matched-rule list named
+   `a:last-child` as the winner. */
+.tb-default:not(.tb-dark) .tb-primary-toolbar .tb-breadcrumb span:not([class]) {
+  color: var(--aq-chrome-ink);
+}
+
+/* ---- N7: rail label custom property + rail dividers ------------------------
+   Deliberately does NOT set `background`: the rail's navy already comes from
+   --aq-sidebar via home.component.scss:126, and a background here would lose
+   to that (0,3,1) rule anyway. */
+.tb-default:not(.tb-dark) .tb-site-sidenav {
+  --mat-button-text-label-text-color: var(--aq-chrome-ink-2);
+}
+/* side-menu.component.html:29 renders a bare <mat-divider>; there is no
+   .tb-side-menu-divider class anywhere in the codebase, so only this form. */
+.tb-default:not(.tb-dark) .tb-site-sidenav mat-divider {
+  border-color: var(--aq-chrome-divider);
+}
+
+/* ---- N12: rail user block ink --------------------------------------------
+   Handled INSIDE user-menu.component.scss (:171 / :182) rather than here.
+   Those rules compile to
+     [_nghost-x] .tb-site-sidenav button.mat-mdc-button:not(.mat-mdc-icon-button)
+       .tb-user-menu span.tb-user-{display-name,authority}
+   = (0,5,1), so any global form in this file loses outright regardless of
+   source order. Per ADR 0004 the fix is to change the token REFERENCE in the
+   component (--aq-text -> --aq-chrome-ink, --aq-text-3 -> --aq-chrome-ink-3),
+   which is dark-neutral because each chrome-ink dark value is a byte-copy of
+   the corresponding --aq-text* dark value. Measured on the rail #0a1435:
+     display name  #333333  1.43:1  ->  #dbe4f5  14.11:1
+     authority     #6b7789  3.97:1  ->  #a9b6d4   8.87:1  (was an AA FAIL)
+   The old selector here also named .tb-user-name, which does not exist — the
+   real class is .tb-user-display-name (user-menu.component.html:30). */
+
+/* ---- N10: the active nav row gradient -------------------------------------
+   (0,7,0) — one class deeper than side-menu.component.scss:119-120, which
+   compiles to [_nghost-x] .tb-side-menu a.mat-mdc-button.mat-mdc-button-base
+   .tb-active = (0,6,0) and is NOT !important. So this wins on specificity with
+   no !important of its own.
+
+   BOTH declarations are required. A gradient is a `background-image`; it does
+   NOT override `background-color` — the two are separate longhands and the
+   image merely paints OVER the colour. With only background-image declared,
+   #2067ff from --aq-accent-container would still sit underneath and the
+   computed background-color would still read rgb(32, 103, 255), which is a
+   value the verification samples. Declaring background-color: transparent at
+   the same (0,7,0) beats the (0,6,0) colour declaration outright.
+
+   Dark is unaffected twice over: (a) :not(.tb-dark) makes the rule inert, and
+   (b) even if it applied, --aq-nav-active-grad is `none` in dark so the
+   background-image is a no-op and the dark block's !important flat pill wins. */
+.tb-default:not(.tb-dark) .tb-site-sidenav .tb-side-menu
+  a.mat-mdc-button.mat-mdc-button-base.tb-active {
+  background-color: transparent;
+  background-image: var(--aq-nav-active-grad);
+}
+
+/* ---- N11: rail hover on non-active rows -----------------------------------
+   (0,8,0), beating side-menu.component.scss:112-115 at (0,7,0). Must NOT set
+   background-image — the gradient belongs to the active row alone. */
+.tb-default:not(.tb-dark) .tb-site-sidenav .tb-side-menu
+  a.mat-mdc-button.mat-mdc-button-base:hover:not(.tb-active),
+.tb-default:not(.tb-dark) .tb-site-sidenav .tb-side-menu
+  a.mat-mdc-button.mat-mdc-button-base.tb-hovered:not(.tb-active) {
+  background-color: var(--aq-hover);
+  --mat-button-text-label-text-color: var(--aq-chrome-ink);
+}
+.tb-default:not(.tb-dark) .tb-site-sidenav .tb-side-menu
+  a.mat-mdc-button.mat-mdc-button-base:hover:not(.tb-active) .mat-icon,
+.tb-default:not(.tb-dark) .tb-site-sidenav .tb-side-menu
+  a.mat-mdc-button.mat-mdc-button-base.tb-hovered:not(.tb-active) .mat-icon {
+  color: var(--aq-chrome-ink);
+}
+
+/* =====================================================================
+ * BOUNDED LEGACY-LITERAL SWEEP — LIGHT ONLY (L1-L7)
+ *
+ * Seven hardcoded colour literals that are actually VISIBLE on the in-scope
+ * routes (login, home dashboard, Devices, Alarms, the six auth pages) and
+ * clash with Airlinq Blue. Each one is handled by DUPLICATING the original
+ * selector here at equal-or-greater depth and re-pointing only the colour;
+ * the original declaration is LEFT IN PLACE. That is what makes dark provably
+ * byte-identical: :not(.tb-dark) is false in dark, so the original literal
+ * still wins there.
+ *
+ * The remaining ~67 literals are catalogued in the follow-up requirement
+ * rather than fixed here — see docs/design/airlinq-blue-light-recolour.md
+ * section 6.2.
+ * ===================================================================== */
+
+/* L1 — body canvas. A `body` DESCENDANT selector cannot reach <body> itself,
+   so the light-only form has to be a compound on body: (0,2,1). */
+body.tb-default:not(.tb-dark) {
+  background-color: var(--aq-bg);
+}
+
+/* L2/L3 — global anchor colour and its bottom border. The original at
+   styles.scss:83 is a:not(.mat-mdc-button-base, .mdc-tab) = (0,2,1); the
+   :not() list is repeated verbatim so no button or tab is ever caught. */
+.tb-default:not(.tb-dark) a:not(.mat-mdc-button-base, .mdc-tab) {
+  color: var(--aq-link);
+  border-bottom-color: var(--aq-border);
+}
+
+/* L4 — anchor hover/focus underline. */
+.tb-default:not(.tb-dark) a:hover:not(.mat-mdc-button-base, .mdc-tab),
+.tb-default:not(.tb-dark) a:focus:not(.mat-mdc-button-base, .mdc-tab) {
+  border-bottom-color: var(--aq-link);
+}
+
+/* L5 — form validation message. rgb(221, 44, 0) is an orange-red beside
+   #dc4848; --aq-error-text #c23333 is also the higher-contrast choice
+   (5.50:1 vs 4.6:1 on the sheet). */
+.tb-default:not(.tb-dark) .tb-error-message {
+  color: var(--aq-error-text);
+}
+
+/* L6 — selected table row. The original resolves to
+   .tb-default .mat-mdc-row.mat-row-select.mat-mdc-selected:not(.tb-current-entity)
+   = (0,4,0); this duplicate reaches (0,5,0) via .mat-mdc-table. */
+.tb-default:not(.tb-dark) .mat-mdc-table .mat-mdc-row.mat-row-select.mat-mdc-selected:not(.tb-current-entity),
+.tb-default:not(.tb-dark) .mat-mdc-table .mat-mdc-header-row.mat-row-select.mat-mdc-selected:not(.tb-current-entity) {
+  background-color: var(--aq-selected);
+}
+
+/* L7 — hovered table row. Only the FALLBACK inside the existing var() is
+   changed, so any consumer that actually sets --tb-hover-color is unaffected.
+   Original resolves to (0,4,0); this is (0,5,0). */
+.tb-default:not(.tb-dark) .mat-mdc-table .mat-mdc-row:hover:not(.tb-current-entity) {
+  background-color: var(--tb-hover-color, var(--aq-hover));
 }
 
 /* =====================================================================
@@ -2132,4 +2505,385 @@ pre.tb-highlight {
     outline: 2px solid var(--aq-accent);
     outline-offset: 2px;
   }
+}
+
+/* =====================================================================
+ * ROUND-3 G3 FIXES (F2, F4) — LIGHT ONLY
+ *
+ * Both rules carry `:not(.tb-dark)`, so dark cannot match them structurally
+ * (ADR 0004). No !important, no geometry, no color-mix() authored here.
+ * ===================================================================== */
+
+/* ---- F2: the /home dashboard route had NO navy header ---------------------
+   Measured on the real authenticated /home route: `.tb-primary-toolbar` does
+   not exist there (querySelector -> null). The dashboard header is instead a
+   bare `<mat-toolbar class="mat-toolbar mat-toolbar-single-row">` rendered by
+   dashboard-toolbar.component.html:27 inside <mat-fab-toolbar>, and it painted
+   `rgba(0, 0, 0, 0)` — transparent over the light sheet.
+
+   SCOPE (remembering NEW-1, where an over-broad twin cost a round): the
+   ancestor chain measured in the browser is
+     section.tb-dashboard-toolbar > tb-dashboard-toolbar > mat-fab-toolbar
+       > div.mat-fab-toolbar-wrapper > div.mat-fab-toolbar-content > mat-toolbar
+   Anchoring on `section.tb-dashboard-toolbar tb-dashboard-toolbar` cannot reach
+   any other mat-toolbar. Verified on the same page: the six live mat-toolbar
+   instances are this one, two inside .tb-site-sidenav (rail head + rail body)
+   and three `.mat-mdc-table-toolbar` inside dashboard widgets — none of which
+   match this selector.
+
+   WHY THE BACKGROUND LANDS ON `div.mat-fab-toolbar-background`, NOT ON THE
+   `mat-toolbar` ITSELF: a pre-existing rule
+     mat-fab-toolbar .mat-toolbar.mat-toolbar-single-row {
+       background-color: transparent !important;
+     }
+   already owns that element, and `!important` beats any non-important rule
+   whatever its specificity (found by asking the browser which background rules
+   matched, on the real authenticated route). Adding a competing `!important` is
+   forbidden this round, so the navy goes on the toolbar's PARENT instead.
+   Measured on the real route the two boxes are geometrically identical - both
+   1326x56 at y=8 - and `.mat-fab-toolbar-content` carries no `!important`
+   background rule at all, so the painted band is the same band, with no
+   geometry change and no `!important`.
+
+   AND WHY NOT `.mat-fab-toolbar-content`, WHICH WAS THE FIRST ATTEMPT: that
+   element DID compute to rgb(28,37,69) - every getComputedStyle assertion
+   passed - but the SCREENSHOT still showed a white band. `document.
+   elementFromPoint` at the middle of the band returns
+   `div.mat-fab-toolbar-background`, which is `position: absolute; z-index: 21`
+   and paints `rgb(255,255,255)` OVER the content div. A winning declaration on
+   a lower-stacked element is not a painted pixel. That div is the real header
+   surface, so the navy goes there and the painted band is verified by
+   screenshot as well as by computed style. */
+.tb-default:not(.tb-dark) section.tb-dashboard-toolbar tb-dashboard-toolbar
+  .mat-fab-toolbar-background {
+  background-color: var(--aq-header);
+}
+
+/* ---- F2 continued: the ink that now sits on that navy header --------------
+   The dashboard toolbar's contents were tuned for the LIGHT SHEET and measured
+   (before this change, on the real route):
+     breadcrumb current entry   rgba(0,0,0,.76)
+     icon buttons / mat-icon    rgba(0,0,0,.87)
+     timewindow tb-icon + label rgb(82,92,110)   (= --aq-text-2)
+   On --aq-header #1c2545 every one of those is far below 4.5:1, so making the
+   header navy REQUIRES re-inking its contents in the same change. Chrome ink
+   on #1c2545 measures 11.73 / 9.30 / 7.38:1 for ink / ink-2 / ink-3.
+
+   The breadcrumb is NOT covered by this rule: it declares its own colour in
+   breadcrumb.component.scss, so the inherited `color` above does not reach it.
+   It gets its own three-tier ramp in the next block - measured at 1.33:1 on
+   the navy before that ramp was added, so it is load-bearing, not cosmetic. */
+.tb-default:not(.tb-dark) section.tb-dashboard-toolbar tb-dashboard-toolbar mat-toolbar {
+  color: var(--aq-chrome-ink);
+  --mat-toolbar-container-text-color: var(--aq-chrome-ink);
+  --mat-icon-button-icon-color: var(--aq-chrome-ink);
+  --mat-button-text-label-text-color: var(--aq-chrome-ink);
+}
+.tb-default:not(.tb-dark) section.tb-dashboard-toolbar tb-dashboard-toolbar
+  mat-toolbar .mat-icon,
+.tb-default:not(.tb-dark) section.tb-dashboard-toolbar tb-dashboard-toolbar
+  mat-toolbar tb-icon {
+  color: var(--aq-chrome-ink-2);
+}
+.tb-default:not(.tb-dark) section.tb-dashboard-toolbar tb-dashboard-toolbar
+  mat-toolbar mat-divider {
+  border-color: var(--aq-chrome-divider);
+}
+
+/* ---- F2 continued: the breadcrumb on the newly-navy dashboard header ------
+   Measured on the real /home route AFTER the navy landed: the breadcrumb was
+   still painting `rgba(0,0,0,.76)` = 1.33:1 on #1c2545, an AA FAIL. The
+   existing three-tier ramp above is scoped to `.tb-primary-toolbar`, which does
+   NOT exist on this route (that is finding F2's whole premise), so it could not
+   reach this instance. This is the same ramp, same tokens, same opacity
+   neutralisation, re-anchored on the dashboard toolbar - NOT an escalation of
+   the .tb-primary-toolbar rule, which must keep owning the shell toolbar alone.
+
+   Scope note: `section.tb-dashboard-toolbar tb-dashboard-toolbar` cannot reach
+   the two off-toolbar <tb-breadcrumb> instances that round-2 finding NEW-1 was
+   about (dashboard-page.component.html:81 and widget-editor.component.html:52
+   render inside the router-outlet, not inside tb-dashboard-toolbar), so those
+   keep the light-sheet inks NEW-1 restored to them.
+
+   Ramp on #1c2545, same as the shell toolbar:
+     current  --aq-chrome-ink    #dbe4f5 = 11.73:1
+     parents  --aq-chrome-ink-2  #c3ccdf =  9.30:1
+     dividers --aq-chrome-ink-3  #a9b6d4 =  7.38:1
+   `span:not([class])` selects the class-less current entry - NOT
+   `span:not(.divider)`, which also matches each parent anchor's wrapper span
+   and, via the component's `color: inherit`, would merge the top two tiers. */
+.tb-default:not(.tb-dark) section.tb-dashboard-toolbar tb-dashboard-toolbar
+  .tb-breadcrumb a {
+  color: var(--aq-chrome-ink-2);
+  opacity: 1;
+}
+.tb-default:not(.tb-dark) section.tb-dashboard-toolbar tb-dashboard-toolbar
+  .tb-breadcrumb .divider,
+.tb-default:not(.tb-dark) section.tb-dashboard-toolbar tb-dashboard-toolbar
+  .tb-breadcrumb .divider.last-divider {
+  color: var(--aq-chrome-ink-3);
+  opacity: 1;
+}
+.tb-default:not(.tb-dark) section.tb-dashboard-toolbar tb-dashboard-toolbar
+  .tb-breadcrumb span:not([class]) {
+  color: var(--aq-chrome-ink);
+}
+
+/* ---- F2 continued (G3 ROUND 2, BLOCKER-1 + MAJOR-2): the REST of the ink on
+       the newly-navy dashboard header ------------------------------------------
+   The round-1 F2 ramp above covered <tb-breadcrumb>'s OWN parts (`a`,
+   `.divider`, class-less current `span`). It did NOT cover the DASHBOARD-STATE
+   controller that renders INSIDE that same breadcrumb, nor the timewindow
+   label. Both were found by decoding the actual PNG pixel: an ancestor-walking
+   `bgOf()` reports `#eeeeee` for this header, because the navy sits on
+   `div.mat-fab-toolbar-background` - a z-index:21 SIBLING layer, not an
+   ancestor - so a computed-style pass measured the wrong backdrop and missed
+   these two entirely.
+
+   BLOCKER-1 - the dashboard title. `section.tb-dashboard-toolbar
+   span.state-entry.last-entry` ("Container Operations") painted
+   `rgba(0,0,0,0.76)` = 1.33:1 on #1c2545, an AA FAIL and illegible. It does NOT
+   inherit from the ramp above: `entity-state-controller.component.scss:20`
+   declares `.entity-state-controller { color: rgba(0,0,0,0.76) }` on an
+   ANCESTOR of `.state-entry`, and `.state-entry` itself is `color: inherit`
+   (:42), so the component's own colour wins over anything the <tb-breadcrumb>
+   ancestor sets. Causation proven in-browser: neutralising the navy restored
+   backdrop #eeeeee -> 9.94:1 PASS, i.e. this pair PASSED before F2 made the
+   header navy and FAILED after - AC-18's blocking condition, and AC-31
+   requires every ink on this header to clear 4.5:1.
+
+   These `.state-entry` / `.state-divider` classes were deliberately dropped as
+   out-of-scope at G2.5 round 1 (MEMORY.md line 36 records them as belonging to
+   `dashboard-page/states/*-state-controller`, a different component from the
+   toolbar breadcrumb). That was CORRECT at the time - nothing had made that
+   surface navy. F2 brought them into scope, so they are re-inked here, scoped
+   to the dashboard toolbar so the ruling that they are not part of the shell
+   breadcrumb still holds everywhere else.
+
+   Specificity, no new `!important`: the competing declaration compiles to
+   `[_nghost-<entityStateController>] .entity-state-controller` = (0,2,1) and is
+   NOT `!important`. The rules below are (0,4,2) / (0,4,3), so they win on
+   specificity alone. `opacity: 1` neutralises the component's `.75` on
+   `:not(.last-entry)` (:45) and on `.state-divider` (:31) - per MEMORY.md
+   line 35, a winning `color` under an `opacity` still paints the wrong pixel.
+
+   Ramp tiers on #1c2545 (same three tiers as the breadcrumb above):
+     current/last entry  --aq-chrome-ink    #dbe4f5 = 11.73:1
+     parent entries      --aq-chrome-ink-2  #c3ccdf =  9.30:1
+     dividers (non-text) --aq-chrome-ink-3  #a9b6d4 =  7.38:1  */
+.tb-default:not(.tb-dark) section.tb-dashboard-toolbar tb-dashboard-toolbar
+  .state-entry {
+  color: var(--aq-chrome-ink-2);
+  opacity: 1;
+}
+.tb-default:not(.tb-dark) section.tb-dashboard-toolbar tb-dashboard-toolbar
+  .state-entry.last-entry {
+  color: var(--aq-chrome-ink);
+  opacity: 1;
+}
+.tb-default:not(.tb-dark) section.tb-dashboard-toolbar tb-dashboard-toolbar
+  .state-divider,
+.tb-default:not(.tb-dark) section.tb-dashboard-toolbar tb-dashboard-toolbar
+  .state-divider.last-divider {
+  color: var(--aq-chrome-ink-3);
+  opacity: 1;
+}
+/* `default-state-controller` renders a <mat-select> instead of spans and sets
+   its trigger ink through a custom property
+   (`default-state-controller.component.scss:47`
+   `--mat-select-enabled-trigger-text-color: rgba(0,0,0,0.76)`), so it needs the
+   property, not a `color`. Same 11.73:1 tier as the last entry. */
+.tb-default:not(.tb-dark) section.tb-dashboard-toolbar tb-dashboard-toolbar
+  .mat-mdc-select.default-state-controller {
+  --mat-select-enabled-trigger-text-color: var(--aq-chrome-ink);
+}
+
+/* ---- D-NEW2: the MOBILE branch of entity-state-controller -----------------
+   Human ruling D-NEW2 (G3): fix this cycle. The BLOCKER-1 fix above covers
+   only the DESKTOP branch of this component. `entity-state-controller.component.html`
+   renders two mutually exclusive branches on `isMobile` (:19 `@if (!isMobile)`
+   / :32 `@else`), and the `@else` branch at :32-46 was left uncovered:
+
+     :34  <mat-select>            when stateObject.length > 1
+     :43  <h1>                    when stateObject.length == 1   <- the /home case
+
+   WHY THE DESKTOP PASS COULD NOT SEE IT. Two independent reasons, both verified
+   rather than assumed:
+   1. Neither element renders at a desktop viewport at all - the branch is
+      exclusive on `isMobile`, so a 1920-wide check exercises only the spans.
+   2. The diff DOES already carry an `h1` rule (N2, :1960), but it is scoped to
+      `.tb-primary-toolbar`, and `section.tb-dashboard-toolbar` is a SEPARATE
+      scope, not nested under it. Verified structurally in the templates:
+      `mat-toolbar.tb-primary-toolbar` opens at `home.component.html:63` and
+      CLOSES at :106; the `<router-outlet>` that renders `dashboard-page.component`
+      (and therefore `section.tb-dashboard-toolbar`, `dashboard-page.component.html:35`)
+      is at :114, inside a SIBLING `div.tb-main-content`. So N2's `h1` term can
+      never match the mobile `h1` here, however much it looks like it should.
+
+   RULE 1 - the mobile <h1> at :43. It declares NO `color` of its own: the
+   component's `h1` rule (`entity-state-controller.component.scss:59-66`) sets
+   only geometry (overflow / text-overflow / white-space / font-size /
+   line-height / font-weight). So it INHERITS `.entity-state-controller
+   { color: rgba(0,0,0,0.76) }` (:20-21) - the exact same interception that
+   caused BLOCKER-1 - painting 1.33:1 on the navy #1c2545, an AA FAIL and
+   illegible. It is the same dashboard title as the desktop
+   `.state-entry.last-entry`, just the mobile rendering, so it gets the SAME
+   top ink tier `--aq-chrome-ink` = #dbe4f5 = 11.73:1.
+
+   RULE 2 - the mobile <mat-select> at :34. Like `default-state-controller`
+   above, its trigger ink is painted through a CUSTOM PROPERTY, not `color`:
+   `entity-state-controller.component.scss:75` sets
+   `--mat-select-enabled-trigger-text-color: rgba(0,0,0,0.76)` under
+   `:host ::ng-deep .mat-mdc-select`. A `color` rule therefore cannot fix it -
+   the same shape as MAJOR-2 and as the `.default-state-controller` select
+   already handled. The existing select rule above does NOT match this one: it
+   is scoped to `.mat-mdc-select.default-state-controller`, and THIS select
+   (a bare `<mat-select>` in a different component's template) carries no such
+   class. Same 11.73:1 top tier - it is the state picker for the same title.
+
+   SPECIFICITY, no new `!important`. Counting classes/attrs/pseudo-classes (b)
+   and elements (c); `:not(.tb-dark)` contributes its argument's one class:
+     Rule 1  .tb-default:not(.tb-dark) section.tb-dashboard-toolbar
+             tb-dashboard-toolbar .entity-state-controller h1
+             b = .tb-default 1 + .tb-dark 1 + .tb-dashboard-toolbar 1
+                 + .entity-state-controller 1                            = 4
+             c = section 1 + tb-dashboard-toolbar 1 + h1 1               = 3
+             => (0,4,3)
+     Rule 2  .tb-default:not(.tb-dark) section.tb-dashboard-toolbar
+             tb-dashboard-toolbar .entity-state-controller .mat-mdc-select
+             b = .tb-default 1 + .tb-dark 1 + .tb-dashboard-toolbar 1
+                 + .entity-state-controller 1 + .mat-mdc-select 1        = 5
+             c = section 1 + tb-dashboard-toolbar 1                      = 2
+             => (0,5,2)
+   The competing declarations both live INSIDE the component and are NOT
+   `!important`:
+     Rule 1's competitor is the INHERITED `color` from
+       `[_nghost-<esc>] .entity-state-controller`                        = (0,2,1)
+       (an inherited value loses to ANY declaration that matches the element
+       itself, so (0,4,3) is far more than sufficient - and no `opacity`
+       composites the <h1>, unlike `.state-entry:not(.last-entry)`, so no
+       `opacity: 1` is needed here.)
+     Rule 2's competitor is
+       `[_nghost-<esc>] .mat-mdc-select`                                 = (0,2,1)
+   So both win on specificity alone. Escalation beyond this is neither needed
+   nor added: no new `!important`, and both rules carry `:not(.tb-dark)` so they
+   are STRUCTURALLY unable to match in dark (ADR 0004).
+
+   Ramp tier on #1c2545, same as the desktop last entry:
+     mobile title + state picker  --aq-chrome-ink  #dbe4f5 = 11.73:1  */
+.tb-default:not(.tb-dark) section.tb-dashboard-toolbar tb-dashboard-toolbar
+  .entity-state-controller h1 {
+  color: var(--aq-chrome-ink);
+}
+.tb-default:not(.tb-dark) section.tb-dashboard-toolbar tb-dashboard-toolbar
+  .entity-state-controller .mat-mdc-select {
+  --mat-select-enabled-trigger-text-color: var(--aq-chrome-ink);
+}
+
+/* MAJOR-2 - the timewindow label. `.tb-timewindow-label`
+   ("Realtime - last 1 hour") painted `#6b7789` = 3.30:1 on #1c2545,
+   pixel-confirmed; it needs 4.5:1 as text. It measured 3.91:1 on the light
+   sheet BEFORE the navy, so it was already failing and is NOT a new AC-18
+   regression - but the navy worsened it and AC-31 requires it to clear 4.5:1.
+
+   WHY THIS IS A TOKEN OVERRIDE AND NOT A `color` RULE: the declaration that
+   paints it is the PRE-EXISTING shared rule at :1689,
+     `.tb-default { .tb-timewindow, .tb-timewindow-label { color: var(--aq-text-3) !important } }`
+   which is `!important`. Per MEMORY.md line 17, `!important` beats a
+   non-important rule at ANY specificity, and this round forbids adding a new
+   `!important`. Narrowing :1689 is also wrong - it is shared with every
+   in-widget timewindow and predates this work.
+   So instead of fighting the declaration, this re-points the TOKEN it reads,
+   scoped to this header only. The `!important` rule still wins and still
+   resolves `var(--aq-text-3)`; inside this scope that now resolves to
+   #a9b6d4 = 7.38:1 instead of #6b7789 = 3.30:1.
+   Blast radius inside the scope, enumerated over all 16 `var(--aq-text-3)`
+   consumers in this file: only :1689 (`.tb-timewindow`/`.tb-timewindow-label`)
+   is reachable inside `section.tb-dashboard-toolbar tb-dashboard-toolbar`. The
+   other light-block consumer, :1699 `.mat-mdc-header-cell`, is a TABLE header
+   cell and renders in the dashboard body, never in this toolbar; the remaining
+   14 split into 10, plus 4 grid/table consumers unreachable in this scope.
+   The 10 (:1746, :1761, :1779, :1855, :1872, :1876, :1891, :1893, :1895,
+   :1906) are inside the `.tb-dark` rule block and cannot match a
+   `:not(.tb-dark)`-scoped subtree.
+   The 4 are :2303 `.tb-entity-table-search`, :2314 its `input::placeholder`,
+   :2372 the `.tb-entity-table-paginator` region and :2427
+   `mat-toolbar.mat-mdc-table-toolbar .mdc-floating-label`. Each was checked
+   individually against this scope's container template, not dismissed as a
+   category: `dashboard-toolbar.component.html` contains NO `tb-entity-table-*`
+   node and NO `mat-mdc-table-toolbar` node, so none of those four selectors
+   can ever match a descendant of `section.tb-dashboard-toolbar
+   tb-dashboard-toolbar`. They render in the dashboard body or on grid routes.
+   Re-verify with: `grep -nE 'tb-entity-table-|mat-mdc-table-toolbar' \
+   ui-ngx/src/app/modules/home/components/dashboard-page/dashboard-toolbar.component.html`
+   Light-only, dark untouched, no `!important` added. */
+.tb-default:not(.tb-dark) section.tb-dashboard-toolbar tb-dashboard-toolbar {
+  --aq-text-3: var(--aq-chrome-ink-3);
+}
+
+
+/* ---- F4: primary CTAs still painted the pre-change teal -------------------
+   Measured on the real /entities/devices route: the "+ Add device" CTA is
+   `<button color="primary" class="mat-mdc-unelevated-button mat-primary">`
+   painting `rgb(11, 107, 120)` = #0b6b78 with a white label, on an otherwise
+   fully-blue grid route.
+
+   BLAST RADIUS, enumerated from the real DOM before changing anything: the
+   Sass M2 primary palette ($tb-mat-teal, theme.scss:26-56) feeds 47 distinct
+   `--mat-*` custom properties on that one button - button, slide-toggle, badge,
+   form-field, slider, pseudo-checkbox, progress-spinner, stepper, option,
+   datepicker and select families. Repointing the PALETTE would move all 47, in
+   BOTH themes: the palette is a compile-time Sass map with no theme scope, so
+   "dark keeps today's teal" is unreachable that way. This rule therefore does
+   not touch the palette at all.
+
+   THE RULE THAT ACTUALLY PAINTS THE TEAL, read out of the COMPILED styles.css
+   (Material generates it; it is in no source file):
+     .tb-default .mat-mdc-button.mat-primary,
+     .tb-default .mat-mdc-unelevated-button.mat-primary,
+     .tb-default .mat-mdc-raised-button.mat-primary,
+     .tb-default .mat-mdc-outlined-button.mat-primary,
+     .tb-default .mat-tonal-button.mat-primary { ...19 properties... }
+   = (0,3,0) ON THE BUTTON ITSELF. A first attempt declared the overrides on
+   `.tb-default:not(.tb-dark)` = (0,2,0) at the ancestor; measured on the real
+   route it inherited down correctly (--mat-button-filled-container-color was
+   #2067ff on div.pl-3, the button's parent) and was then overridden by the
+   button's own (0,3,0) declaration back to #0b6b78 - the same "the element
+   re-declares the token on itself" hijack as F3. Matching Material's own
+   selector shape and adding `:not(.tb-dark)` lands this at (0,4,0), which wins
+   with no !important.
+
+   Dark is safe twice over: `:not(.tb-dark)` is structural, AND Material emits a
+   parallel `.tb-dark ... .mat-primary` block at #37b6c9 that this cannot reach.
+   Dark keeps today's teal exactly as the ruling requires.
+
+   ONLY THE THREE CONTAINER FILLS MOVE. Of the 19 properties in that block:
+     --mat-button-filled-container-color     (mat-mdc-unelevated-button: the CTA)
+     --mat-button-protected-container-color  (mat-mdc-raised-button)
+     --mat-button-tonal-container-color      (mat-tonal-button)
+   Their label properties are already `white`, and white on #2067ff = 4.72:1
+   (AA PASS), so no label property needs to change.
+
+   DELIBERATELY NOT REPOINTED, and this is the load-bearing exclusion:
+     --mat-button-text-label-text-color      (low-emphasis text buttons)
+     --mat-button-outlined-label-text-color  (outlined buttons)
+     --mat-button-*-ripple-color / *-state-layer-color
+   Those paint the primary colour AS TEXT ON THE SHEET, not as a fill. Measured
+   on the real /entities/devices route the "Device filter" text button sits on
+   div.tb-entity-table-content rgb(247,248,250) = #f7f8fa, where
+     #0b6b78 (today) = 5.83:1  PASS
+     #2067ff         = 4.45:1  AA FAIL
+   Repointing them would be a NEW accessibility regression, so they keep the
+   teal - they are low-emphasis text actions, not the "primary buttons/CTAs"
+   the ruling names. The ripple/state-layer properties are excluded for the same
+   reason and because several are `color-mix()` values this round may not
+   author. */
+.tb-default:not(.tb-dark) .mat-mdc-button.mat-primary,
+.tb-default:not(.tb-dark) .mat-mdc-unelevated-button.mat-primary,
+.tb-default:not(.tb-dark) .mat-mdc-raised-button.mat-primary,
+.tb-default:not(.tb-dark) .mat-mdc-outlined-button.mat-primary,
+.tb-default:not(.tb-dark) .mat-tonal-button.mat-primary {
+  --mat-button-filled-container-color:    var(--aq-accent-container);
+  --mat-button-protected-container-color: var(--aq-accent-container);
+  --mat-button-tonal-container-color:     var(--aq-accent-container);
 }
