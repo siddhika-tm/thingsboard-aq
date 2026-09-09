@@ -39,4 +39,18 @@ export class MenuLinkComponent {
   constructor() {
   }
 
+  /**
+   * AIRLINQ (Q3 / AC-47): the rendered badge text, capped at '99+'. AlarmBadgeService
+   * emits the raw PageData.totalElements, which is unbounded - a busy tenant with 1200
+   * active alarms would paint four digits into a 40px row and overflow the rail. The
+   * cap is PRESENTATION ONLY: the template keeps the uncapped number in the
+   * `cdk-visually-hidden` span, so assistive tech still reports the exact count.
+   * Lives here rather than in menu-toggle because this is the component that renders
+   * the digits - both the top-level row and the nested row go through it.
+   */
+  get badgeLabel(): string {
+    const n = this.badgeCount ?? 0;
+    return n > 99 ? '99+' : String(n);
+  }
+
 }

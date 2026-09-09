@@ -77,7 +77,28 @@ export class MenuService {
   private updateOpenedMenuSections() {
     const openedMenuSections = getCurrentOpenedMenuSections(this.store);
     if (this.currentMenuSections?.length) {
-      this.currentMenuSections.filter(section => section.type === 'toggle' &&
+      // AIRLINQ (AC-48): walk the WHOLE tree, not just the top level, so a nested
+      // toggle restores its persisted open state too. The previous version filtered
+      // `this.currentMenuSections` - the top-level array only - so any toggle below
+      // the first level silently never reopened. Reuses the existing recursive
+      // walker rather than hand-rolling a third recursion; `_availableMenuSections`
+      // is exactly `allMenuSections(this.currentMenuSections)` and is assigned in
+      // buildMenu() immediately before this call.
+      //
+      // AIRLINQ (F7, round 1) - INTENT: recomputing the walk is deliberate, not an
+      // oversight. `buildMenu()` is not this method's only caller: the NavigationEnd
+      // subscription in the constructor calls it on every route change, with no
+      // preceding reassignment of `_availableMenuSections`. Reading that field here
+      // would therefore couple this method to a value another method happens to have
+      // refreshed, and would read a stale array on any path that mutates
+      // `currentMenuSections` without rebuilding. The walk is O(sections) over a
+      // static ~40-node tree on navigation only, so the cost is not worth the
+      // coupling.
+      //
+      // `|| section.active` is deliberate and pre-existing upstream behaviour: the
+      // group containing the current route auto-opens. That is why persistence must
+      // be tested on a group that does NOT contain the active route.
+      this.allMenuSections(this.currentMenuSections).filter(section => section.type === 'toggle' &&
         (openedMenuSections.includes(section.path) || section.active)).forEach(
         section => section.opened = true
       );

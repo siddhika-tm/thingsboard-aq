@@ -61,6 +61,30 @@
   .tb-menu-badge {
     margin-left: auto;
     flex: none;
+    // AIRLINQ (D2): mat-button projects ALL unslotted content into ONE
+    // `span.mdc-button__label`, and side-menu.component.scss:151 makes that
+    // wrapper `display: inline-flex` with no `align-items` - so it defaults to
+    // `stretch` and, on a 40px row, stretched this badge to the full row height.
+    // With `border-radius: 999px` that painted as a tall pill. `line-height: 14px`
+    // sizes the TEXT box only, so it never constrained the ELEMENT.
+    //
+    // Fixed on the badge itself rather than on the shared wrapper: that wrapper
+    // serves every nav row AND the toggle rows, so changing its cross-axis
+    // alignment to fix one chip risks a label shift on 60+ rows. The badge is
+    // owned by THIS component (menu-link.component.html:33), which is where
+    // AC-30 requires the rule to live.
+    //
+    // `align-self` on the child overrides the parent's `align-items` outright -
+    // a different property on a different element, so there is no specificity
+    // contest and no !important (AC-29). Colours are unchanged, so dark is a
+    // no-op by construction (AC-11).
+    align-self: center;
+    box-sizing: border-box;
+    height: 16px;
+    min-width: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     font-size: 10px;
     font-weight: 700;
     letter-spacing: .06em;

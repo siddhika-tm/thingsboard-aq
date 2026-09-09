@@ -1,5 +1,15 @@
 # Requirement — Left menu redesign (Option A · Sectioned) + favicon placement
 
+> **PARTIALLY SUPERSEDED 2026-09-08.** The menu-structure decision in this document
+> (Option A · Sectioned — flat rows under uppercase headings, every page one click away)
+> was **reversed by human decision** in work item `left-menu-defect-fixes`: multi-page
+> groups are collapsible `toggle` parents again, and the collapsed rail shows one icon per
+> group with a click-to-open flyout. The `'section'` heading type itself is **retained**.
+> Rationale and scope in
+> [ADR 0005](../adr/0005-collapsible-menu-groups-supersedes-0003.md), which supersedes
+> [ADR 0003](../adr/0003-sectioned-menu-model.md). Every other requirement in this document
+> (favicon, rail anatomy, the 64px head band, the user block, the alarm badge) still stands.
+
 - **Work item slug:** `left-menu-and-favicon`
 - **Mode:** dev
 - **Task-size class:** `standard` (human-confirmed at G1)

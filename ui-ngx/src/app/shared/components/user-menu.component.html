@@ -34,8 +34,26 @@
     }
   </div>
   <!-- AIRLINQ: overflow affordance (AC-18). Decorative: the whole block is already the
-       popover trigger, so a nested button would add a second tab stop for one action. -->
-  <tb-icon class="material-icons tb-user-overflow" aria-hidden="true">more_vert</tb-icon>
+       popover trigger, so a nested button would add a second tab stop for one action.
+       AIRLINQ (D3): `iconPositionEnd` is REQUIRED, not cosmetic. mat-button projects all
+       unslotted content into ONE `span.mdc-button__label`, and its FIRST slot selects
+       `.material-icons:not([iconPositionEnd])` - emitted BEFORE that label. So this glyph,
+       which carries `material-icons`, was hoisted ahead of the avatar and the name stack
+       REGARDLESS of template order; the defect was projection-slot order, not a cascade
+       fault, and no CSS `order`/`margin-left` could fix it. `iconPositionEnd` moves it to
+       the trailing slot (`.material-icons[iconPositionEnd]`, emitted AFTER the label) -
+       matched by CLASS, so it works on `tb-icon` as well as `mat-icon`. Trailing
+       ALIGNMENT is a separate concern and is handled in user-menu.component.scss:
+       `.tb-user-info`'s `flex: 1 1 auto` expands only inside Material's own
+       `span.mdc-button__label` wrapper, so it does NOT claim the button's free space -
+       `margin-left: auto` on the glyph does that. CORRECTION (round 2): the figure
+       once quoted here ("106.2px left over, glyph parked mid-button") described an
+       overflowing button, not free space. `box-sizing: content-box` had made the
+       rail-foot border box 278px inside the 250px rail, so `margin-left: auto` was
+       aligning correctly to an edge that sat OUTSIDE the rail and the glyph landed at
+       x 258-274. The fix is the inline-axis constraint in the SCSS
+       (`width: calc(100% - 28px)`), not anything in this template. -->
+  <tb-icon class="material-icons tb-user-overflow" iconPositionEnd aria-hidden="true">more_vert</tb-icon>
 </button>
 <button #menuPopoverIcon="tbPopover" mat-icon-button class="tb-user-menu-icon"
         (click)="$event.stopPropagation();"

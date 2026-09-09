@@ -38,6 +38,48 @@ export class MenuToggleComponent {
   collapsed = false;
 
   /**
+   * AIRLINQ (AC-47): the live active-alarm count, forwarded to whichever CHILD row
+   * carries `badge: 'alarmCount'`. Taken as an @Input rather than injecting
+   * AlarmBadgeService here so there stays exactly ONE subscription owner
+   * (`tb-side-menu`), matching how `collapsed` already flows down. Needed because
+   * D4 moved `alarms` from a top-level link - where side-menu.component.html binds
+   * `badgeCount` directly - to a child of the `alarms_center` toggle, and
+   * menu-toggle.component.html previously passed NO badgeCount at all, which would
+   * have silently dropped the badge.
+   */
+  @Input() alarmCount: number | null = null;
+
+  /**
+   * AIRLINQ (AC-47): true when this child row should show the alarm count. Data-driven
+   * off `section.badge` - no template anywhere compares a MenuId.
+   */
+  childBadgeCount(page: MenuSection): number | null {
+    return page.badge === 'alarmCount' ? this.alarmCount : null;
+  }
+
+  /**
+   * AIRLINQ (Q3 / AC-47): '99+' cap for the FLYOUT row, which is a hand-rolled
+   * <a mat-button> and therefore cannot reuse MenuLinkComponent.badgeLabel. Same rule,
+   * same reason: AlarmBadgeService emits the raw unbounded PageData.totalElements and
+   * four digits overflow the row. Presentation only - the uncapped number sits beside
+   * it in a cdk-visually-hidden span.
+   */
+  badgeLabel(count: number | null): string {
+    const n = count ?? 0;
+    return n > 99 ? '99+' : String(n);
+  }
+
+  /**
+   * AIRLINQ (AC-47, collapsed rail): the presence DOT on the group tile. The human
+   * ruling is that the collapsed rail shows PRESENCE only, never digits - so this is
+   * a boolean, not a count. True when any badged descendant is non-zero.
+   */
+  hasBadgedDescendant(): boolean {
+    return (this.alarmCount ?? 0) > 0 &&
+      !!this.section?.pages?.some(page => page.badge === 'alarmCount');
+  }
+
+  /**
    * AIRLINQ: the rail tile, so Escape in the flyout can return focus to it (AC-29c)
    * and so Enter/Space can tell the tile apart from the flyout rows (AC-29c).
    *
@@ -53,8 +95,24 @@ export class MenuToggleComponent {
   }
 
   sectionHeight(): string {
+    // AIRLINQ (AC-49): this is bound to [style.height], so it runs on EVERY
+    // change-detection cycle. An unguarded `this.section.pages.length` therefore
+    // throws continuously - not once - and because it sits in the shared
+    // menuSections() pipeline it BLANKS THE ENTIRE SIDE MENU on the affected
+    // route, not just this tile. A `toggle` reshaped into a pages-less `link`
+    // (or any future section arriving without `pages`) is enough to trigger it.
+    // Guarded with `?.` + `?? 0` so a missing/empty `pages` collapses the tile
+    // to 0px instead of throwing. Mirrors the existing guard style in
+    // router-tabs.component.ts:118.
+    //
+    // AIRLINQ (F3, round 1): the guard and the structural assertion are COMPLEMENTS,
+    // not alternatives. This guard removes the throw that used to be the only symptom
+    // of a pages-less or malformed toggle, so on its own it would turn a loud failure
+    // into a silently wrong menu with a plausible-looking height. The compensating
+    // check is `findNestedToggles()`, called from `buildUserMenu()`
+    // (menu.models.ts) under `isDevMode()` on every login for every authority.
     if (this.section.opened && !this.collapsed) {
-      return this.section.pages.length * 40 + 'px';
+      return (this.section.pages?.length ?? 0) * 40 + 'px';
     } else {
       return '0px';
     }

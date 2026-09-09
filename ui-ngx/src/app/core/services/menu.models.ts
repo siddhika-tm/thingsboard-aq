@@ -14,6 +14,7 @@
 /// limitations under the License.
 ///
 
+import { isDevMode } from '@angular/core';
 import { AuthState } from '@core/auth/auth.models';
 import { Authority } from '@shared/models/authority.enum';
 import { deepClone } from '@core/utils';
@@ -553,7 +554,14 @@ export const menuSectionMap = new Map<MenuId, MenuSection>([
     {
       id: MenuId.alarms_center,
       name: 'alarm.alarms',
-      type: 'link',
+      // AIRLINQ (D4): was 'link'. Restored as a collapsible group so `alarms` +
+      // `alarm_rules` render as one Alarms tile in the rail. This dictionary is shared
+      // by EVERY authority, but the flip is safe for the Home page because in
+      // `homeMenuMap` `alarms_center` sits INSIDE the `monitor` toggle, i.e. as a
+      // `place`, and `menuSectionToHomeSection` only reads the TOP-LEVEL section's
+      // type - a place's type is never inspected. Proven by the Home snapshot diff,
+      // not asserted (docs/design/left-menu-defect-fixes-d4-tree.md §3.1).
+      type: 'toggle',
       path: '/alarms',
       icon: 'mdi:alert-outline'
     }
@@ -988,8 +996,18 @@ const defaultUserMenuMap = new Map<Authority, MenuReference[]>([
       {id: MenuId.divider},
       {id: MenuId.monitor_label},
       {id: MenuId.dashboards},
-      {id: MenuId.alarms},
-      {id: MenuId.alarm_rules},
+      {
+        // AIRLINQ (D4): restored collapsible Alarms group under the MONITOR heading.
+        // `alarms` keeps `badge: 'alarmCount'` and is now a CHILD, so `menu-toggle`
+        // forwards `badgeCount` to it (AC-47). The four `*_label` headings are flat
+        // SIBLINGS, not containers - "under MONITOR" is document order, which is how
+        // side-menu.component.html renders it.
+        id: MenuId.alarms_center,
+        pages: [
+          {id: MenuId.alarms},
+          {id: MenuId.alarm_rules}
+        ]
+      },
       {
         id: MenuId.notifications_center,
         pages: [
@@ -1091,6 +1109,11 @@ const defaultUserMenuMap = new Map<Authority, MenuReference[]>([
       {id: MenuId.home},
       {id: MenuId.monitor_label},
       {id: MenuId.dashboards},
+      // AIRLINQ (D4): `alarms` stays FLAT for this authority - deliberate, not drift.
+      // CUSTOMER_USER has no `alarm_rules`, so an `alarms_center` group would wrap a
+      // single child: two clicks to reach one page, and the badge would move a level
+      // down for no benefit. Flat is pageset-identical and leaves the badge on the
+      // top-level row that side-menu.component.html already forwards to.
       {id: MenuId.alarms},
       {id: MenuId.notification_inbox},
       {id: MenuId.devices_assets_label},
@@ -1326,9 +1349,64 @@ const homeMenuMap = new Map<Authority, MenuReference[]>([
   ]
 ]);
 
+/**
+ * AIRLINQ (MEMORY:65, F2 round 1): the menu tree MUST stay `heading -> toggle -> link`.
+ *
+ * `menu-toggle.component.html` renders every child of a toggle unconditionally as
+ * `<tb-menu-link>` with NO child `@switch`, so a toggle nested inside a toggle renders
+ * as a flat link and SILENTLY LOSES its grandchildren. Nothing else catches it:
+ * `sectionHeight()`'s `pages.length * 40` would be accidentally RIGHT while the
+ * rendered content is wrong, and the AC-49 `?.`/`?? 0` guard at
+ * menu-toggle.component.ts:108 deliberately removes the thrown error that used to be
+ * the only symptom of a malformed subtree. So the invariant needs its own assertion.
+ *
+ * Reported, not thrown: a throw here would blank the whole shell on login for a
+ * malformed tree, which is a worse outcome than a wrong menu. `isDevMode()` keeps it
+ * out of the production console; the tree is static per authority, so a dev-mode check
+ * on every login for every authority covers every shape this app can build.
+ *
+ * SCOPE - do NOT widen this to buildUserHome(). The invariant belongs to
+ * `defaultUserMenuMap` (the RAIL tree, which menu-toggle renders) and NOT to
+ * `homeMenuMap` (the HOME-CARD tree). In homeMenuMap `alarms_center` deliberately
+ * sits INSIDE the `monitor` toggle, so it IS a toggle-in-toggle there - and that is
+ * safe and pre-existing, because `menuSectionToHomeSection` only inspects the
+ * TOP-LEVEL section's type and a place's type is never read (see the note at the
+ * `alarms_center` entry in menuSectionMap). Measured: defaultUserMenuMap has zero
+ * offenders for all three authorities; homeMenuMap has one (`/alarms`) for
+ * TENANT_ADMIN and CUSTOMER_USER. Asserting over homeMenuMap would therefore emit a
+ * permanent false positive on every login.
+ *
+ * Returns the offending paths so a caller/test can assert on them.
+ */
+export const findNestedToggles = (sections: Array<MenuSection>): Array<string> => {
+  const offenders: Array<string> = [];
+  const walk = (section: MenuSection, insideToggle: boolean) => {
+    if (section.type === 'toggle' && insideToggle) {
+      offenders.push(section.path ?? section.id ?? section.name);
+    }
+    const nowInsideToggle = insideToggle || section.type === 'toggle';
+    (section.pages ?? []).forEach(page => walk(page, nowInsideToggle));
+  };
+  (sections ?? []).forEach(section => walk(section, false));
+  return offenders;
+};
+
 export const buildUserMenu = (authState: AuthState): Array<MenuSection> => {
   const references = defaultUserMenuMap.get(authState.authUser.authority);
-  return (references || []).map(ref => referenceToMenuSection(authState, ref)).filter(section => !!section);
+  const sections = (references || []).map(ref => referenceToMenuSection(authState, ref))
+    .filter(section => !!section);
+  if (isDevMode()) {
+    const offenders = findNestedToggles(sections);
+    if (offenders.length) {
+      console.error(
+        '[AIRLINQ menu] toggle-in-toggle detected for authority ' +
+        authState.authUser.authority + ': ' + offenders.join(', ') +
+        '. menu-toggle renders toggle children as flat tb-menu-link rows, so these ' +
+        'sections will silently lose their own children. The tree must stay ' +
+        'heading -> toggle -> link.');
+    }
+  }
+  return sections;
 };
 
 export const buildUserHome = (authState: AuthState): Array<HomeSection> => {

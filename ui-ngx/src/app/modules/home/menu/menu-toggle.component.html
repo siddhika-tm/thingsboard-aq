@@ -41,6 +41,42 @@
     <tb-icon matButtonIcon>{{section.icon}}</tb-icon>
   }
   <span>{{section.customTranslate ? (section.name | customTranslate) : (section.name | translate)}}</span>
+  <!-- AIRLINQ (AC-47, collapsed rail): PRESENCE DOT ONLY - no digits. Per the human
+       ruling the collapsed rail's job is to surface THAT alarms exist; the number
+       belongs on the nested row in the expanded rail / flyout. The uncapped count
+       stays available to assistive tech via cdk-visually-hidden. Rendered only when
+       collapsed, because expanded the badge lives on the child row itself. -->
+  <!-- AIRLINQ (D3 round 2): `matButtonIcon iconPositionEnd` is REQUIRED here, not
+       decorative. mat-button projects all unslotted content into ONE
+       `span.mdc-button__label`, and side-menu.component.scss:53-57 fades that label to
+       `opacity: 0` (and `width: 0`) when the rail collapses, so the row's text
+       disappears as the rail narrows. A dot projected into the label inherited that
+       fade and painted NOTHING - measured as 0 reddish pixels in the tile crop while
+       `getComputedStyle` on the dot still reported `opacity: 1` and the correct
+       --aq-error background, which is why the defect survived several computed-style
+       checks. An ancestor's `opacity` cannot be cancelled from the child, so the dot
+       has to leave that subtree.
+       Material's button template (read from @angular/material/fesm2022/button.mjs)
+       projects exactly two slots OUTSIDE the label:
+         ".material-icons:not([iconPositionEnd]), mat-icon:not([iconPositionEnd]), [matButtonIcon]:not([iconPositionEnd])"
+         ".material-icons[iconPositionEnd],       mat-icon[iconPositionEnd],       [matButtonIcon][iconPositionEnd]"
+       Note `mat-icon` there is an ELEMENT selector, so `class="mat-icon"` does NOT
+       match it (tried; the dot stayed inside the label). `matButtonIcon` is the
+       attribute form and works on a plain span, and `iconPositionEnd` picks the
+       TRAILING slot, which is the correct side for a `right: 8px` dot. The slot's own
+       icon sizing is neutralised in menu-toggle.component.scss.
+       The dot and the screen-reader count sit in SEPARATE @if blocks on purpose:
+       Angular's NG8011 extended diagnostic skips content projection when an @if block
+       has more than one root node, so keeping both in one block silently left the dot
+       inside the label (measured: still opacity 0) AND emitted a new build warning.
+       One projectable node per block is the compiler's own prescribed fix; the
+       predicate is identical, so the two always render together. -->
+  @if (collapsed && hasBadgedDescendant()) {
+    <span class="tb-menu-dot" matButtonIcon iconPositionEnd aria-hidden="true"></span>
+  }
+  @if (collapsed && hasBadgedDescendant()) {
+    <span class="cdk-visually-hidden">{{ alarmCount }}</span>
+  }
   <!-- AIRLINQ (AC-12): 16x16 chevron, pointing RIGHT when the section is closed and
        rotating down when it opens. The canvas draws a right chevron (m9 6 6 6-6 6),
        not a down-caret, so the closed state must not be pre-rotated. Inline SVG keeps
@@ -63,7 +99,13 @@
     [style.visibility]="section.opened && !collapsed ? null : 'hidden'">
   @for (page of section.pages; track page.id) {
     <li>
-      <tb-menu-link [section]="page"></tb-menu-link>
+      <!-- AIRLINQ (AC-47): forward the alarm count per child using the SAME
+           data-driven predicate side-menu.component.html uses (`section.badge`), so
+           no template compares a MenuId. Without this binding the badge on the nested
+           Alarm list row would be silently absent - a missing input binding is
+           invisible to a grep or a getComputedStyle check. -->
+      <tb-menu-link [section]="page"
+                    [badgeCount]="childBadgeCount(page)"></tb-menu-link>
     </li>
   }
 </ul>
@@ -76,9 +118,25 @@
       <span>{{section.customTranslate ? (section.name | customTranslate) : (section.name | translate)}}</span>
     </div>
     @for (page of section.pages; track page.id) {
+      <!-- AIRLINQ (F6, round 1): ONE call to childBadgeCount() per row per
+           change-detection pass. The previous form called it FOUR times (once in each
+           half of `!== null && > 0`, once for badgeLabel(), once for the SR span).
+           `@let` at the loop-body level binds it once for the whole row. -->
+      @let badge = childBadgeCount(page) ?? 0;
       <a mat-button routerLinkActive="tb-active" [routerLinkActiveOptions]="{paths: 'subset', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'ignored'}"
          routerLink="{{page.path}}" (click)="menuPopover?.hide();">
         <span>{{page.customTranslate ? (page.name | customTranslate) : (page.name | translate)}}</span>
+        <!-- AIRLINQ (AC-47): the flyout is the collapsed rail's expanded surface, so
+             the NUMBER belongs here (capped at 99+, same rule as the expanded row);
+             the tile itself carries only the presence dot. This is a hand-rolled
+             <a mat-button> list, not a tb-menu-link, so the badge markup is repeated
+             rather than inherited. -->
+        <!-- `badge > 0` is the whole guard: the `?? 0` above already collapses null
+             and undefined into 0, so the old `!== null && > 0` pair is redundant. -->
+        @if (badge > 0) {
+          <span class="tb-menu-badge" aria-hidden="true">{{ badgeLabel(badge) }}</span>
+          <span class="cdk-visually-hidden">{{ badge }}</span>
+        }
       </a>
     }
   </div>

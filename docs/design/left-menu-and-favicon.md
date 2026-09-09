@@ -1,5 +1,22 @@
 # Design — Left menu redesign (Option A · Sectioned) + favicon verification
 
+> **PARTIALLY SUPERSEDED 2026-09-08.** The structural half of this design was **reversed by
+> human decision** in work item `left-menu-defect-fixes`. Specifically superseded:
+> **(a)** the Option A · Sectioned menu structure, **(b)** the `MenuSectionType` reshape's
+> `link`-for-`toggle` substitution, and **(c)** the flattened TENANT_ADMIN reference tree.
+> Multi-page groups are collapsible `toggle` parents again, and the collapsed rail shows one
+> icon per group with a click-to-open flyout.
+>
+> **The `'section'` heading type itself is RETAINED** — its union member, its `@switch` arm
+> and its use in all three authority trees are unchanged. This reversal is about
+> `link`-vs-`toggle`, not about headings. The reachability analysis in §1 is not superseded;
+> it is vindicated, and it is the argument the reversal itself uses.
+>
+> Everything else in this document — the rail anatomy, the head band, the user block, the
+> alarm badge, the favicon work — still stands. Rationale and scope in
+> [ADR 0005](../adr/0005-collapsible-menu-groups-supersedes-0003.md), which supersedes
+> [ADR 0003](../adr/0003-sectioned-menu-model.md).
+
 - **Work item slug:** `left-menu-and-favicon`
 - **Author:** technical-architect
 - **Date:** 2026-09-06

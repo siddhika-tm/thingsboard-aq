@@ -24,13 +24,17 @@
     <tb-icon matButtonIcon>{{section.icon}}</tb-icon>
   }
   <span>{{section.customTranslate ? (section.name | customTranslate) : (section.name | translate)}}</span>
-  <!-- AIRLINQ: live count. Hidden at zero; the collapsed dot carries a text alternative. -->
+  <!-- AIRLINQ: live count. Hidden at zero; the collapsed dot carries a text alternative.
+       AC-47: the VISIBLE badge is capped at '99+' (badgeLabel) so four digits cannot
+       overflow the 40px row, while the cdk-visually-hidden span keeps the UNCAPPED
+       number in both rail states so assistive tech reports the exact count. -->
   @if ((badgeCount ?? 0) > 0) {
     @if (collapsed) {
       <span class="tb-menu-dot" aria-hidden="true"></span>
       <span class="cdk-visually-hidden">{{ badgeCount }}</span>
     } @else {
-      <span class="tb-menu-badge">{{ badgeCount }}</span>
+      <span class="tb-menu-badge" aria-hidden="true">{{ badgeLabel }}</span>
+      <span class="cdk-visually-hidden">{{ badgeCount }}</span>
     }
   }
 </a>

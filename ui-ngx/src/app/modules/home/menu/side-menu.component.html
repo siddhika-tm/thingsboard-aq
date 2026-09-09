@@ -24,7 +24,11 @@
                         [badgeCount]="section.badge === 'alarmCount' ? (alarmCount$ | async) : null"></tb-menu-link>
         }
         @case ('toggle') {
-          <tb-menu-toggle [section]="section" [collapsed]="collapsed"></tb-menu-toggle>
+          <!-- AIRLINQ (AC-47): forward the count so a badged CHILD row (D4 moved
+               `alarms` under the `alarms_center` toggle) still gets its badge.
+               tb-side-menu stays the single subscription owner. -->
+          <tb-menu-toggle [section]="section" [collapsed]="collapsed"
+                          [alarmCount]="alarmCount$ | async"></tb-menu-toggle>
         }
         @case ('divider') {
           <mat-divider></mat-divider>

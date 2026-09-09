@@ -164,6 +164,31 @@ tb-user-menu {
       gap: 10px;
       align-items: center;
 
+      // AIRLINQ (D3, round 2): constrain the INLINE axis so the border box fits
+      // the rail.
+      //
+      // `box-sizing: content-box` above is load-bearing on the BLOCK axis - it is
+      // what makes AC-15's 56px height read as 12 + 32 + 12 (padding excluded from
+      // the declared `height: 32px`). But it applies to BOTH axes, so the stock
+      // `width: 100%` at :63 resolved to a 250px CONTENT width inside the 250px
+      // rail, and the horizontal padding was then added OUTSIDE it:
+      //
+      //   border box = width(250, = 100% of the 250px rail)
+      //              + padding-left(16) + padding-right(12)
+      //              = 278px
+      //
+      // i.e. a 28px overflow, where 28 = the padding-left + padding-right declared
+      // on the line above. `margin: 0 0 0 auto` on the overflow glyph then parked it
+      // in that overflowing tail (measured at x 258-274, entirely outside the rail),
+      // which is the 16px `glyphBeyondRailRight` the Tester reported.
+      //
+      // Subtracting the same two padding values here makes the border box exactly
+      // 250px, so the trailing edge the glyph aligns to is the rail's own edge. Only
+      // `width` is touched: the block axis, and therefore AC-15's 56px, is unchanged.
+      // Flipping `box-sizing` to `border-box` instead would fix the inline axis and
+      // break that height in the same stroke.
+      width: calc(100% - 28px);
+
       // AC-16: 32px initials circle on the accent container.
       .tb-user-avatar {
         display: flex;
@@ -229,7 +254,34 @@ tb-user-menu {
         height: 16px;
         min-width: 16px;
         min-height: 16px;
-        margin: 0;
+        // AIRLINQ (D3, replacement criterion for the retired AC-18): push the glyph
+        // to the instance's trailing edge.
+        //
+        // `iconPositionEnd` on the template fixed the ORDER (the glyph is now a
+        // sibling emitted after `span.mdc-button__label`, measured), but not the
+        // POSITION. The button is `display: flex; justify-content: start` and BOTH of
+        // its in-flow items are `flex-grow: 0` - the label wrapper is Material's own
+        // `flex: 0 1 auto` - so `.tb-user-info`'s `flex: 1 1 auto` expands only INSIDE
+        // that wrapper and never claims the button's own free space. `margin-left:
+        // auto` absorbs the button's free space, which is the flex idiom for trailing
+        // alignment and moves NOTHING else: the avatar, the name/role stack and their
+        // inks keep their measured geometry.
+        //
+        // CORRECTION (round 2). The earlier note here read "content box 24 -> 274,
+        // items 135.8px wide, leaving 106.2px of free space, glyph parked at
+        // right=169.8". The 24 -> 274 measurement was real, but the inference from it
+        // was wrong: 274 is not slack inside the rail, it is 24px PAST the 250px rail
+        // edge, because `box-sizing: content-box` had put the border box at 278px (see
+        // the `width: calc(100% - 28px)` note above). `margin-left: auto` was working
+        // exactly as intended all along - it was aligning to a trailing edge that lay
+        // outside the rail, which is why the glyph measured at x 258-274 and the
+        // Tester saw `glyphBeyondRailRight = 16.00`. The varying label widths that
+        // round also reported (119.8px, then 39.38px) were the label shrink-to-fit
+        // seen through that overflow, changing with the display-name string, not a
+        // second defect. With the inline axis constrained the free space is now real
+        // and this declaration lands the glyph inside the rail, with no !important and
+        // no template change.
+        margin: 0 0 0 auto;
         font-size: 16px;
         line-height: 16px;
         // Same navy rail as the two spans above. As a decorative 16px glyph
@@ -248,6 +300,17 @@ tb-user-menu {
         min-height: 0;
         padding: 0 0 12px;
         justify-content: center;
+
+        // AIRLINQ (NF-1): undo the `width: calc(100% - 28px)` inset from :190.
+        // That 28px is exactly the EXPANDED horizontal padding (16 + 12) that
+        // `box-sizing: content-box` would otherwise add outside the declared
+        // width. Collapsed padding is `0 0 12px` — zero on the inline axis — so
+        // there is nothing to compensate, and the inset instead shrank the border
+        // box to 64 - 28 = 36px on the 64px rail. `justify-content: center` then
+        // centred the 32px avatar at x≈18 instead of the rail's icon axis x=32.
+        // `&.tb-collapsed` adds a class, so this wins on specificity (0,6,1 vs
+        // 0,5,1) with no `!important`.
+        width: 100%;
 
         .tb-user-avatar {
           width: 32px;

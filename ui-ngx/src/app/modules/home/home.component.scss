@@ -59,8 +59,45 @@
       &.tb-collapsed {
         mat-sidenav.tb-site-sidenav {
           width: var(--aq-rail-w);
-          .tb-brand {
-            display: none;
+          // AIRLINQ (D1): hide the wordmark on the collapsed icon rail.
+          //
+          // This rule MUST be nested through `.tb-nav-header .tb-nav-header-toolbar`,
+          // even though `.tb-brand` alone identifies the element, because the expanded
+          // head's `display: flex` for the SAME element is written at that depth (see
+          // the `.tb-brand` block further down this file). Angular compiles every
+          // nesting level to `<selector>[_ngcontent-...]`, so each extra level adds a
+          // class AND an attribute. Measured on the compiled stylesheet, the two rules
+          // land at:
+          //     display: flex  ->  (0,9,1)   ... .tb-nav-header .tb-nav-header-toolbar .tb-brand
+          //     display: none  ->  (0,8,2)   ... .tb-desktop.tb-collapsed ... .tb-brand
+          // Class count outranks type count, so the shallower `none` LOST and the
+          // wordmark stayed visible on the 64px rail, overflowing its right edge by
+          // 14.38px and being cut mid-glyph by `mat-sidenav`'s `overflow: hidden`.
+          // Matching the winner's depth takes this rule to (0,12,2) and it wins on
+          // specificity - no `!important` needed. Authored specificity was NOT a
+          // reliable guide here; only the compiled selectors were.
+          //
+          // AIRLINQ (F5, round 1): that post-fix figure was previously written as
+          // (0,10,1) and was WRONG. Re-measured off the COMPILED bundle
+          // (target/generated-resources/public/main-*.js), the emitted selector is
+          //   [_nghost-%COMP%] mat-sidenav-container.tb-desktop.tb-collapsed[_ngcontent-%COMP%]
+          //     mat-sidenav.tb-site-sidenav[_ngcontent-%COMP%] .tb-nav-header[_ngcontent-%COMP%]
+          //     .tb-nav-header-toolbar[_ngcontent-%COMP%] .tb-brand[_ngcontent-%COMP%]
+          // = 6 attributes (one `_nghost` + one `_ngcontent` per compound, six
+          // compounds) + 6 classes (.tb-desktop, .tb-collapsed, .tb-site-sidenav,
+          // .tb-nav-header, .tb-nav-header-toolbar, .tb-brand) = 12, and TWO type
+          // selectors (mat-sidenav-container, mat-sidenav), not one: (0,12,2).
+          // The two baseline figures above are correct as written and were
+          // re-measured the same way: display:flex = (0,9,1), pre-fix none = (0,8,2).
+          // This defect was mis-diagnosed twice by trusting written weights over
+          // measured ones - the conclusion (this rule wins) is unchanged, but the
+          // number now matches the artifact.
+          .tb-nav-header {
+            .tb-nav-header-toolbar {
+              .tb-brand {
+                display: none;
+              }
+            }
           }
           .tb-nav-header-toolbar {
             flex-direction: column;

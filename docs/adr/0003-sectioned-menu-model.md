@@ -1,9 +1,35 @@
 # 0003 — A section-heading type in the menu model, and a sectioned TENANT_ADMIN tree
 
-- **Status:** proposed (awaiting human approval at G2)
+- **Status:** superseded by [ADR 0005](0005-collapsible-menu-groups-supersedes-0003.md) on 2026-09-08
+- **Superseded by:** [0005 — Collapsible menu groups (Option B)](0005-collapsible-menu-groups-supersedes-0003.md)
 - **Date:** 2026-09-06
 - **Deciders:** human (product owner), technical-architect
 - **Context work item:** `left-menu-and-favicon`
+
+> **SUPERSEDED 2026-09-08.** Option A ("sectioned / every page one click away") was
+> **reversed by human decision** in work item `left-menu-defect-fixes`. On the COLLAPSED
+> rail, flattening groups rendered one icon per PAGE rather than one per GROUP — which does
+> not scale and loses the group affordance entirely, because the flyout (the collapsed
+> rail's only way to express a group) had nothing to show. Multi-page groups are `toggle`
+> parents again.
+>
+> **Most of the rationale below still stands.** In particular: the reachability finding is
+> fully vindicated (restoring groups is likewise a MODEL change, not a styling change); the
+> `'section'` type was a genuine model gap and is **RETAINED**, arm and all; constraint 3
+> (`menuFilters` untouched, not one line) remains binding; constraint 4 (never flatten a
+> group whose children are all filtered) is honoured *a fortiori* by not flattening at all;
+> constraint 6 (equivalence proved, not argued) is carried forward and strengthened; and the
+> recorded silent failure mode (a `MenuSectionType` value with no `@switch` arm renders
+> nothing, with no error) stands as a live warning.
+>
+> **What is overturned is narrow:** constraint 2's link/toggle assignment ("`toggle` is
+> retained for exactly five true sub-menus; every other row navigates directly") and the
+> flattened TENANT_ADMIN tree that followed from it. Nothing else.
+>
+> See [ADR 0005](0005-collapsible-menu-groups-supersedes-0003.md). **The body below is
+> preserved unedited as the historical record** — an ADR is an immutable decision record,
+> and editing its Decision to say the opposite would destroy the audit trail this note
+> exists to protect.
 
 ## Context
 

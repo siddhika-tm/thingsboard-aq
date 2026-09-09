@@ -50,6 +50,45 @@ import { DomSanitizer } from '@angular/platform-browser';
 
 const squareLayoutSize = 160;
 const horizontalLayoutHeight = 80;
+// AIRLINQ (D5, AC-50): floor for the autoScale factor.
+//
+// `autoScale` shrinks tile text with `transform: scale()`, not with font-size, so the
+// declared size is multiplied by this factor before it is painted and a CSS
+// `min-font-size` cannot rescue it. Unfloored, `scale` falls with the panel without
+// limit, so a small tile paints text at an illegible fraction of its declared size.
+//
+// 0.70 is the nearest round value above the 0.6875 minimum that a 16px stored label
+// needs to paint at 11px (11/16 = 0.6875), pairing this floor with the stored
+// label 16px / context 18px that D5 writes to the dashboard.
+//
+// Cost, stated explicitly. The floor is applied in BOTH branches of onResize(), and
+// the two branches have DIFFERENT geometry, so there are TWO clip-onset thresholds
+// (F4, round 1 - only the square one was documented before):
+//
+//   SQUARE branch. Below
+//       min(panelW, panelH) = squareLayoutSize * autoScaleMin = 160 * 0.70 = 112px
+//   the 160px content box no longer fits its panel and overflows instead of
+//   shrinking further.
+//
+//   HORIZONTAL branch. Content HEIGHT is `horizontalLayoutHeight * scale`, floored at
+//   80 * 0.70 = 56px, while the panel can be shorter than that. Because `aspect` is
+//   capped at 0.25, targetHeight = min(panelH, 0.25 * panelW), so the onset has two
+//   forms:
+//       panelH < 56px    (the panel-height term binds), or
+//       panelW < 224px   (the 0.25 aspect cap binds: 56 / 0.25 = 224)
+//   Measured vertical overflow, panel WxH -> overflow:
+//       300x50 -> 6px    240x40 -> 16px    200x30 -> 26px
+//   There is NO horizontal WIDTH defect: `width = targetWidth / scale` stays an exact
+//   inverse of the transform under the floor, so the content box's painted width
+//   still equals panelWidth at any scale.
+//
+// Both thresholds are the deliberate trade - text too small to read is not a usable
+// rendering either - and the reasoning the human accepted for the square branch
+// applies to the horizontal one. Kept in BOTH branches rather than square-only,
+// because a horizontal value card left unfloored would keep exactly the AC-50
+// illegibility defect this floor exists to fix. See
+// docs/design/d5-autoscale-floor-rationale.md.
+const autoScaleMin = 0.70;
 
 @Component({
     selector: 'tb-value-card-widget',
@@ -203,12 +242,12 @@ export class ValueCardWidgetComponent implements OnInit, AfterViewInit, OnDestro
     let scale: number;
     if (!this.horizontal) {
       const size = Math.min(panelWidth, panelHeight);
-      scale = size / squareLayoutSize;
+      scale = Math.max(size / squareLayoutSize, autoScaleMin);
     } else {
       const targetWidth = panelWidth;
       const aspect = Math.min(panelHeight / targetWidth, 0.25);
       const targetHeight = targetWidth * aspect;
-      scale = targetHeight / horizontalLayoutHeight;
+      scale = Math.max(targetHeight / horizontalLayoutHeight, autoScaleMin);
       const width = targetWidth / scale;
       this.renderer.setStyle(this.valueCardContent.nativeElement, 'width', width + 'px');
     }

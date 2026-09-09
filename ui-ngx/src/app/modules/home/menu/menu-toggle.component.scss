@@ -57,6 +57,82 @@
     @media (prefers-reduced-motion: reduce) {
       .tb-toggle-icon { transition: none; }
     }
+    // AIRLINQ (F1, round 1): the collapsed-rail PRESENCE DOT is rendered by THIS
+    // component's template (menu-toggle.component.html:50), so its rule MUST live in
+    // THIS stylesheet. The visually identical `.tb-menu-dot` in
+    // menu-link.component.scss:98 compiles to `[_nghost-<menu-link>] .tb-menu-dot`
+    // and can NEVER reach an element emitted by menu-toggle's template - the dot
+    // therefore painted with no position, no size and no background (a 0x0 nothing),
+    // failing AC-10 / AC-47's dot requirement. Duplicated rather than shared because
+    // Angular's host prefixing makes cross-component reuse impossible without a
+    // global rule, and the two dots sit on two different owners' elements.
+    //
+    // CORRECTION (round 2). The earlier note here claimed "the positioned ancestor is
+    // the tile itself", citing side-menu.component.scss:108's `position: relative` on
+    // `a.mat-mdc-button.mat-mdc-button-base`. That rule is real and does match this
+    // tile, but it was not the whole story, and the dot had TWO independent defects.
+    // Both were found only by decoding the painted PNG - geometry, `offsetParent` and
+    // `elementFromPoint` all reported "correct" while the crop held 0 reddish pixels.
+    //
+    // (a) CONTAINING BLOCK. mat-button projects all unslotted content into
+    //     `span.mdc-button__label`, and side-menu.component.scss:53-57 gives that
+    //     label `width: 0` when the rail collapses. Measured: the label's clip box was
+    //     left 51 / right 51 / width 0, so `right: 8px` resolved against a zero-width
+    //     box. Moving the dot out of the label (see (b)) fixes this too: Material's own
+    //     `.mdc-button { position: relative }` makes the TILE the nearest positioned
+    //     ancestor for a slot sibling, so no extra `position` declaration is needed
+    //     here - `offsetParent` is asserted in the browser to confirm it.
+    //
+    // (b) OPACITY - the actual reason nothing painted. That same collapse rule also
+    //     sets `opacity: 0` on the label, to fade the row's text out as the rail
+    //     narrows. The dot was projected INTO that label, so it inherited the fade and
+    //     composited to nothing no matter how it was positioned. `opacity` on an
+    //     ancestor cannot be cancelled from the child, and `getComputedStyle` on the
+    //     dot returns `opacity: 1` and the correct `--aq-error` background throughout,
+    //     which is precisely why every computed-style check passed.
+    //
+    // The fix for (b) is therefore structural and lives in the TEMPLATE: the dot
+    // carries `matButtonIcon iconPositionEnd`, which selects Material's TRAILING
+    // projection slot, so it is emitted as a SIBLING of the label rather than a child
+    // and sits outside the fade. `class="mat-icon"` does NOT work for this - in
+    // Material's own template `mat-icon` is an element selector, not a class (read
+    // from @angular/material/fesm2022/button.mjs; the dot stayed inside the label when
+    // tried). See menu-toggle.component.html:50.
+    //
+    // `overflow: hidden` from side-menu.component.scss:114 still applies, so the dot
+    // must stay inside the tile box - top 6px / right 8px does.
+    //
+    // Colours are `--aq-error` only, and its dark value is unchanged, so dark is a
+    // no-op by construction (AC-11). No !important (AC-29): this is the only rule
+    // declaring these properties on this element.
+
+    // Nested one level under `.tb-button-toggle`, so this compiles to
+    // `[_nghost-%COMP%] .tb-button-toggle .tb-menu-dot` plus the host attribute.
+    // Material's only competing declaration on a projected icon is
+    // `.mat-mdc-button-base .mat-icon { min-height: fit-content; flex-shrink: 0 }`
+    // (0,2,0) - and the dot carries no `.mat-icon` class at all, so nothing contests
+    // these properties and no !important is needed (AC-29). The zeroing below is
+    // defensive against the button's icon-slot metrics rather than a specificity
+    // contest: the dot is a background, not a glyph.
+    .tb-menu-dot {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      width: 6px;
+      height: 6px;
+      min-width: 0;
+      min-height: 0;
+      // `.mat-icon` is `display: inline-block` with a 24px font-size and margins from
+      // the button's icon slot; zero them so the measured box is the 6px dot.
+      margin: 0;
+      padding: 0;
+      font-size: 0;
+      line-height: 0;
+      flex: none;
+      box-sizing: border-box;
+      border-radius: 50%;
+      background: var(--aq-error);
+    }
     &.is-new::after {
       position: absolute;
       right: 44px;
@@ -149,6 +225,65 @@
     &.tb-active {
       background-color: var(--aq-hover);
       --mat-button-text-label-text-color: var(--aq-text);
+    }
+    // AIRLINQ (F1, round 1): the FLYOUT badge pill (menu-toggle.component.html:103).
+    // Scoped here, inside the GLOBAL `.tb-toggle-menu-items` block, and NOT inside
+    // `:host ::ng-deep`, because the flyout panel is rendered from #menuToggleMenuTpl
+    // into a CDK overlay OUTSIDE this component's host element (see the block comment
+    // at :95). A `:host ::ng-deep` rule compiles to `[_nghost-<menu-toggle>] ...`,
+    // which requires the host as an ANCESTOR - and in the overlay it is not one, so
+    // such a rule would match nothing. `.tb-menu-badge` in menu-link.component.scss:61
+    // is doubly unreachable here (wrong owner AND wrong subtree), which is why the
+    // flyout badge painted as bare unstyled text - no pill, no colour, no 16px box
+    // (AC-30).
+    //
+    // VERIFIED from the compiled bundle (target/generated-resources/public/main-*.js),
+    // not from this source. Both new rules land in the SAME `styles:[...]` array, and
+    // the component owning that array is `tb-menu-toggle` - the component whose
+    // template emits both elements. The two emitted selectors differ in exactly the
+    // way that matters:
+    //   dot   -> [_nghost-%COMP%] .tb-button-toggle .tb-menu-dot
+    //            host-prefixed; the tile IS inside menu-toggle's host, so it matches.
+    //   badge -> .tb-toggle-menu-items[_ngcontent-%COMP%]
+    //              a.mat-mdc-button[_ngcontent-%COMP%] .tb-menu-badge[_ngcontent-%COMP%]
+    //            _ngcontent ONLY, no _nghost - which is why it survives the CDK
+    //            overlay: it requires no host ancestor, only the per-element content
+    //            attribute that Angular stamps at compile time on this template's
+    //            markup wherever it is later projected.
+    // That is the whole reason the flyout badge must be scoped here and NOT inside
+    // `:host ::ng-deep`. The pre-existing sibling rules in this same block
+    // (`.mat-icon { display: none }`, `:hover`, `.tb-active`) compile to the identical
+    // _ngcontent-only shape and are known to work on the real flyout, which is the
+    // corroborating evidence that this prefix chain reaches the overlay.
+    //
+    // Nested one level under `.tb-toggle-menu-items a.mat-mdc-button`, so the
+    // compiled selector is `.tb-toggle-menu-items a.mat-mdc-button .tb-menu-badge`
+    // (0,3,1) - nothing else declares these properties on this element, so no
+    // specificity contest and no !important (AC-29).
+    //
+    // `align-self: center` for the same reason as menu-link.component.scss:81:
+    // mat-button projects unslotted content into one `span.mdc-button__label` whose
+    // default `align-items: stretch` would otherwise stretch the pill to the row.
+    // Colours are `--aq-accent-container` / `--aq-on-accent-container`, unchanged in
+    // both themes, so dark is a no-op (AC-11).
+    .tb-menu-badge {
+      margin-left: auto;
+      flex: none;
+      align-self: center;
+      box-sizing: border-box;
+      height: 16px;
+      min-width: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      line-height: 14px;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: var(--aq-accent-container);
+      color: var(--aq-on-accent-container);
     }
   }
 }
