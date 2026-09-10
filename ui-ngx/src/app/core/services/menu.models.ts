@@ -1087,10 +1087,10 @@ const defaultUserMenuMap = new Map<Authority, MenuReference[]>([
               {id: MenuId.notification_settings},
               {id: MenuId.repository_settings},
               {id: MenuId.auto_commit_settings},
-              {id: MenuId.trendz_settings},
-              {id: MenuId.ai_models}
+              {id: MenuId.trendz_settings}
             ]
           },
+          {id: MenuId.ai_models},
           {id: MenuId.api_usage}
         ]
       },
@@ -1291,10 +1291,10 @@ const homeMenuMap = new Map<Authority, MenuReference[]>([
               {id: MenuId.notification_settings},
               {id: MenuId.repository_settings},
               {id: MenuId.auto_commit_settings},
-              {id: MenuId.trendz_settings},
-              {id: MenuId.ai_models}
+              {id: MenuId.trendz_settings}
             ]
           },
+          {id: MenuId.ai_models},
           {id: MenuId.api_usage}
         ]
       },

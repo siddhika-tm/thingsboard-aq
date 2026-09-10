@@ -46,6 +46,7 @@ rebuild-docker.sh
 .planning
 docs/superpowers/
 .env
+.env.*
 CLAUDE.md
 *.orig
 ui-ngx/src/assets/.orig-tb-logos/
